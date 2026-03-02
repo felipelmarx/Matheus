@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { fetchMetricsFromSheets } from '@/lib/googleSheets';
-import { DashboardData } from '@/types/metrics';
+import { fetchMetricsFromSheets, forceRefresh } from '@/lib/googleSheets';
+import type { DashboardData } from '@/types/metrics';
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,10 +11,14 @@ export default async function handler(
   }
 
   try {
-    const data = await fetchMetricsFromSheets();
-    res.status(200).json(data);
+    const data = req.query.refresh === 'true'
+      ? await forceRefresh()
+      : await fetchMetricsFromSheets();
+
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json(data);
   } catch (error) {
-    console.error('API Error:', error);
-    res.status(500).json({ error: 'Failed to fetch metrics' });
+    console.error('[api] Error:', error);
+    return res.status(503).json({ error: 'Service unavailable' });
   }
 }

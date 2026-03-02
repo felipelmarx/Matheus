@@ -5,28 +5,22 @@ export interface MetricCard {
   unit?: string;
   change?: number;
   changeType?: 'increase' | 'decrease' | 'neutral';
-  icon?: string;
-}
-
-export interface BestPerformer {
-  id: string;
-  name: string;
-  value: number;
-  percentage: number;
-  rank: number;
 }
 
 export interface DashboardData {
-  investedValue: number;
-  salesCount: number;
+  investimento: number;
+  faturamento: number;
+  vendas: number;
   cpa: number;
-  bestAds: BestPerformer[];
-  bestPages: BestPerformer[];
+  ticketMedio: number;
+  desafioAtual: string;
+  periodo: string;
   lastUpdated: string;
+  fromCache: boolean;
 }
 
-export interface GoogleSheetsConfig {
-  spreadsheetId: string;
-  serviceAccountEmail: string;
-  privateKey: string;
+export interface CacheEntry {
+  data: DashboardData;
+  timestamp: number;
+  ttl: number;
 }
