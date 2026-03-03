@@ -1,7 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import type { DashboardData, MetricCard as MetricCardType } from '@/types/metrics';
-import MetricCard from '@/components/MetricCard';
-import { RefreshCw, Calendar, AlertTriangle } from 'lucide-react';
+import type { DashboardData } from '@/types/metrics';
+import DashboardHeader from '@/components/DashboardHeader';
+import StatCards from '@/components/StatCards';
+import ResumoGeral from '@/components/ResumoGeral';
+import MelhorPagina from '@/components/MelhorPagina';
+import ListaAnuncios from '@/components/ListaAnuncios';
+import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -32,28 +36,18 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-
-  const metricsCards: MetricCardType[] = data
-    ? [
-        { id: 'investimento', label: 'Investimento', value: BRL.format(data.investimento) },
-        { id: 'faturamento', label: 'Faturamento', value: BRL.format(data.faturamento) },
-        { id: 'vendas', label: 'Vendas', value: data.vendas.toLocaleString('pt-BR') },
-        { id: 'cpa', label: 'CPA', value: BRL.format(data.cpa) },
-        { id: 'ticket', label: 'Ticket Medio', value: BRL.format(data.ticketMedio) },
-      ]
-    : [];
-
   if (error && !data) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-          <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-3" />
-          <h2 className="text-red-800 font-semibold mb-2 text-center">Erro ao carregar dados</h2>
-          <p className="text-red-700 text-sm mb-4 text-center">{error}</p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 max-w-md">
+          <AlertTriangle className="w-8 h-8 text-destructive mx-auto mb-3" />
+          <h2 className="text-foreground font-semibold mb-2 text-center font-heading">
+            Erro ao carregar dados
+          </h2>
+          <p className="text-muted-foreground text-sm mb-4 text-center">{error}</p>
           <button
             onClick={() => fetchData(true)}
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded transition"
+            className="w-full bg-destructive text-destructive-foreground font-medium py-2 px-4 rounded-lg transition hover:opacity-90 font-heading"
           >
             Tentar novamente
           </button>
@@ -63,58 +57,31 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Desafio 5D</h1>
-              {data && (
-                <p className="text-gray-600 mt-1">
-                  {data.desafioAtual}{data.periodo ? ` \u2014 ${data.periodo}` : ''}
-                </p>
-              )}
-            </div>
-            <button
-              onClick={() => fetchData(true)}
-              disabled={loading}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Atualizar
-            </button>
-          </div>
+    <div className="min-h-screen bg-background">
+      <DashboardHeader
+        data={data}
+        loading={loading}
+        lastRefresh={lastRefresh}
+        onRefresh={() => fetchData(true)}
+      />
 
-          {lastRefresh && (
-            <div className="flex items-center gap-2 text-sm text-gray-500 mt-4">
-              <Calendar className="w-4 h-4" />
-              <span>Ultima atualizacao: {lastRefresh.toLocaleString('pt-BR')}</span>
-              {data?.fromCache && (
-                <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full ml-2">cache</span>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="px-4 lg:px-16 py-8 space-y-6">
         {loading && !data ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-              <p className="text-gray-600">Carregando dados...</p>
+              <RefreshCw className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+              <p className="text-muted-foreground font-heading">Carregando dados...</p>
             </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {metricsCards.map((metric) => (
-              <MetricCard key={metric.id} metric={metric} />
-            ))}
-          </div>
-        )}
-      </div>
+        ) : data ? (
+          <>
+            <StatCards data={data} />
+            <ResumoGeral data={data} />
+            <MelhorPagina />
+            <ListaAnuncios />
+          </>
+        ) : null}
+      </main>
     </div>
   );
 }

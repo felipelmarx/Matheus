@@ -8,11 +8,24 @@ export interface MetricCard {
 }
 
 export interface DashboardData {
+  // Core metrics
   investimento: number;
   faturamento: number;
   vendas: number;
   cpa: number;
   ticketMedio: number;
+
+  // Extended metrics
+  cliques: number;
+  viewPages: number;
+  conectRate: number;
+  lucroPrejuizo: number;
+  aplicacoes: number;
+  custoPorAplicacao: number;
+  vendasFormacao: number;
+  faturamentoTotal: number;
+
+  // Metadata
   desafioAtual: string;
   periodo: string;
   lastUpdated: string;

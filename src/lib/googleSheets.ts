@@ -27,15 +27,23 @@ function findValue(rows: string[][], pattern: RegExp, labelCol: number, valueCol
   return '';
 }
 
-// Extract 5 metrics for a desafio column pair
+// Extract all metrics for a desafio column pair
 function extractMetrics(rows: string[][], labelCol: number, valueCol: number) {
   const p = parseSheetNumber;
   return {
     investimento: p(findValue(rows, /investimento/i, labelCol, valueCol)),
-    faturamento: p(findValue(rows, /faturamento\s*(total|ingresso)/i, labelCol, valueCol)),
+    faturamento: p(findValue(rows, /faturamento\s*(ingresso|.*bumps)/i, labelCol, valueCol)),
     vendas: p(findValue(rows, /^vendas$/i, labelCol, valueCol)),
     cpa: p(findValue(rows, /^cpa$/i, labelCol, valueCol)),
     ticketMedio: p(findValue(rows, /ticket\s*m[eé]dio/i, labelCol, valueCol)),
+    cliques: p(findValue(rows, /cliques/i, labelCol, valueCol)),
+    viewPages: p(findValue(rows, /view\s*pages?/i, labelCol, valueCol)),
+    conectRate: p(findValue(rows, /conect\s*rate/i, labelCol, valueCol)),
+    lucroPrejuizo: p(findValue(rows, /lucro.*preju[ií]zo|preju[ií]zo.*lucro/i, labelCol, valueCol)),
+    aplicacoes: p(findValue(rows, /aplica[cç][oõ]es/i, labelCol, valueCol)),
+    custoPorAplicacao: p(findValue(rows, /custo\s*(por|\/)\s*aplica[cç][aã]o/i, labelCol, valueCol)),
+    vendasFormacao: p(findValue(rows, /vendas\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol)),
+    faturamentoTotal: p(findValue(rows, /faturamento\s*total/i, labelCol, valueCol)),
   };
 }
 
@@ -51,6 +59,8 @@ function extractPeriod(rows: string[][], labelCol: number): string {
 function getDefaultData(): DashboardData {
   return {
     investimento: 0, faturamento: 0, vendas: 0, cpa: 0, ticketMedio: 0,
+    cliques: 0, viewPages: 0, conectRate: 0, lucroPrejuizo: 0,
+    aplicacoes: 0, custoPorAplicacao: 0, vendasFormacao: 0, faturamentoTotal: 0,
     desafioAtual: '', periodo: '', lastUpdated: new Date().toISOString(), fromCache: false,
   };
 }
@@ -78,7 +88,6 @@ export async function fetchMetricsFromSheets(): Promise<DashboardData> {
     console.log('[sheets] Fetching from Google Sheets...');
     const rows = await fetchResumoRows();
 
-    // Try latest desafio first, fall back to older ones
     for (const d of DESAFIOS) {
       const metrics = extractMetrics(rows, d.labelCol, d.valueCol);
       const hasData = metrics.investimento > 0 || metrics.vendas > 0 || metrics.faturamento > 0;
@@ -98,7 +107,6 @@ export async function fetchMetricsFromSheets(): Promise<DashboardData> {
       }
     }
 
-    // No data in any desafio
     console.warn('[sheets] No data found in any desafio');
     return getDefaultData();
 
