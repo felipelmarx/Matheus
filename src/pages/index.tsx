@@ -79,7 +79,7 @@ export default function DashboardPage() {
           </div>
         ) : data && activeData ? (
           <>
-            <DesafioTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            <DesafioTabs activeTab={activeTab} onTabChange={setActiveTab} data={data} />
             <StatCards data={activeData} />
             <ResumoGeral data={activeData} />
           </>

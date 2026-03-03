@@ -1,19 +1,23 @@
+import { Clock, MousePointerClick, Wallet, Receipt, GitBranch, GraduationCap } from 'lucide-react';
 import type { DesafioData } from '@/types/metrics';
 
 interface ResumoGeralProps {
   data: DesafioData;
 }
 
-interface MetricCard {
+interface MetricItem {
   label: string;
   value: string;
   isNegative?: boolean;
-  isBold?: boolean;
+  isHighlight?: boolean;
 }
 
 interface MetricGroup {
   title: string;
-  metrics: MetricCard[];
+  icon: React.ComponentType<{ className?: string }>;
+  accentColor: string;
+  headerBg: string;
+  metrics: MetricItem[];
 }
 
 export default function ResumoGeral({ data }: ResumoGeralProps) {
@@ -29,6 +33,9 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
   const groups: MetricGroup[] = [
     {
       title: 'Periodo',
+      icon: Clock,
+      accentColor: 'text-sky-400',
+      headerBg: 'from-sky-500/10 to-transparent',
       metrics: [
         { label: 'Captacao', value: data.captacao || '--' },
         { label: 'Ao Vivo', value: data.aoVivo || '--' },
@@ -36,16 +43,22 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
     },
     {
       title: 'Trafego',
+      icon: MousePointerClick,
+      accentColor: 'text-cyan-400',
+      headerBg: 'from-cyan-500/10 to-transparent',
       metrics: [
         { label: 'Cliques', value: fmtNum(data.cliques) },
         { label: 'View Pages', value: fmtNum(data.viewPages) },
-        { label: 'Conect Rate', value: fmtPct(data.conectRate) },
+        { label: 'Conect Rate', value: fmtPct(data.conectRate), isHighlight: data.conectRate >= 70 },
       ],
     },
     {
       title: 'Aquisicao',
+      icon: Wallet,
+      accentColor: 'text-blue-400',
+      headerBg: 'from-blue-500/10 to-transparent',
       metrics: [
-        { label: 'Investimento', value: fmt(data.investimento), isBold: true },
+        { label: 'Investimento', value: fmt(data.investimento), isHighlight: true },
         { label: 'Vendas', value: fmtNum(data.vendas) },
         { label: 'CPA', value: fmt(data.cpa) },
         { label: 'Ticket Medio', value: fmt(data.ticketMedio) },
@@ -53,19 +66,25 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
     },
     {
       title: 'Receita',
+      icon: Receipt,
+      accentColor: 'text-emerald-400',
+      headerBg: 'from-emerald-500/10 to-transparent',
       metrics: [
-        { label: 'Faturamento (Ingressos + Bumps)', value: fmt(data.faturamento) },
-        { label: 'Faturamento Total', value: fmt(data.faturamentoTotal), isBold: true },
+        { label: 'Fat. Ingressos + Bumps', value: fmt(data.faturamento) },
+        { label: 'Faturamento Total', value: fmt(data.faturamentoTotal), isHighlight: true },
         {
           label: 'Lucro / Prejuizo',
           value: data.lucroPrejuizo === 0 ? '--' : BRL.format(data.lucroPrejuizo),
           isNegative: data.lucroPrejuizo < 0,
         },
-        { label: 'ROAS', value: roas === 0 ? '--' : roas.toFixed(2) + 'x', isBold: true },
+        { label: 'ROAS', value: roas === 0 ? '--' : roas.toFixed(2) + 'x', isHighlight: roas >= 2 },
       ],
     },
     {
       title: 'Funil',
+      icon: GitBranch,
+      accentColor: 'text-violet-400',
+      headerBg: 'from-violet-500/10 to-transparent',
       metrics: [
         { label: 'Aplicacoes', value: fmtNum(data.aplicacoes) },
         { label: 'Custo / Aplicacao', value: fmt(data.custoPorAplicacao) },
@@ -76,9 +95,12 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
     },
     {
       title: 'Formacao',
+      icon: GraduationCap,
+      accentColor: 'text-amber-400',
+      headerBg: 'from-amber-500/10 to-transparent',
       metrics: [
         { label: 'Vendas Formacao', value: fmtNum(data.vendasFormacao) },
-        { label: 'Custo / Venda Formacao', value: fmt(data.custoVendasFormacao) },
+        { label: 'Custo / Venda', value: fmt(data.custoVendasFormacao) },
         { label: 'Clique / Venda', value: cliquePorVenda === 0 ? '--' : cliquePorVenda.toFixed(1) },
         { label: 'View Page / Venda', value: viewPagePorVenda === 0 ? '--' : viewPagePorVenda.toFixed(1) },
       ],
@@ -86,38 +108,45 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <h2 className="text-sm uppercase tracking-wider text-muted-foreground font-heading">
         RESUMO GERAL
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {groups.map((group) => (
-          <div key={group.title} className="bg-card border border-border rounded-xl overflow-hidden">
-            <div className="px-5 py-3 border-b border-border">
-              <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading">
-                {group.title}
-              </h3>
-            </div>
-            <div className="p-5 space-y-4">
-              {group.metrics.map((m) => (
-                <div key={m.label}>
-                  <p className="text-xs text-muted-foreground font-heading mb-1">{m.label}</p>
-                  <p
-                    className={`text-sm font-mono font-medium ${
-                      m.isNegative
-                        ? 'text-destructive'
-                        : m.isBold
-                          ? 'text-primary font-bold text-base'
-                          : 'text-foreground'
-                    }`}
-                  >
-                    {m.value}
-                  </p>
+        {groups.map((group) => {
+          const Icon = group.icon;
+          return (
+            <div key={group.title} className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">
+              <div className={`px-5 py-3 border-b border-border bg-gradient-to-r ${group.headerBg}`}>
+                <div className="flex items-center gap-2">
+                  <Icon className={`w-4 h-4 ${group.accentColor}`} />
+                  <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
+                    {group.title}
+                  </h3>
                 </div>
-              ))}
+              </div>
+              <div className="p-5 space-y-4">
+                {group.metrics.map((m) => (
+                  <div key={m.label} className="flex items-baseline justify-between gap-2">
+                    <p className="text-xs text-muted-foreground font-heading shrink-0">{m.label}</p>
+                    <div className="border-b border-dotted border-border/50 flex-1 mb-1 mx-1" />
+                    <p
+                      className={`text-sm font-mono font-medium whitespace-nowrap ${
+                        m.isNegative
+                          ? 'text-destructive'
+                          : m.isHighlight
+                            ? 'text-primary font-bold'
+                            : 'text-foreground'
+                      }`}
+                    >
+                      {m.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
