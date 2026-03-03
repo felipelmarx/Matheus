@@ -1,9 +1,9 @@
 import { RefreshCw, Calendar } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import type { DashboardData } from '@/types/metrics';
+import type { AllDesafiosData } from '@/types/metrics';
 
 interface DashboardHeaderProps {
-  data: DashboardData | null;
+  data: AllDesafiosData | null;
   loading: boolean;
   lastRefresh: Date | null;
   onRefresh: () => void;
@@ -16,15 +16,11 @@ export default function DashboardHeader({ data, loading, lastRefresh, onRefresh 
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold font-heading text-foreground">
-              Melhores Ads &amp; Paginas <span className="text-primary">5D</span>
+              Dashboard <span className="text-primary">5D</span>
             </h1>
-            {data && (
-              <p className="text-muted-foreground mt-1 text-sm font-heading">
-                Ranking de performance dos criativos
-                {data.desafioAtual ? ` \u00B7 ${data.desafioAtual}` : ''}
-                {data.periodo ? ` \u00B7 ${data.periodo}` : ''}
-              </p>
-            )}
+            <p className="text-muted-foreground mt-1 text-sm font-heading">
+              Metricas de performance por desafio
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <ThemeToggle />

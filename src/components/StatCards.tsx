@@ -1,8 +1,8 @@
 import { DollarSign, ShoppingCart, Ticket, Target } from 'lucide-react';
-import type { DashboardData } from '@/types/metrics';
+import type { DesafioData } from '@/types/metrics';
 
 interface StatCardsProps {
-  data: DashboardData;
+  data: DesafioData;
 }
 
 export default function StatCards({ data }: StatCardsProps) {
@@ -11,7 +11,7 @@ export default function StatCards({ data }: StatCardsProps) {
   const cards = [
     { label: 'INVESTIMENTO', value: BRL.format(data.investimento), icon: DollarSign },
     { label: 'VENDAS', value: data.vendas.toLocaleString('pt-BR'), icon: ShoppingCart },
-    { label: 'INGRESSOS TOTAIS', value: BRL.format(data.faturamento), icon: Ticket },
+    { label: 'FATURAMENTO TOTAL', value: BRL.format(data.faturamentoTotal), icon: Ticket },
     { label: 'CPA', value: BRL.format(data.cpa), icon: Target },
   ];
 

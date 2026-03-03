@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import type { DashboardData } from '@/types/metrics';
+import type { AllDesafiosData } from '@/types/metrics';
 import DashboardHeader from '@/components/DashboardHeader';
+import DesafioTabs from '@/components/DesafioTabs';
 import StatCards from '@/components/StatCards';
 import ResumoGeral from '@/components/ResumoGeral';
-import MelhorPagina from '@/components/MelhorPagina';
-import ListaAnuncios from '@/components/ListaAnuncios';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
+type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3';
+
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<AllDesafiosData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [activeTab, setActiveTab] = useState<DesafioKey>('desafio3');
 
   const fetchData = useCallback(async (force = false) => {
     try {
@@ -20,7 +22,7 @@ export default function DashboardPage() {
       const url = force ? '/api/metrics?refresh=true' : '/api/metrics';
       const res = await fetch(url);
       if (!res.ok) throw new Error('Falha ao carregar dados');
-      const newData: DashboardData = await res.json();
+      const newData: AllDesafiosData = await res.json();
       setData(newData);
       setLastRefresh(new Date());
     } catch (err) {
@@ -56,6 +58,8 @@ export default function DashboardPage() {
     );
   }
 
+  const activeData = data ? data[activeTab] : null;
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader
@@ -73,12 +77,11 @@ export default function DashboardPage() {
               <p className="text-muted-foreground font-heading">Carregando dados...</p>
             </div>
           </div>
-        ) : data ? (
+        ) : data && activeData ? (
           <>
-            <StatCards data={data} />
-            <ResumoGeral data={data} />
-            <MelhorPagina />
-            <ListaAnuncios />
+            <DesafioTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            <StatCards data={activeData} />
+            <ResumoGeral data={activeData} />
           </>
         ) : null}
       </main>

@@ -1,13 +1,14 @@
-import type { DashboardData } from '@/types/metrics';
+import type { DesafioData } from '@/types/metrics';
 
 interface ResumoGeralProps {
-  data: DashboardData;
+  data: DesafioData;
 }
 
 interface MetricRow {
   label: string;
   value: string;
   isNegative?: boolean;
+  isBold?: boolean;
 }
 
 export default function ResumoGeral({ data }: ResumoGeralProps) {
@@ -16,30 +17,37 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
   const fmtNum = (v: number) => (v === 0 ? '--' : v.toLocaleString('pt-BR'));
   const fmtPct = (v: number) => (v === 0 ? '--' : `${v}%`);
 
-  const roas = data.investimento > 0 ? (data.faturamento / data.investimento) : 0;
+  const roas = data.investimento > 0 ? (data.faturamentoTotal / data.investimento) : 0;
   const cliquePorVenda = data.vendas > 0 ? (data.cliques / data.vendas) : 0;
   const viewPagePorVenda = data.vendas > 0 ? (data.viewPages / data.vendas) : 0;
 
   const metrics: MetricRow[] = [
-    { label: 'Periodo', value: data.periodo || '--' },
-    { label: 'Investimento', value: fmt(data.investimento) },
+    { label: 'Captacao', value: data.captacao || '--' },
+    { label: 'Ao Vivo', value: data.aoVivo || '--' },
+    { label: 'Cliques', value: fmtNum(data.cliques) },
+    { label: 'View Pages', value: fmtNum(data.viewPages) },
+    { label: 'Conect Rate', value: fmtPct(data.conectRate) },
+    { label: 'Investimento', value: fmt(data.investimento), isBold: true },
     { label: 'Vendas', value: fmtNum(data.vendas) },
-    { label: 'Ingressos Cortesias', value: '--' },
-    { label: 'Ingressos TOTAIS', value: fmt(data.faturamento) },
-    { label: 'Leads no Grupo', value: '--' },
-    { label: 'Conversao de Entrada', value: fmtPct(data.conectRate) },
     { label: 'CPA', value: fmt(data.cpa) },
     { label: 'Ticket Medio', value: fmt(data.ticketMedio) },
-    { label: 'Faturamento', value: fmt(data.faturamento) },
+    { label: 'Faturamento (Ingressos + Bumps)', value: fmt(data.faturamento) },
     {
       label: 'Lucro / Prejuizo',
       value: data.lucroPrejuizo === 0 ? '--' : BRL.format(data.lucroPrejuizo),
       isNegative: data.lucroPrejuizo < 0,
     },
-    { label: 'ROAS', value: roas === 0 ? '--' : roas.toFixed(2) + 'x' },
+    { label: 'Aplicacoes', value: fmtNum(data.aplicacoes) },
+    { label: 'Custo por Aplicacao', value: fmt(data.custoPorAplicacao) },
+    { label: 'Agendamentos', value: fmtNum(data.agendamentos) },
+    { label: 'Entrevistas', value: fmtNum(data.entrevistas) },
+    { label: 'Custo por Entrevista', value: fmt(data.custoEntrevista) },
+    { label: 'Vendas da Formacao', value: fmtNum(data.vendasFormacao) },
+    { label: 'Custo por Venda Formacao', value: fmt(data.custoVendasFormacao) },
+    { label: 'Faturamento Total', value: fmt(data.faturamentoTotal), isBold: true },
+    { label: 'ROAS', value: roas === 0 ? '--' : roas.toFixed(2) + 'x', isBold: true },
     { label: 'Clique / Venda', value: cliquePorVenda === 0 ? '--' : cliquePorVenda.toFixed(1) },
     { label: 'View Page / Venda', value: viewPagePorVenda === 0 ? '--' : viewPagePorVenda.toFixed(1) },
-    { label: 'Checkout / Venda', value: '--' },
   ];
 
   return (
@@ -52,10 +60,12 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
       <div className="divide-y divide-border">
         {metrics.map((m) => (
           <div key={m.label} className="flex items-center justify-between px-6 py-3">
-            <span className="text-sm text-foreground font-heading">{m.label}</span>
+            <span className={`text-sm font-heading ${m.isBold ? 'font-semibold text-foreground' : 'text-foreground'}`}>
+              {m.label}
+            </span>
             <span
               className={`text-sm font-mono font-medium ${
-                m.isNegative ? 'text-destructive' : 'text-foreground'
+                m.isNegative ? 'text-destructive' : m.isBold ? 'text-primary font-bold' : 'text-foreground'
               }`}
             >
               {m.value}

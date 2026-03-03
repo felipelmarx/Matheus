@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchMetricsFromSheets, forceRefresh } from '@/lib/googleSheets';
-import type { DashboardData } from '@/types/metrics';
+import type { AllDesafiosData } from '@/types/metrics';
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<DashboardData | { error: string }>
+  res: NextApiResponse<AllDesafiosData | { error: string }>
 ) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });

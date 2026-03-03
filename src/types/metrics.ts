@@ -7,15 +7,54 @@ export interface MetricCard {
   changeType?: 'increase' | 'decrease' | 'neutral';
 }
 
+export interface DesafioData {
+  // Periods
+  captacao: string;
+  aoVivo: string;
+
+  // Traffic
+  cliques: number;
+  viewPages: number;
+  conectRate: number;
+
+  // Investment & Revenue
+  investimento: number;
+  vendas: number;
+  cpa: number;
+  ticketMedio: number;
+  faturamento: number;
+  lucroPrejuizo: number;
+
+  // Applications
+  aplicacoes: number;
+  custoPorAplicacao: number;
+
+  // Scheduling & Interviews
+  agendamentos: number;
+  entrevistas: number;
+  custoEntrevista: number;
+
+  // Formation
+  vendasFormacao: number;
+  custoVendasFormacao: number;
+  faturamentoTotal: number;
+}
+
+export interface AllDesafiosData {
+  desafio1: DesafioData;
+  desafio2: DesafioData;
+  desafio3: DesafioData;
+  lastUpdated: string;
+  fromCache: boolean;
+}
+
+// Keep legacy type for backward compat
 export interface DashboardData {
-  // Core metrics
   investimento: number;
   faturamento: number;
   vendas: number;
   cpa: number;
   ticketMedio: number;
-
-  // Extended metrics
   cliques: number;
   viewPages: number;
   conectRate: number;
@@ -24,8 +63,6 @@ export interface DashboardData {
   custoPorAplicacao: number;
   vendasFormacao: number;
   faturamentoTotal: number;
-
-  // Metadata
   desafioAtual: string;
   periodo: string;
   lastUpdated: string;
@@ -33,7 +70,7 @@ export interface DashboardData {
 }
 
 export interface CacheEntry {
-  data: DashboardData;
+  data: AllDesafiosData;
   timestamp: number;
   ttl: number;
 }
