@@ -1,8 +1,8 @@
-import type { DesafioData } from '@/types/metrics';
+import type { DesafioData, TabKey } from '@/types/metrics';
 
 interface DesafioTabsProps {
-  activeTab: 'desafio1' | 'desafio2' | 'desafio3';
-  onTabChange: (tab: 'desafio1' | 'desafio2' | 'desafio3') => void;
+  activeTab: TabKey;
+  onTabChange: (tab: TabKey) => void;
   data: {
     desafio1: DesafioData;
     desafio2: DesafioData;
@@ -10,10 +10,11 @@ interface DesafioTabsProps {
   };
 }
 
-const tabs = [
-  { key: 'desafio1' as const, label: 'Desafio 1', num: '01' },
-  { key: 'desafio2' as const, label: 'Desafio 2', num: '02' },
-  { key: 'desafio3' as const, label: 'Desafio 3', num: '03' },
+const tabs: { key: TabKey; label: string; num: string }[] = [
+  { key: 'geral', label: '\u2211 Geral', num: '\u2211' },
+  { key: 'desafio1', label: 'Desafio 1', num: '01' },
+  { key: 'desafio2', label: 'Desafio 2', num: '02' },
+  { key: 'desafio3', label: 'Desafio 3', num: '03' },
 ];
 
 export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTabsProps) {
@@ -21,8 +22,8 @@ export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTab
     <div className="flex flex-col sm:flex-row gap-3">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
-        const desafioData = data[tab.key];
-        const hasData = desafioData.investimento > 0 || desafioData.vendas > 0;
+        const desafioData = tab.key === 'geral' ? null : data[tab.key];
+        const hasData = tab.key === 'geral' || (desafioData !== null && (desafioData.investimento > 0 || desafioData.vendas > 0));
         return (
           <button
             key={tab.key}
@@ -38,7 +39,7 @@ export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTab
             </span>
             <div className="text-left">
               <span className="block">{tab.label}</span>
-              {desafioData.captacao && (
+              {desafioData?.captacao && (
                 <span className={`block text-xs ${isActive ? 'text-primary-foreground/60' : 'text-muted-foreground/60'}`}>
                   {desafioData.captacao.replace(/CAPTAÇÃO\s*-\s*/i, '')}
                 </span>

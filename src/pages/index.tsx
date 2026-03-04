@@ -1,19 +1,56 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import type { AllDesafiosData } from '@/types/metrics';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import type { AllDesafiosData, DesafioData, TabKey } from '@/types/metrics';
 import DashboardHeader from '@/components/DashboardHeader';
 import DesafioTabs from '@/components/DesafioTabs';
 import StatCards from '@/components/StatCards';
 import ResumoGeral from '@/components/ResumoGeral';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
-type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3';
+function consolidateDesafios(data: AllDesafiosData): DesafioData {
+  const desafios = [data.desafio1, data.desafio2, data.desafio3];
+
+  const sum = (key: keyof DesafioData) =>
+    desafios.reduce((acc, d) => acc + (typeof d[key] === 'number' ? (d[key] as number) : 0), 0);
+
+  const totalInvestimento = sum('investimento');
+  const totalVendas = sum('vendas');
+  const totalVendasFormacao = sum('vendasFormacao');
+  const totalFaturamentoTotal = sum('faturamentoTotal');
+
+  return {
+    captacao: '',
+    aoVivo: '',
+
+    cliques: sum('cliques'),
+    viewPages: sum('viewPages'),
+    conectRate: totalVendas > 0 ? Math.round(sum('conectRate') / desafios.filter(d => d.conectRate > 0).length) : 0,
+
+    investimento: totalInvestimento,
+    vendas: totalVendas,
+    cpa: totalVendas > 0 ? Math.round(totalInvestimento / totalVendas) : 0,
+    ticketMedio: totalVendasFormacao > 0 ? Math.round(totalFaturamentoTotal / totalVendasFormacao) : 0,
+    faturamento: sum('faturamento'),
+    lucroPrejuizo: sum('lucroPrejuizo'),
+
+    aplicacoes: sum('aplicacoes'),
+    custoPorAplicacao: sum('aplicacoes') > 0 ? totalInvestimento / sum('aplicacoes') : 0,
+
+    agendamentos: sum('agendamentos'),
+    entrevistas: sum('entrevistas'),
+    custoEntrevista: sum('entrevistas') > 0 ? totalInvestimento / sum('entrevistas') : 0,
+
+    vendasFormacao: totalVendasFormacao,
+    custoVendasFormacao: totalVendasFormacao > 0 ? totalInvestimento / totalVendasFormacao : 0,
+    faturamentoTotal: totalFaturamentoTotal,
+  };
+}
 
 export default function DashboardPage() {
   const [data, setData] = useState<AllDesafiosData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-  const [activeTab, setActiveTab] = useState<DesafioKey>('desafio3');
+  const [activeTab, setActiveTab] = useState<TabKey>('geral');
 
   const fetchData = useCallback(async (force = false) => {
     try {
@@ -38,6 +75,12 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  const activeData = useMemo(() => {
+    if (!data) return null;
+    if (activeTab === 'geral') return consolidateDesafios(data);
+    return data[activeTab];
+  }, [data, activeTab]);
+
   if (error && !data) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -57,8 +100,6 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const activeData = data ? data[activeTab] : null;
 
   return (
     <div className="min-h-screen bg-background">

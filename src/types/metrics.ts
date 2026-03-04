@@ -40,6 +40,9 @@ export interface DesafioData {
   faturamentoTotal: number;
 }
 
+export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3';
+export type TabKey = 'geral' | DesafioKey;
+
 export interface AllDesafiosData {
   desafio1: DesafioData;
   desafio2: DesafioData;
