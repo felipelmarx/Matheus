@@ -60,7 +60,7 @@ export default function StatCards({ data }: StatCardsProps) {
                 <Icon className="w-4 h-4" />
               </div>
             </div>
-            <p className="text-xl font-bold font-mono text-foreground">{card.value}</p>
+            <p className="text-sm font-bold font-mono text-foreground">{card.value}</p>
           </div>
         );
       })}
