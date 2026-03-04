@@ -6,9 +6,9 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID ?? '';
 const API_KEY = process.env.GOOGLE_API_KEY ?? '';
 const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
-// Fetch rows from DASH AUTO (C1:R40)
+// Fetch rows from RESUMO - GERAL (C1:R40)
 async function fetchDashAutoRows(): Promise<string[][]> {
-  const range = encodeURIComponent('DASH AUTO!C1:R40');
+  const range = encodeURIComponent('RESUMO - GERAL!C1:R40');
   const url = `${SHEETS_API}/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}&valueRenderOption=FORMATTED_VALUE`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Sheets API error ${res.status}`);
@@ -103,7 +103,7 @@ function getDefaultData(): AllDesafiosData {
   };
 }
 
-// Column mappings for DASH AUTO (C1:R35 → indices 0-15)
+// Column mappings for RESUMO - GERAL (C1:R40 → indices 0-15)
 // DESAFIO 1: label=0 (C), value=1 (D)
 // DESAFIO 2: label=6 (I), value=7 (J)
 // DESAFIO 3: label=12 (O), value=13 (P)
