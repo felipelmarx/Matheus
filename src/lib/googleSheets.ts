@@ -41,7 +41,7 @@ function findText(rows: string[][], pattern: RegExp, col: number): string {
 function extractDesafioData(rows: string[][], labelCol: number, valueCol: number): DesafioData {
   const p = parseSheetNumber;
 
-  return {
+  const result: DesafioData = {
     captacao: findText(rows, /capta[cç][aã]o/i, labelCol),
     aoVivo: findText(rows, /ao\s*vivo/i, labelCol),
 
@@ -69,9 +69,17 @@ function extractDesafioData(rows: string[][], labelCol: number, valueCol: number
     vendasFormacao: p(findValue(rows, /vendas\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol)),
     custoVendasFormacao: p(findValue(rows, /custo\s*por\s*vendas\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol)),
     faturamentoTotal: p(findValue(rows, /faturamento\s*total/i, labelCol, valueCol)),
-    ticketMedioFormacao: p(findValue(rows, /ticket\s*m[eé]dio\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol))
-      || p(findValue(rows, /ticket\s*m[eé]dio\s*(da\s*)?forma[cç][aã]o/i, 0, valueCol)),
+    ticketMedioFormacao: 0,
   };
+
+  // ticketMedioFormacao: try sheet extraction, fallback to computed value
+  const tmf = p(findValue(rows, /ticket\s*m[eé]dio\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol))
+    || p(findValue(rows, /ticket\s*m[eé]dio\s*(da\s*)?forma[cç][aã]o/i, 0, valueCol));
+  result.ticketMedioFormacao = tmf > 0
+    ? tmf
+    : (result.vendasFormacao > 0 ? result.faturamentoTotal / result.vendasFormacao : 0);
+
+  return result;
 }
 
 function getDefaultDesafio(): DesafioData {
