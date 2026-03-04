@@ -159,7 +159,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     // Daily fetch is independent - don't let it break the main data
     let dailyRows: string[][] = [];
     try {
-      dailyRows = await fetchSheetRows("'MAR/ABR MÉTRICAS GERAIS'!CU5:DB17");
+      dailyRows = await fetchSheetRows("'MAR/ABR - METRICAS GERAIS'!CU5:DB17");
     } catch (err) {
       console.warn('[sheets] Daily metrics fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
