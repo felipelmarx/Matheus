@@ -28,7 +28,7 @@ function consolidateDesafios(data: AllDesafiosData): DesafioData {
     investimento: totalInvestimento,
     vendas: totalVendas,
     cpa: totalVendas > 0 ? Math.round(totalInvestimento / totalVendas) : 0,
-    ticketMedio: totalVendasFormacao > 0 ? Math.round(totalFaturamentoTotal / totalVendasFormacao) : 0,
+    ticketMedio: totalVendas > 0 ? Math.round(sum('faturamento') / totalVendas) : 0,
     faturamento: sum('faturamento'),
     lucroPrejuizo: sum('lucroPrejuizo'),
 
@@ -42,6 +42,7 @@ function consolidateDesafios(data: AllDesafiosData): DesafioData {
     vendasFormacao: totalVendasFormacao,
     custoVendasFormacao: totalVendasFormacao > 0 ? totalInvestimento / totalVendasFormacao : 0,
     faturamentoTotal: totalFaturamentoTotal,
+    ticketMedioFormacao: totalVendasFormacao > 0 ? Math.round(totalFaturamentoTotal / totalVendasFormacao) : 0,
   };
 }
 

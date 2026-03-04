@@ -35,7 +35,7 @@ export default function StatCards({ data }: StatCardsProps) {
     },
     {
       label: 'TICKET MEDIO FORMACAO',
-      value: BRL.format(data.ticketMedio),
+      value: BRL.format(data.ticketMedioFormacao),
       icon: Target,
       color: 'from-amber-500/10 to-amber-600/5',
       iconColor: 'text-amber-400',

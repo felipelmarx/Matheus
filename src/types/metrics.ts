@@ -38,6 +38,7 @@ export interface DesafioData {
   vendasFormacao: number;
   custoVendasFormacao: number;
   faturamentoTotal: number;
+  ticketMedioFormacao: number;
 }
 
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3';

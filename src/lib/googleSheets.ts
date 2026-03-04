@@ -6,9 +6,9 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID ?? '';
 const API_KEY = process.env.GOOGLE_API_KEY ?? '';
 const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
-// Fetch rows from DASH AUTO (C1:R35)
+// Fetch rows from DASH AUTO (C1:R40)
 async function fetchDashAutoRows(): Promise<string[][]> {
-  const range = encodeURIComponent('DASH AUTO!C1:R35');
+  const range = encodeURIComponent('DASH AUTO!C1:R40');
   const url = `${SHEETS_API}/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}&valueRenderOption=FORMATTED_VALUE`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Sheets API error ${res.status}`);
@@ -69,6 +69,7 @@ function extractDesafioData(rows: string[][], labelCol: number, valueCol: number
     vendasFormacao: p(findValue(rows, /vendas\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol)),
     custoVendasFormacao: p(findValue(rows, /custo\s*por\s*vendas\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol)),
     faturamentoTotal: p(findValue(rows, /faturamento\s*total/i, labelCol, valueCol)),
+    ticketMedioFormacao: p(findValue(rows, /ticket\s*m[eé]dio\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol)),
   };
 }
 
@@ -79,7 +80,7 @@ function getDefaultDesafio(): DesafioData {
     investimento: 0, vendas: 0, cpa: 0, ticketMedio: 0, faturamento: 0, lucroPrejuizo: 0,
     aplicacoes: 0, custoPorAplicacao: 0,
     agendamentos: 0, entrevistas: 0, custoEntrevista: 0,
-    vendasFormacao: 0, custoVendasFormacao: 0, faturamentoTotal: 0,
+    vendasFormacao: 0, custoVendasFormacao: 0, faturamentoTotal: 0, ticketMedioFormacao: 0,
   };
 }
 
