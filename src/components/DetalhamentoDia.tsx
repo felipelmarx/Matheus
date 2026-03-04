@@ -6,7 +6,7 @@ interface DetalhamentoDiaProps {
 }
 
 export default function DetalhamentoDia({ daily }: DetalhamentoDiaProps) {
-  const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const fmt = (v: number) => (v === 0 ? '--' : BRL.format(v));
   const fmtNum = (v: number) => (v === 0 ? '--' : v.toLocaleString('pt-BR'));
 
@@ -57,15 +57,15 @@ export default function DetalhamentoDia({ daily }: DetalhamentoDiaProps) {
                 const isPositive = m.isProfit && value > 0;
 
                 return (
-                  <div key={m.key} className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Icon className={`w-3 h-3 ${m.iconColor}`} />
-                      <span className="text-xs text-muted-foreground font-heading">
+                  <div key={m.key} className="flex items-center justify-between gap-1">
+                    <div className="flex items-center gap-1 min-w-0">
+                      <Icon className={`w-3 h-3 shrink-0 ${m.iconColor}`} />
+                      <span className="text-[11px] text-muted-foreground font-heading truncate">
                         {m.label}
                       </span>
                     </div>
                     <span
-                      className={`text-xs font-mono font-medium whitespace-nowrap ${
+                      className={`text-[11px] font-mono font-medium text-right ${
                         isNegative
                           ? 'text-destructive'
                           : isPositive
