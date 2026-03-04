@@ -1,4 +1,4 @@
-import type { DesafioData, AllDesafiosData } from '@/types/metrics';
+import type { DesafioData, DailyMetric, AllDesafiosData } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
 
@@ -6,10 +6,10 @@ const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID ?? '';
 const API_KEY = process.env.GOOGLE_API_KEY ?? '';
 const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
-// Fetch rows from RESUMO - GERAL (C1:R40)
-async function fetchDashAutoRows(): Promise<string[][]> {
-  const range = encodeURIComponent('RESUMO - GERAL!C1:R40');
-  const url = `${SHEETS_API}/${SPREADSHEET_ID}/values/${range}?key=${API_KEY}&valueRenderOption=FORMATTED_VALUE`;
+// Fetch rows from a given sheet range
+async function fetchSheetRows(range: string): Promise<string[][]> {
+  const encoded = encodeURIComponent(range);
+  const url = `${SHEETS_API}/${SPREADSHEET_ID}/values/${encoded}?key=${API_KEY}&valueRenderOption=FORMATTED_VALUE`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Sheets API error ${res.status}`);
   const json = await res.json();
@@ -93,17 +93,44 @@ function getDefaultDesafio(): DesafioData {
   };
 }
 
+// Extract daily metrics from MAR/ABR MÉTRICAS GERAIS (CU5:DB17)
+// Columns: CU=data, CV=investimento, CW=vendas, CX=CPA, CY=ticket médio, CZ=faturamento, DA=lucro/prejuízo, DB=cortesia
+function extractDailyMetrics(rows: string[][]): DailyMetric[] {
+  const p = parseSheetNumber;
+  const daily: DailyMetric[] = [];
+
+  for (const row of rows) {
+    const dateVal = (row[0] ?? '').trim();
+    if (!dateVal || /^(data|dia|date)$/i.test(dateVal)) continue;
+
+    daily.push({
+      data: dateVal,
+      investimento: p(row[1]),
+      vendas: p(row[2]),
+      cpa: p(row[3]),
+      ticketMedio: p(row[4]),
+      faturamento: p(row[5]),
+      lucroPrejuizo: p(row[6]),
+      cortesia: p(row[7]),
+    });
+  }
+
+  return daily;
+}
+
 function getDefaultData(): AllDesafiosData {
   return {
+    geral: getDefaultDesafio(),
     desafio1: getDefaultDesafio(),
     desafio2: getDefaultDesafio(),
     desafio3: getDefaultDesafio(),
+    desafio3Daily: [],
     lastUpdated: new Date().toISOString(),
     fromCache: false,
   };
 }
 
-// Column mappings for RESUMO - GERAL (C1:R40 → indices 0-15)
+// Column mappings for DASH AUTO (C1:R35 → indices 0-15)
 // DESAFIO 1: label=0 (C), value=1 (D)
 // DESAFIO 2: label=6 (I), value=7 (J)
 // DESAFIO 3: label=12 (O), value=13 (P)
@@ -123,19 +150,32 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
   }
 
   try {
-    console.log('[sheets] Fetching from DASH AUTO...');
-    const rows = await fetchDashAutoRows();
+    console.log('[sheets] Fetching from DASH AUTO, RESUMO - GERAL, and MAR/ABR MÉTRICAS GERAIS...');
+    const [dashRows, resumoRows, dailyRows] = await Promise.all([
+      fetchSheetRows('DASH AUTO!C1:R35'),
+      fetchSheetRows('RESUMO - GERAL!C1:R77'),
+      fetchSheetRows("'MAR/ABR MÉTRICAS GERAIS'!CU5:DB17"),
+    ]);
+
+    // Extract geral data from RESUMO - GERAL (label=col0/C, value=col1/D)
+    const geralData = extractDesafioData(resumoRows, 0, 1);
+    console.log(`[sheets] geral: inv=${geralData.investimento} vendas=${geralData.vendas} fat=${geralData.faturamentoTotal}`);
+
+    const desafio3Daily = extractDailyMetrics(dailyRows);
+    console.log(`[sheets] desafio3Daily: ${desafio3Daily.length} days loaded`);
 
     const data: AllDesafiosData = {
+      geral: geralData,
       desafio1: getDefaultDesafio(),
       desafio2: getDefaultDesafio(),
       desafio3: getDefaultDesafio(),
+      desafio3Daily,
       lastUpdated: new Date().toISOString(),
       fromCache: false,
     };
 
     for (const col of DESAFIO_COLS) {
-      const desafioData = extractDesafioData(rows, col.labelCol, col.valueCol);
+      const desafioData = extractDesafioData(dashRows, col.labelCol, col.valueCol);
       data[col.key] = desafioData;
       console.log(`[sheets] ${col.key}: inv=${desafioData.investimento} vendas=${desafioData.vendas} fat=${desafioData.faturamentoTotal}`);
     }

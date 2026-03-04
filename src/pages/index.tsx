@@ -4,6 +4,7 @@ import DashboardHeader from '@/components/DashboardHeader';
 import DesafioTabs from '@/components/DesafioTabs';
 import StatCards from '@/components/StatCards';
 import ResumoGeral from '@/components/ResumoGeral';
+import DetalhamentoDia from '@/components/DetalhamentoDia';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 function consolidateDesafios(data: AllDesafiosData): DesafioData {
@@ -124,6 +125,9 @@ export default function DashboardPage() {
             <DesafioTabs activeTab={activeTab} onTabChange={setActiveTab} data={data} />
             <StatCards data={activeData} />
             <ResumoGeral data={activeData} />
+            {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
+              <DetalhamentoDia daily={data.desafio3Daily} />
+            )}
           </>
         ) : null}
       </main>

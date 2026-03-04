@@ -44,10 +44,23 @@ export interface DesafioData {
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3';
 export type TabKey = 'geral' | DesafioKey;
 
+export interface DailyMetric {
+  data: string;
+  investimento: number;
+  vendas: number;
+  cpa: number;
+  ticketMedio: number;
+  faturamento: number;
+  lucroPrejuizo: number;
+  cortesia: number;
+}
+
 export interface AllDesafiosData {
+  geral: DesafioData;
   desafio1: DesafioData;
   desafio2: DesafioData;
   desafio3: DesafioData;
+  desafio3Daily: DailyMetric[];
   lastUpdated: string;
   fromCache: boolean;
 }
