@@ -151,11 +151,18 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
   try {
     console.log('[sheets] Fetching from DASH AUTO, RESUMO - GERAL, and MAR/ABR MÉTRICAS GERAIS...');
-    const [dashRows, resumoRows, dailyRows] = await Promise.all([
+    const [dashRows, resumoRows] = await Promise.all([
       fetchSheetRows('DASH AUTO!C1:R35'),
       fetchSheetRows('RESUMO - GERAL!C1:R77'),
-      fetchSheetRows("'MAR/ABR MÉTRICAS GERAIS'!CU5:DB17"),
     ]);
+
+    // Daily fetch is independent - don't let it break the main data
+    let dailyRows: string[][] = [];
+    try {
+      dailyRows = await fetchSheetRows("'MAR/ABR MÉTRICAS GERAIS'!CU5:DB17");
+    } catch (err) {
+      console.warn('[sheets] Daily metrics fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
 
     // Extract geral data from RESUMO - GERAL (label=col0/C, value=col1/D)
     const geralData = extractDesafioData(resumoRows, 0, 1);
