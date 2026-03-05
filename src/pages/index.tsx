@@ -9,19 +9,34 @@ import MetasCard from '@/components/MetasCard';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 function buildGeralData(data: AllDesafiosData): DesafioData {
-  // Use data from RESUMO - GERAL sheet, but exclude Desafio 3 investimento
-  const geral = { ...data.geral };
-  const inv = data.desafio1.investimento + data.desafio2.investimento;
-  geral.investimento = inv;
+  const d1 = data.desafio1;
+  const d2 = data.desafio2;
 
-  // Recalculate metrics that depend on investimento
-  geral.cpa = geral.vendas > 0 ? Math.round(inv / geral.vendas) : 0;
-  geral.custoPorAplicacao = geral.aplicacoes > 0 ? inv / geral.aplicacoes : 0;
-  geral.custoEntrevista = geral.entrevistas > 0 ? inv / geral.entrevistas : 0;
-  geral.custoVendasFormacao = geral.vendasFormacao > 0 ? inv / geral.vendasFormacao : 0;
-  geral.lucroPrejuizo = geral.faturamento - inv;
+  // Sum Desafio 1 + 2 only (exclude Desafio 3)
+  const inv = d1.investimento + d2.investimento;
+  const fat = d1.faturamento + d2.faturamento;
+  const vendasForm = d1.vendasFormacao + d2.vendasFormacao;
+  const fatTotal = d1.faturamentoTotal + d2.faturamentoTotal;
+  const vendas = d1.vendas + d2.vendas;
 
-  return geral;
+  const cac = vendasForm > 0 ? inv / vendasForm : 0;
+  const tmFormacao = vendasForm > 0 ? fatTotal / vendasForm : 0;
+
+  return {
+    ...data.geral,
+    investimento: inv,
+    faturamento: fat,
+    vendas,
+    vendasFormacao: vendasForm,
+    faturamentoTotal: fatTotal,
+    ticketMedioFormacao: Math.round(tmFormacao),
+    custoVendasFormacao: cac,
+    cpa: vendas > 0 ? Math.round(inv / vendas) : 0,
+    ticketMedio: vendas > 0 ? Math.round(fat / vendas) : 0,
+    custoPorAplicacao: data.geral.aplicacoes > 0 ? inv / data.geral.aplicacoes : 0,
+    custoEntrevista: data.geral.entrevistas > 0 ? inv / data.geral.entrevistas : 0,
+    lucroPrejuizo: fat - inv,
+  };
 }
 
 export default function DashboardPage() {
