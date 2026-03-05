@@ -19,7 +19,8 @@ function buildGeralData(data: AllDesafiosData): DesafioData {
   const fatTotal = d1.faturamentoTotal + d2.faturamentoTotal;
   const vendas = d1.vendas + d2.vendas;
 
-  const cac = vendasForm > 0 ? inv / vendasForm : 0;
+  const lucroPrejuizo = d1.lucroPrejuizo + d2.lucroPrejuizo;
+  const cac = vendasForm > 0 ? lucroPrejuizo / vendasForm : 0;
   const tmFormacao = vendasForm > 0 ? fatTotal / vendasForm : 0;
 
   return {
