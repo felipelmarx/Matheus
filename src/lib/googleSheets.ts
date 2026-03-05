@@ -150,11 +150,8 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
   }
 
   try {
-    console.log('[sheets] Fetching from DASH AUTO, RESUMO - GERAL, and MAR/ABR MÉTRICAS GERAIS...');
-    const [dashRows, resumoRows] = await Promise.all([
-      fetchSheetRows('DASH AUTO!C1:R35'),
-      fetchSheetRows('RESUMO - GERAL!C1:R77'),
-    ]);
+    console.log('[sheets] Fetching from RESUMO - GERAL and MAR/ABR MÉTRICAS GERAIS...');
+    const resumoRows = await fetchSheetRows('RESUMO - GERAL!C1:R77');
 
     // Daily fetch is independent - don't let it break the main data
     let dailyRows: string[][] = [];
@@ -181,8 +178,9 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       fromCache: false,
     };
 
+    // All desafio data from RESUMO - GERAL (same column structure)
     for (const col of DESAFIO_COLS) {
-      const desafioData = extractDesafioData(dashRows, col.labelCol, col.valueCol);
+      const desafioData = extractDesafioData(resumoRows, col.labelCol, col.valueCol);
       data[col.key] = desafioData;
       console.log(`[sheets] ${col.key}: inv=${desafioData.investimento} vendas=${desafioData.vendas} fat=${desafioData.faturamentoTotal}`);
     }
