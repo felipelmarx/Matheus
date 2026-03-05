@@ -8,44 +8,20 @@ import DetalhamentoDia from '@/components/DetalhamentoDia';
 import MetasCard from '@/components/MetasCard';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
-function consolidateDesafios(data: AllDesafiosData): DesafioData {
-  const desafios = [data.desafio1, data.desafio2, data.desafio3];
+function buildGeralData(data: AllDesafiosData): DesafioData {
+  // Use data from RESUMO - GERAL sheet, but exclude Desafio 3 investimento
+  const geral = { ...data.geral };
+  const inv = data.desafio1.investimento + data.desafio2.investimento;
+  geral.investimento = inv;
 
-  const sum = (key: keyof DesafioData) =>
-    desafios.reduce((acc, d) => acc + (typeof d[key] === 'number' ? (d[key] as number) : 0), 0);
+  // Recalculate metrics that depend on investimento
+  geral.cpa = geral.vendas > 0 ? Math.round(inv / geral.vendas) : 0;
+  geral.custoPorAplicacao = geral.aplicacoes > 0 ? inv / geral.aplicacoes : 0;
+  geral.custoEntrevista = geral.entrevistas > 0 ? inv / geral.entrevistas : 0;
+  geral.custoVendasFormacao = geral.vendasFormacao > 0 ? inv / geral.vendasFormacao : 0;
+  geral.lucroPrejuizo = geral.faturamento - inv;
 
-  const totalInvestimento = sum('investimento');
-  const totalVendas = sum('vendas');
-  const totalVendasFormacao = sum('vendasFormacao');
-  const totalFaturamentoTotal = sum('faturamentoTotal');
-
-  return {
-    captacao: '',
-    aoVivo: '',
-
-    cliques: sum('cliques'),
-    viewPages: sum('viewPages'),
-    conectRate: totalVendas > 0 ? Math.round(sum('conectRate') / desafios.filter(d => d.conectRate > 0).length) : 0,
-
-    investimento: totalInvestimento,
-    vendas: totalVendas,
-    cpa: totalVendas > 0 ? Math.round(totalInvestimento / totalVendas) : 0,
-    ticketMedio: totalVendas > 0 ? Math.round(sum('faturamento') / totalVendas) : 0,
-    faturamento: sum('faturamento'),
-    lucroPrejuizo: sum('lucroPrejuizo'),
-
-    aplicacoes: sum('aplicacoes'),
-    custoPorAplicacao: sum('aplicacoes') > 0 ? totalInvestimento / sum('aplicacoes') : 0,
-
-    agendamentos: sum('agendamentos'),
-    entrevistas: sum('entrevistas'),
-    custoEntrevista: sum('entrevistas') > 0 ? totalInvestimento / sum('entrevistas') : 0,
-
-    vendasFormacao: totalVendasFormacao,
-    custoVendasFormacao: totalVendasFormacao > 0 ? totalInvestimento / totalVendasFormacao : 0,
-    faturamentoTotal: totalFaturamentoTotal,
-    ticketMedioFormacao: totalVendasFormacao > 0 ? Math.round(totalFaturamentoTotal / totalVendasFormacao) : 0,
-  };
+  return geral;
 }
 
 export default function DashboardPage() {
@@ -80,7 +56,7 @@ export default function DashboardPage() {
 
   const activeData = useMemo(() => {
     if (!data) return null;
-    if (activeTab === 'geral') return consolidateDesafios(data);
+    if (activeTab === 'geral') return buildGeralData(data);
     return data[activeTab];
   }, [data, activeTab]);
 
