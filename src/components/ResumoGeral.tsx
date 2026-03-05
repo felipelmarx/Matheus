@@ -26,7 +26,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
   const fmtNum = (v: number) => (v === 0 ? '--' : v.toLocaleString('pt-BR'));
   const fmtPct = (v: number) => (v === 0 ? '--' : `${v}%`);
 
-  const roas = data.investimento > 0 ? (data.faturamentoTotal / data.investimento) : 0;
+  const roas = data.investimento > 0 ? (data.faturamento / data.investimento) : 0;
 
   const groups: MetricGroup[] = [
     {
