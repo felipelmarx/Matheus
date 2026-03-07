@@ -28,6 +28,12 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
 
   const roas = data.investimento > 0 ? (data.faturamento / data.investimento) : 0;
 
+  // Funnel conversion rates
+  const convIngressosAplic = data.ingressosTotais > 0 ? (data.aplicacoes / data.ingressosTotais) * 100 : 0;
+  const convAplicAgend = data.aplicacoes > 0 ? (data.agendamentos / data.aplicacoes) * 100 : 0;
+  const convAgendEntrev = data.agendamentos > 0 ? (data.entrevistas / data.agendamentos) * 100 : 0;
+  const convEntrevVendas = data.entrevistas > 0 ? (data.vendasFormacao / data.entrevistas) * 100 : 0;
+
   const groups: MetricGroup[] = [
     {
       title: 'Trafego',
@@ -59,11 +65,15 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
       headerBg: 'from-violet-500/10 to-transparent',
       metrics: [
         { label: 'Ingressos Totais (vendas + cortesia)', value: fmtNum(data.ingressosTotais) },
+        { label: 'Conv. Ingressos → Aplicacoes', value: fmtPct(parseFloat(convIngressosAplic.toFixed(2))), isHighlight: convIngressosAplic > 0 },
         { label: 'Aplicacoes', value: fmtNum(data.aplicacoes) },
         { label: 'Custo / Aplicacao', value: fmt(data.custoPorAplicacao) },
+        { label: 'Conv. Aplicacoes → Agendamentos', value: fmtPct(parseFloat(convAplicAgend.toFixed(2))), isHighlight: convAplicAgend > 0 },
         { label: 'Agendamentos', value: fmtNum(data.agendamentos) },
+        { label: 'Conv. Agendamentos → Entrevistas', value: fmtPct(parseFloat(convAgendEntrev.toFixed(2))), isHighlight: convAgendEntrev > 0 },
         { label: 'Entrevistas', value: fmtNum(data.entrevistas) },
         { label: 'Custo / Entrevista', value: fmt(data.custoEntrevista) },
+        { label: 'Conv. Entrevistas → Vendas', value: fmtPct(parseFloat(convEntrevVendas.toFixed(2))), isHighlight: convEntrevVendas > 0 },
       ],
     },
   ];
