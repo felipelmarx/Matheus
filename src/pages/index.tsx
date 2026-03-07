@@ -19,6 +19,9 @@ function buildGeralData(data: AllDesafiosData): DesafioData {
   const vendasForm = d1.vendasFormacao + d2.vendasFormacao;
   const fatTotal = d1.faturamentoTotal + d2.faturamentoTotal;
   const vendas = d1.vendas + d2.vendas;
+  const aplicacoes = d1.aplicacoes + d2.aplicacoes;
+  const agendamentos = d1.agendamentos + d2.agendamentos;
+  const entrevistas = d1.entrevistas + d2.entrevistas;
 
   const lucroPrejuizo = d1.lucroPrejuizo + d2.lucroPrejuizo;
   const cac = vendasForm > 0 ? lucroPrejuizo / vendasForm : 0;
@@ -29,14 +32,17 @@ function buildGeralData(data: AllDesafiosData): DesafioData {
     investimento: inv,
     faturamento: fat,
     vendas,
+    aplicacoes,
+    agendamentos,
+    entrevistas,
     vendasFormacao: vendasForm,
     faturamentoTotal: fatTotal,
     ticketMedioFormacao: Math.round(tmFormacao),
     custoVendasFormacao: cac,
     cpa: vendas > 0 ? Math.round(inv / vendas) : 0,
     ticketMedio: vendas > 0 ? Math.round(fat / vendas) : 0,
-    custoPorAplicacao: data.geral.aplicacoes > 0 ? inv / data.geral.aplicacoes : 0,
-    custoEntrevista: data.geral.entrevistas > 0 ? inv / data.geral.entrevistas : 0,
+    custoPorAplicacao: aplicacoes > 0 ? inv / aplicacoes : 0,
+    custoEntrevista: entrevistas > 0 ? inv / entrevistas : 0,
     lucroPrejuizo: fat - inv,
   };
 }
