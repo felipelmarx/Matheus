@@ -17,13 +17,13 @@ export default function MetasCard({ data }: MetasCardProps) {
 
   const metrics = [
     {
-      label: 'Vendas da Formacao',
+      label: 'Vendas da Formação',
       value: fmtNum(data.vendasFormacao),
       icon: Trophy,
       iconColor: 'text-emerald-400',
     },
     {
-      label: 'CAC da Formacao',
+      label: 'CAC da Formação',
       value: fmt(data.custoVendasFormacao),
       icon: UserCheck,
       iconColor: 'text-orange-400',

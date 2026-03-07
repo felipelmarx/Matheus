@@ -18,7 +18,7 @@ export default function StatCards({ data }: StatCardsProps) {
       borderColor: 'border-blue-500/20',
     },
     {
-      label: 'VENDAS FORMACAO',
+      label: 'VENDAS FORMAÇÃO',
       value: data.vendasFormacao.toLocaleString('pt-BR'),
       icon: ShoppingCart,
       color: 'from-emerald-500/10 to-emerald-600/5',
@@ -26,7 +26,7 @@ export default function StatCards({ data }: StatCardsProps) {
       borderColor: 'border-emerald-500/20',
     },
     {
-      label: 'FATURAMENTO FORMACAO',
+      label: 'FATURAMENTO FORMAÇÃO',
       value: BRL.format(data.faturamentoTotal),
       icon: TrendingUp,
       color: 'from-violet-500/10 to-violet-600/5',
@@ -34,7 +34,7 @@ export default function StatCards({ data }: StatCardsProps) {
       borderColor: 'border-violet-500/20',
     },
     {
-      label: 'TICKET MEDIO FORMACAO',
+      label: 'TICKET MÉDIO FORMAÇÃO',
       value: BRL.format(data.ticketMedioFormacao),
       icon: Target,
       color: 'from-amber-500/10 to-amber-600/5',

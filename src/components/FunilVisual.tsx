@@ -17,10 +17,10 @@ export default function FunilVisual({ data }: FunilVisualProps) {
 
   const stages: FunnelStage[] = [
     { label: 'Ingressos Totais', value: data.ingressosTotais, width: '100%', color: 'bg-violet-500' },
-    { label: 'Aplicacoes', value: data.aplicacoes, width: '78%', color: 'bg-violet-500/85' },
+    { label: 'Aplicações', value: data.aplicacoes, width: '78%', color: 'bg-violet-500/85' },
     { label: 'Agendamentos', value: data.agendamentos, width: '58%', color: 'bg-violet-500/70' },
     { label: 'Entrevistas', value: data.entrevistas, width: '42%', color: 'bg-violet-500/55' },
-    { label: 'Vendas Formacao', value: data.vendasFormacao, width: '28%', color: 'bg-emerald-500' },
+    { label: 'Vendas Formação', value: data.vendasFormacao, width: '28%', color: 'bg-emerald-500' },
   ];
 
   const conversionRate = (from: number, to: number) => {
@@ -34,7 +34,7 @@ export default function FunilVisual({ data }: FunilVisualProps) {
         <div className="flex items-center gap-2">
           <GitBranch className="w-4 h-4 text-violet-400" />
           <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
-            Funil de Conversao
+            Funil de Conversão
           </h3>
         </div>
       </div>

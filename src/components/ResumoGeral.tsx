@@ -36,7 +36,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
 
   const groups: MetricGroup[] = [
     {
-      title: 'Trafego',
+      title: 'Tráfego',
       icon: MousePointerClick,
       accentColor: 'text-cyan-400',
       headerBg: 'from-cyan-500/10 to-transparent',
@@ -48,10 +48,10 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
         { label: 'Vendas', value: fmtNum(data.vendas) },
         { label: 'Ingressos Totais (vendas + cortesia)', value: fmtNum(data.ingressosTotais) },
         { label: 'CPA', value: fmt(data.cpa) },
-        { label: 'Ticket Medio', value: fmt(data.ticketMedio) },
+        { label: 'Ticket Médio', value: fmt(data.ticketMedio) },
         { label: 'Fat. Ingressos + Bumps', value: fmt(data.faturamento) },
         {
-          label: 'Lucro / Prejuizo',
+          label: 'Lucro / Prejuízo',
           value: data.lucroPrejuizo === 0 ? '--' : BRL.format(data.lucroPrejuizo),
           isNegative: data.lucroPrejuizo < 0,
         },
@@ -65,10 +65,10 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
       headerBg: 'from-violet-500/10 to-transparent',
       metrics: [
         { label: 'Ingressos Totais (vendas + cortesia)', value: fmtNum(data.ingressosTotais) },
-        { label: 'Conv. Ingressos → Aplicacoes', value: fmtPct(parseFloat(convIngressosAplic.toFixed(2))), isHighlight: convIngressosAplic > 0 },
-        { label: 'Aplicacoes', value: fmtNum(data.aplicacoes) },
-        { label: 'Custo / Aplicacao', value: fmt(data.custoPorAplicacao) },
-        { label: 'Conv. Aplicacoes → Agendamentos', value: fmtPct(parseFloat(convAplicAgend.toFixed(2))), isHighlight: convAplicAgend > 0 },
+        { label: 'Conv. Ingressos → Aplicações', value: fmtPct(parseFloat(convIngressosAplic.toFixed(2))), isHighlight: convIngressosAplic > 0 },
+        { label: 'Aplicações', value: fmtNum(data.aplicacoes) },
+        { label: 'Custo / Aplicação', value: fmt(data.custoPorAplicacao) },
+        { label: 'Conv. Aplicações → Agendamentos', value: fmtPct(parseFloat(convAplicAgend.toFixed(2))), isHighlight: convAplicAgend > 0 },
         { label: 'Agendamentos', value: fmtNum(data.agendamentos) },
         { label: 'Conv. Agendamentos → Entrevistas', value: fmtPct(parseFloat(convAgendEntrev.toFixed(2))), isHighlight: convAgendEntrev > 0 },
         { label: 'Entrevistas', value: fmtNum(data.entrevistas) },
