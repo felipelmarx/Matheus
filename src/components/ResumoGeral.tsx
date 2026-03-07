@@ -58,6 +58,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
       accentColor: 'text-violet-400',
       headerBg: 'from-violet-500/10 to-transparent',
       metrics: [
+        { label: 'Ingressos Totais (vendas + cortesia)', value: fmtNum(data.ingressosTotais) },
         { label: 'Aplicacoes', value: fmtNum(data.aplicacoes) },
         { label: 'Custo / Aplicacao', value: fmt(data.custoPorAplicacao) },
         { label: 'Agendamentos', value: fmtNum(data.agendamentos) },
