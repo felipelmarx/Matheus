@@ -40,6 +40,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
         { label: 'Conect Rate', value: fmtPct(data.conectRate), isHighlight: data.conectRate >= 70 },
         { label: 'Investimento', value: fmt(data.investimento), isHighlight: true },
         { label: 'Vendas', value: fmtNum(data.vendas) },
+        { label: 'Ingressos Totais (vendas + cortesia)', value: fmtNum(data.ingressosTotais) },
         { label: 'CPA', value: fmt(data.cpa) },
         { label: 'Ticket Medio', value: fmt(data.ticketMedio) },
         { label: 'Fat. Ingressos + Bumps', value: fmt(data.faturamento) },

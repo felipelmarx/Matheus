@@ -20,6 +20,7 @@ export interface DesafioData {
   // Investment & Revenue
   investimento: number;
   vendas: number;
+  ingressosTotais: number;
   cpa: number;
   ticketMedio: number;
   faturamento: number;
