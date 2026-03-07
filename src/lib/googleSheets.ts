@@ -1,15 +1,17 @@
-import type { DesafioData, DailyMetric, AllDesafiosData } from '@/types/metrics';
+import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID ?? '';
+const ADS_SPREADSHEET_ID = process.env.ADS_SPREADSHEET_ID ?? '';
 const API_KEY = process.env.GOOGLE_API_KEY ?? '';
 const SHEETS_API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
-// Fetch rows from a given sheet range
-async function fetchSheetRows(range: string): Promise<string[][]> {
+// Fetch rows from a given sheet range (optionally from a different spreadsheet)
+async function fetchSheetRows(range: string, spreadsheetId?: string): Promise<string[][]> {
+  const id = spreadsheetId ?? SPREADSHEET_ID;
   const encoded = encodeURIComponent(range);
-  const url = `${SHEETS_API}/${SPREADSHEET_ID}/values/${encoded}?key=${API_KEY}&valueRenderOption=FORMATTED_VALUE`;
+  const url = `${SHEETS_API}/${id}/values/${encoded}?key=${API_KEY}&valueRenderOption=FORMATTED_VALUE`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Sheets API error ${res.status}`);
   const json = await res.json();
@@ -119,6 +121,47 @@ function extractDailyMetrics(rows: string[][]): DailyMetric[] {
   return daily;
 }
 
+// Aggregate ads data: group by ad name, sum spent/purchases, rank by purchases
+function extractAdsData(rows: string[][]): AdMetric[] {
+  const p = parseSheetNumber;
+  const adsMap = new Map<string, { spent: number; purchases: number; daily: Map<string, { spent: number; purchases: number }> }>();
+
+  for (const row of rows) {
+    const day = (row[0] ?? '').trim();
+    const name = (row[1] ?? '').trim();
+    if (!day || !name) continue;
+
+    const spent = p(row[2]);
+    const purchases = p(row[3]);
+
+    const existing = adsMap.get(name) ?? { spent: 0, purchases: 0, daily: new Map() };
+    existing.spent += spent;
+    existing.purchases += purchases;
+
+    const dayData = existing.daily.get(day) ?? { spent: 0, purchases: 0 };
+    dayData.spent += spent;
+    dayData.purchases += purchases;
+    existing.daily.set(day, dayData);
+
+    adsMap.set(name, existing);
+  }
+
+  return [...adsMap.entries()]
+    .filter(([, d]) => d.purchases > 0 || d.spent > 0)
+    .sort((a, b) => b[1].purchases - a[1].purchases || a[1].spent - b[1].spent)
+    .slice(0, 10)
+    .map(([name, d], i) => ({
+      rank: i + 1,
+      name,
+      totalSpent: d.spent,
+      totalPurchases: d.purchases,
+      cpa: d.purchases > 0 ? d.spent / d.purchases : 0,
+      dailyBreakdown: [...d.daily.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([day, v]) => ({ day, spent: v.spent, purchases: v.purchases })),
+    }));
+}
+
 function getDefaultData(): AllDesafiosData {
   return {
     geral: getDefaultDesafio(),
@@ -126,6 +169,7 @@ function getDefaultData(): AllDesafiosData {
     desafio2: getDefaultDesafio(),
     desafio3: getDefaultDesafio(),
     desafio3Daily: [],
+    topAds: [],
     lastUpdated: new Date().toISOString(),
     fromCache: false,
   };
@@ -151,7 +195,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
   }
 
   try {
-    console.log('[sheets] Fetching from RESUMO - GERAL and MAR/ABR MÉTRICAS GERAIS...');
+    console.log('[sheets] Fetching from RESUMO - GERAL, MAR/ABR MÉTRICAS GERAIS, and ADS...');
     const resumoRows = await fetchSheetRows('RESUMO - GERAL!C1:R77');
 
     // Daily fetch is independent - don't let it break the main data
@@ -162,6 +206,17 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Daily metrics fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
+    // Ads fetch is independent - don't let it break the main data
+    let adsRows: string[][] = [];
+    try {
+      if (ADS_SPREADSHEET_ID) {
+        adsRows = await fetchSheetRows('ADD!A2:D1000', ADS_SPREADSHEET_ID);
+        console.log(`[sheets] Ads: ${adsRows.length} rows loaded`);
+      }
+    } catch (err) {
+      console.warn('[sheets] Ads fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
     // Extract geral data from RESUMO - GERAL (label=col0/C, value=col1/D)
     const geralData = extractDesafioData(resumoRows, 0, 1);
     console.log(`[sheets] geral: inv=${geralData.investimento} vendas=${geralData.vendas} fat=${geralData.faturamentoTotal}`);
@@ -169,12 +224,16 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const desafio3Daily = extractDailyMetrics(dailyRows);
     console.log(`[sheets] desafio3Daily: ${desafio3Daily.length} days loaded`);
 
+    const topAds = extractAdsData(adsRows);
+    console.log(`[sheets] topAds: ${topAds.length} ads ranked`);
+
     const data: AllDesafiosData = {
       geral: geralData,
       desafio1: getDefaultDesafio(),
       desafio2: getDefaultDesafio(),
       desafio3: getDefaultDesafio(),
       desafio3Daily,
+      topAds,
       lastUpdated: new Date().toISOString(),
       fromCache: false,
     };

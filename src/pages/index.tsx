@@ -5,6 +5,7 @@ import DesafioTabs from '@/components/DesafioTabs';
 import StatCards from '@/components/StatCards';
 import ResumoGeral from '@/components/ResumoGeral';
 import FunilVisual from '@/components/FunilVisual';
+import ListaAnuncios from '@/components/ListaAnuncios';
 import DetalhamentoDia from '@/components/DetalhamentoDia';
 import MetasCard from '@/components/MetasCard';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
@@ -127,6 +128,7 @@ export default function DashboardPage() {
             <MetasCard data={activeData} />
             <ResumoGeral data={activeData} />
             <FunilVisual data={activeData} />
+            <ListaAnuncios ads={data.topAds} />
             {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
               <DetalhamentoDia daily={data.desafio3Daily} />
             )}

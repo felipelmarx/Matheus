@@ -56,12 +56,22 @@ export interface DailyMetric {
   cortesia: number;
 }
 
+export interface AdMetric {
+  rank: number;
+  name: string;
+  totalSpent: number;
+  totalPurchases: number;
+  cpa: number;
+  dailyBreakdown: { day: string; spent: number; purchases: number }[];
+}
+
 export interface AllDesafiosData {
   geral: DesafioData;
   desafio1: DesafioData;
   desafio2: DesafioData;
   desafio3: DesafioData;
   desafio3Daily: DailyMetric[];
+  topAds: AdMetric[];
   lastUpdated: string;
   fromCache: boolean;
 }
