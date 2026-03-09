@@ -188,7 +188,7 @@ export default function CompararView({ data }: CompararViewProps) {
 
               {/* Column headers */}
               <div className="px-5 pt-3 pb-2 border-b border-border/50">
-                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 text-xs text-muted-foreground/70 font-heading">
+                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 text-xs text-muted-foreground/70 font-heading">
                   <span />
                   <span className="text-right w-24">{desafioOptions.find((o) => o.key === leftKey)?.label}</span>
                   <span className="text-right w-24">{desafioOptions.find((o) => o.key === rightKey)?.label}</span>
@@ -201,7 +201,7 @@ export default function CompararView({ data }: CompararViewProps) {
                   const lv = leftData[row.key] as number;
                   const rv = rightData[row.key] as number;
                   return (
-                    <div key={row.key} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-baseline">
+                    <div key={row.key} className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-baseline">
                       <p className="text-xs text-muted-foreground font-heading truncate">{row.label}</p>
                       <p className="text-sm font-mono font-medium text-foreground text-right w-24 whitespace-nowrap">
                         {formatValue(lv, row.format)}
