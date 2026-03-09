@@ -190,9 +190,9 @@ export default function CompararView({ data }: CompararViewProps) {
               <div className="px-5 pt-3 pb-2 border-b border-border/50">
                 <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 text-xs text-muted-foreground/70 font-heading">
                   <span />
-                  <span className="text-right w-24">{desafioOptions.find((o) => o.key === leftKey)?.label}</span>
-                  <span className="text-right w-24">{desafioOptions.find((o) => o.key === rightKey)?.label}</span>
-                  <span className="text-right w-32">Delta</span>
+                  <span className="text-right w-28">{desafioOptions.find((o) => o.key === leftKey)?.label}</span>
+                  <span className="text-right w-28">{desafioOptions.find((o) => o.key === rightKey)?.label}</span>
+                  <span className="text-right w-40">Delta</span>
                 </div>
               </div>
 
@@ -203,13 +203,13 @@ export default function CompararView({ data }: CompararViewProps) {
                   return (
                     <div key={row.key} className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-baseline">
                       <p className="text-xs text-muted-foreground font-heading truncate">{row.label}</p>
-                      <p className="text-sm font-mono font-medium text-foreground text-right w-24 whitespace-nowrap">
+                      <p className="text-sm font-mono font-medium text-foreground text-right w-28 whitespace-nowrap">
                         {formatValue(lv, row.format)}
                       </p>
-                      <p className="text-sm font-mono font-medium text-foreground text-right w-24 whitespace-nowrap">
+                      <p className="text-sm font-mono font-medium text-foreground text-right w-28 whitespace-nowrap">
                         {formatValue(rv, row.format)}
                       </p>
-                      <div className="text-right w-32 whitespace-nowrap">
+                      <div className="text-right w-40 whitespace-nowrap">
                         {renderDelta(lv, rv, row.format, row.invertColor)}
                       </div>
                     </div>
