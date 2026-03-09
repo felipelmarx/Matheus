@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ArrowLeftRight, MousePointerClick, DollarSign, GitBranch, GraduationCap, AlertTriangle } from 'lucide-react';
 import type { AllDesafiosData, DesafioData, DesafioKey } from '@/types/metrics';
-import AnaliseComparativa from '@/components/AnaliseComparativa';
 
 interface CompararViewProps {
   data: AllDesafiosData;
@@ -221,9 +220,6 @@ export default function CompararView({ data }: CompararViewProps) {
           );
         })}
       </div>
-
-      {/* AI Analysis */}
-      <AnaliseComparativa leftKey={leftKey} rightKey={rightKey} data={data} />
     </div>
   );
 }
