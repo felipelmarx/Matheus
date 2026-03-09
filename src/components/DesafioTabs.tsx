@@ -1,4 +1,4 @@
-import type { DesafioData, TabKey } from '@/types/metrics';
+import type { DesafioData, DesafioKey, TabKey } from '@/types/metrics';
 
 interface DesafioTabsProps {
   activeTab: TabKey;
@@ -15,6 +15,7 @@ const tabs: { key: TabKey; label: string; num: string }[] = [
   { key: 'desafio1', label: 'Desafio 1', num: '01' },
   { key: 'desafio2', label: 'Desafio 2', num: '02' },
   { key: 'desafio3', label: 'Desafio 3', num: '03' },
+  { key: 'comparar', label: 'Comparar', num: '⇄' },
 ];
 
 export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTabsProps) {
@@ -22,8 +23,9 @@ export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTab
     <div className="flex flex-col sm:flex-row gap-3">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
-        const desafioData = tab.key === 'geral' ? null : data[tab.key];
-        const hasData = tab.key === 'geral' || (desafioData !== null && (desafioData.investimento > 0 || desafioData.vendas > 0));
+        const isDesafio = tab.key !== 'geral' && tab.key !== 'comparar';
+        const desafioData = isDesafio ? data[tab.key as DesafioKey] : null;
+        const hasData = !isDesafio || (desafioData !== null && (desafioData.investimento > 0 || desafioData.vendas > 0));
         return (
           <button
             key={tab.key}

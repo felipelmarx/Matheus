@@ -8,6 +8,7 @@ import FunilVisual from '@/components/FunilVisual';
 import ListaAnuncios from '@/components/ListaAnuncios';
 import DetalhamentoDia from '@/components/DetalhamentoDia';
 import MetasCard from '@/components/MetasCard';
+import CompararView from '@/components/CompararView';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 function buildGeralData(data: AllDesafiosData): DesafioData {
@@ -80,6 +81,7 @@ export default function DashboardPage() {
 
   const activeData = useMemo(() => {
     if (!data) return null;
+    if (activeTab === 'comparar') return null;
     if (activeTab === 'geral') return buildGeralData(data);
     return data[activeTab];
   }, [data, activeTab]);
@@ -121,17 +123,23 @@ export default function DashboardPage() {
               <p className="text-muted-foreground font-heading">Carregando dados...</p>
             </div>
           </div>
-        ) : data && activeData ? (
+        ) : data ? (
           <>
             <DesafioTabs activeTab={activeTab} onTabChange={setActiveTab} data={data} />
-            <StatCards data={activeData} />
-            <MetasCard data={activeData} />
-            <ResumoGeral data={activeData} />
-            <FunilVisual data={activeData} />
-            {activeTab === 'desafio3' && <ListaAnuncios ads={data.topAds} />}
-            {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
-              <DetalhamentoDia daily={data.desafio3Daily} />
-            )}
+            {activeTab === 'comparar' ? (
+              <CompararView data={data} />
+            ) : activeData ? (
+              <>
+                <StatCards data={activeData} />
+                <MetasCard data={activeData} />
+                <ResumoGeral data={activeData} />
+                <FunilVisual data={activeData} />
+                {activeTab === 'desafio3' && <ListaAnuncios ads={data.topAds} />}
+                {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
+                  <DetalhamentoDia daily={data.desafio3Daily} />
+                )}
+              </>
+            ) : null}
           </>
         ) : null}
       </main>

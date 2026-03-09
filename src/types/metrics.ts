@@ -43,7 +43,7 @@ export interface DesafioData {
 }
 
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3';
-export type TabKey = 'geral' | DesafioKey;
+export type TabKey = 'geral' | DesafioKey | 'comparar';
 
 export interface DailyMetric {
   data: string;
