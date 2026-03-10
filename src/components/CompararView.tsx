@@ -186,31 +186,52 @@ export default function CompararView({ data }: CompararViewProps) {
                 </div>
               </div>
 
-              {/* Column headers */}
-              <div className="px-5 pt-3 pb-2 border-b border-border/50">
-                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 text-xs text-muted-foreground/70 font-heading">
+              {/* Column headers - hidden on mobile, visible on larger screens */}
+              <div className="hidden sm:block px-5 pt-3 pb-2 border-b border-border/50">
+                <div className="grid grid-cols-[1fr_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-2 text-xs text-muted-foreground/70 font-heading">
                   <span />
-                  <span className="text-right w-28">{desafioOptions.find((o) => o.key === leftKey)?.label}</span>
-                  <span className="text-right w-28">{desafioOptions.find((o) => o.key === rightKey)?.label}</span>
-                  <span className="text-right w-40">Delta</span>
+                  <span className="text-right">{desafioOptions.find((o) => o.key === leftKey)?.label}</span>
+                  <span className="text-right">{desafioOptions.find((o) => o.key === rightKey)?.label}</span>
+                  <span className="text-right">Delta</span>
                 </div>
               </div>
 
-              <div className="p-5 space-y-3">
+              <div className="p-4 sm:p-5 space-y-3">
                 {section.rows.map((row) => {
                   const lv = leftData[row.key] as number;
                   const rv = rightData[row.key] as number;
                   return (
-                    <div key={row.key} className="grid grid-cols-[1fr_auto_auto_auto] gap-4 items-baseline">
-                      <p className="text-xs text-muted-foreground font-heading truncate">{row.label}</p>
-                      <p className="text-sm font-mono font-medium text-foreground text-right w-28 whitespace-nowrap">
-                        {formatValue(lv, row.format)}
-                      </p>
-                      <p className="text-sm font-mono font-medium text-foreground text-right w-28 whitespace-nowrap">
-                        {formatValue(rv, row.format)}
-                      </p>
-                      <div className="text-right w-40 whitespace-nowrap">
-                        {renderDelta(lv, rv, row.format, row.invertColor)}
+                    <div key={row.key}>
+                      {/* Desktop layout */}
+                      <div className="hidden sm:grid grid-cols-[1fr_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-2 items-baseline">
+                        <p className="text-xs text-muted-foreground font-heading truncate">{row.label}</p>
+                        <p className="text-sm font-mono font-medium text-foreground text-right whitespace-nowrap overflow-hidden text-ellipsis">
+                          {formatValue(lv, row.format)}
+                        </p>
+                        <p className="text-sm font-mono font-medium text-foreground text-right whitespace-nowrap overflow-hidden text-ellipsis">
+                          {formatValue(rv, row.format)}
+                        </p>
+                        <div className="text-right whitespace-nowrap overflow-hidden text-ellipsis">
+                          {renderDelta(lv, rv, row.format, row.invertColor)}
+                        </div>
+                      </div>
+                      {/* Mobile layout - stacked */}
+                      <div className="sm:hidden space-y-1">
+                        <p className="text-xs text-muted-foreground font-heading">{row.label}</p>
+                        <div className="grid grid-cols-3 gap-1">
+                          <div>
+                            <p className="text-[10px] text-muted-foreground/60 font-heading">{desafioOptions.find((o) => o.key === leftKey)?.label}</p>
+                            <p className="text-xs font-mono font-medium text-foreground">{formatValue(lv, row.format)}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-muted-foreground/60 font-heading">{desafioOptions.find((o) => o.key === rightKey)?.label}</p>
+                            <p className="text-xs font-mono font-medium text-foreground">{formatValue(rv, row.format)}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] text-muted-foreground/60 font-heading">Delta</p>
+                            <div>{renderDelta(lv, rv, row.format, row.invertColor)}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   );
