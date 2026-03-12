@@ -18,14 +18,14 @@ interface KpiDef {
 
 const KPI_DEFINITIONS: KpiDef[] = [
   { label: 'Faturamento', key: 'totalFaturamento', format: (v) => BRL.format(v), positiveIsGood: true },
-  { label: 'Lucro / Prejuizo', key: 'totalLucroPrejuizo', format: (v) => BRL.format(v), positiveIsGood: true },
+  { label: 'Lucro / Prejuízo', key: 'totalLucroPrejuizo', format: (v) => BRL.format(v), positiveIsGood: true },
   { label: 'Investimento', key: 'totalInvestimento', format: (v) => BRL.format(v) },
   { label: 'Inscritos', key: 'totalInscritos', format: (v) => v.toLocaleString('pt-BR'), positiveIsGood: true },
   { label: 'Total Vendas', key: 'totalVendas', format: (v) => v.toLocaleString('pt-BR'), positiveIsGood: true },
   { label: 'Vendas Ads', key: 'totalVendasAds', format: (v) => v.toLocaleString('pt-BR') },
-  { label: 'Vendas Organicas', key: 'totalVendasOrganicas', format: (v) => v.toLocaleString('pt-BR') },
-  { label: 'CPA Medio', key: 'cpaMedio', format: (v) => BRL.format(v), positiveIsGood: false },
-  { label: 'Ticket Medio', key: 'ticketMedio', format: (v) => BRL.format(v), positiveIsGood: true },
+  { label: 'Vendas Orgânicas', key: 'totalVendasOrganicas', format: (v) => v.toLocaleString('pt-BR') },
+  { label: 'CPA Médio', key: 'cpaMedio', format: (v) => BRL.format(v), positiveIsGood: false },
+  { label: 'Ticket Médio', key: 'ticketMedio', format: (v) => BRL.format(v), positiveIsGood: true },
   { label: 'ROI', key: 'roi', format: (v) => `${v.toFixed(1)}%`, positiveIsGood: true },
 ];
 
@@ -71,7 +71,7 @@ export default function ComparativoTab() {
     return (
       <div className="bg-card border border-card-border rounded-xl p-12 text-center">
         <p className="text-muted text-sm">
-          O comparativo estara disponivel quando houver dados de mais de um evento.
+          O comparativo estará disponível quando houver dados de mais de um evento.
         </p>
       </div>
     );
@@ -95,7 +95,7 @@ export default function ComparativoTab() {
                 </th>
               ))}
               {data.length === 2 && (
-                <th className="text-right px-4 py-3 text-muted font-medium">Variacao</th>
+                <th className="text-right px-4 py-3 text-muted font-medium">Variação</th>
               )}
             </tr>
           </thead>
@@ -110,7 +110,7 @@ export default function ComparativoTab() {
               return (
                 <tr
                   key={kpi.key}
-                  className="border-b border-border/50 hover:bg-[var(--row-hover)] transition-colors"
+                  className="border-b border-border/50 hover:bg-row-hover transition-colors"
                 >
                   <td className="px-4 py-2.5 text-muted">{kpi.label}</td>
                   {values.map((val, i) => (

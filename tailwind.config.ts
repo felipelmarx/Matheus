@@ -19,6 +19,8 @@ const config: Config = {
         subtle: "var(--subtle)",
         border: "var(--border)",
         "border-strong": "var(--border-strong)",
+        stripe: "var(--stripe)",
+        "row-hover": "var(--row-hover)",
       },
     },
   },

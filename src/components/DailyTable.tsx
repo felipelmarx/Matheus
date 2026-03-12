@@ -16,7 +16,7 @@ export default function DailyTable({ data }: DailyTableProps) {
     return (
       <div className="bg-card border border-card-border rounded-xl p-8 text-center">
         <p className="text-muted text-sm">
-          Nenhum dado diario registrado ainda.
+          Nenhum dado diário registrado ainda.
         </p>
       </div>
     );
@@ -26,41 +26,41 @@ export default function DailyTable({ data }: DailyTableProps) {
     <div className="bg-card border border-card-border rounded-xl overflow-hidden">
       <div className="px-5 py-3 border-b border-border">
         <h3 className="text-sm font-semibold text-fg">
-          Detalhamento Diario
+          Detalhamento Diário
         </h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-border">
-              <th className="text-left px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-left px-4 py-2 text-muted font-medium">
                 Data
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
                 Invest.
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
                 Inscritos
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
                 Vendas Ads
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
-                Organicas
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
+                Orgânicas
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
                 Cortesias
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
                 CPA
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
                 Ticket
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
                 Fatur.
               </th>
-              <th className="text-right px-4 py-2 text-muted font-medium">
+              <th scope="col" className="text-right px-4 py-2 text-muted font-medium">
                 Lucro
               </th>
             </tr>
@@ -70,8 +70,8 @@ export default function DailyTable({ data }: DailyTableProps) {
               <tr
                 key={row.date}
                 className={`border-b border-border/50 ${
-                  i % 2 === 0 ? 'bg-[var(--stripe)]' : ''
-                } hover:bg-[var(--row-hover)] transition-colors`}
+                  i % 2 === 0 ? 'bg-stripe' : ''
+                } hover:bg-row-hover transition-colors`}
               >
                 <td className="px-4 py-2 text-fg font-mono">
                   {row.date}

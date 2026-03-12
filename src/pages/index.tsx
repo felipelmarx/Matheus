@@ -123,7 +123,7 @@ export default function Home() {
         </div>
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-muted mb-3 tracking-wider">
-            DETALHAMENTO DIARIO
+            DETALHAMENTO DIÁRIO
           </h2>
           <DailyTable data={data.dailyData} />
         </div>
@@ -157,6 +157,7 @@ export default function Home() {
             <button
               onClick={toggleTheme}
               className="flex items-center justify-center w-9 h-9 bg-surface border border-card-border rounded-lg hover:bg-surface-hover transition-colors"
+              aria-label={theme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}
               title={theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
             >
               {theme === 'dark' ? (
@@ -182,7 +183,9 @@ export default function Home() {
         <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
         {/* Content */}
-        {renderContent()}
+        <div role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
+          {renderContent()}
+        </div>
 
         {/* Footer */}
         <footer className="text-center text-xs text-subtle py-4 border-t border-border mt-8">

@@ -28,7 +28,7 @@ export default function StatCards({ data }: StatCardsProps) {
       borderColor: 'border-emerald-500/20',
     },
     {
-      label: 'LUCRO / PREJUIZO',
+      label: 'LUCRO / PREJUÍZO',
       value: BRL.format(data.totalLucroPrejuizo),
       icon: TrendingUp,
       gradient:

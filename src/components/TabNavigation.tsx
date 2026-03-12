@@ -23,12 +23,19 @@ export default function TabNavigation({ activeTab, onTabChange }: TabNavigationP
   ];
 
   return (
-    <div className="flex items-center gap-1 bg-surface border border-card-border rounded-lg p-1 mb-6 overflow-x-auto">
+    <div
+      role="tablist"
+      aria-label="Eventos"
+      className="flex items-center gap-1 bg-surface border border-card-border rounded-lg p-1 mb-6 overflow-x-auto"
+    >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         return (
           <button
             key={tab.id}
+            role="tab"
+            aria-selected={isActive}
+            aria-controls={`panel-${tab.id}`}
             onClick={() => onTabChange(tab.id)}
             className={`
               flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium

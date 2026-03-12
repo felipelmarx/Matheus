@@ -2,8 +2,12 @@ import { DailyData, EventoMetrics } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, setCache } from './cache';
 
-const API_KEY = process.env.GOOGLE_API_KEY!;
-const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID!;
+const API_KEY = process.env.GOOGLE_API_KEY;
+const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+
+if (!API_KEY || !SPREADSHEET_ID) {
+  throw new Error('Missing GOOGLE_API_KEY or GOOGLE_SHEETS_SPREADSHEET_ID env vars');
+}
 
 async function fetchSheetRows(range: string): Promise<string[][]> {
   const encodedRange = encodeURIComponent(range);

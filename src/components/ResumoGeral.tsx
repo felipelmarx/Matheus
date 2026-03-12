@@ -49,7 +49,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
           value: data.totalVendasAds.toLocaleString('pt-BR'),
         },
         {
-          label: 'Vendas Organicas',
+          label: 'Vendas Orgânicas',
           value: data.totalVendasOrganicas.toLocaleString('pt-BR'),
         },
         {
@@ -65,12 +65,12 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
       borderColor: 'border-blue-500/20',
       metrics: [
         {
-          label: 'CPA Medio',
+          label: 'CPA Médio',
           value: BRL.format(data.cpaMedio),
           highlight: true,
         },
         {
-          label: 'Ticket Medio',
+          label: 'Ticket Médio',
           value: BRL.format(data.ticketMedio),
         },
         {
@@ -97,7 +97,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
           value: BRL.format(data.totalInvestimento),
         },
         {
-          label: 'Lucro / Prejuizo',
+          label: 'Lucro / Prejuízo',
           value: BRL.format(data.totalLucroPrejuizo),
           highlight: true,
           destructive: data.totalLucroPrejuizo < 0,
