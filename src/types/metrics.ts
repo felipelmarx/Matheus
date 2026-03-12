@@ -26,7 +26,7 @@ export interface EventoMetrics {
   ticketMedio: number;
 
   // Calculated
-  roi: number;
+  roas: number;
   totalVendas: number;
 
   // Daily breakdown (only days with activity)

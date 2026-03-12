@@ -26,7 +26,7 @@ const KPI_DEFINITIONS: KpiDef[] = [
   { label: 'Vendas Orgânicas', key: 'totalVendasOrganicas', format: (v) => v.toLocaleString('pt-BR') },
   { label: 'CPA Médio', key: 'cpaMedio', format: (v) => BRL.format(v), positiveIsGood: false },
   { label: 'Ticket Médio', key: 'ticketMedio', format: (v) => BRL.format(v), positiveIsGood: true },
-  { label: 'ROI', key: 'roi', format: (v) => `${v.toFixed(1)}%`, positiveIsGood: true },
+  { label: 'ROAS', key: 'roas', format: (v) => `${v.toFixed(2)}x`, positiveIsGood: true },
 ];
 
 export default function ComparativoTab() {

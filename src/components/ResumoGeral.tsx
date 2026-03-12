@@ -74,10 +74,10 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
           value: BRL.format(data.ticketMedio),
         },
         {
-          label: 'ROI',
-          value: `${data.roi.toFixed(1)}%`,
+          label: 'ROAS',
+          value: `${data.roas.toFixed(2)}x`,
           highlight: true,
-          destructive: data.roi < 0,
+          destructive: data.roas < 1,
         },
       ],
     },

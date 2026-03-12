@@ -81,9 +81,9 @@ export async function fetchEventoMetrics(
       ? daysWithSales.reduce((sum, d) => sum + d.ticketMedio, 0) / daysWithSales.length
       : 0;
 
-  // ROI
-  const roi = totalInvestimento > 0
-    ? ((totalFaturamento - totalInvestimento) / totalInvestimento) * 100
+  // ROAS (Return on Ad Spend) = Faturamento / Investimento
+  const roas = totalInvestimento > 0
+    ? totalFaturamento / totalInvestimento
     : 0;
 
   const metrics: EventoMetrics = {
@@ -96,7 +96,7 @@ export async function fetchEventoMetrics(
     totalLucroPrejuizo,
     cpaMedio,
     ticketMedio,
-    roi,
+    roas,
     totalVendas,
     dailyData: activeDays,
     lastUpdated: new Date().toISOString(),
