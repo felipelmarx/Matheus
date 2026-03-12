@@ -35,3 +35,13 @@ export interface EventoMetrics {
   // Meta
   lastUpdated: string;
 }
+
+export interface EventData {
+  eventId: string;
+  eventLabel: string;
+  metrics: EventoMetrics;
+}
+
+export interface MultiEventResponse {
+  events: EventData[];
+}

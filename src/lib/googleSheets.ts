@@ -4,7 +4,6 @@ import { getCached, setCache } from './cache';
 
 const API_KEY = process.env.GOOGLE_API_KEY!;
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID!;
-const CACHE_KEY = 'evento-metrics';
 
 async function fetchSheetRows(range: string): Promise<string[][]> {
   const encodedRange = encodeURIComponent(range);
@@ -45,11 +44,15 @@ function hasActivity(day: DailyData): boolean {
   );
 }
 
-export async function fetchEventoMetrics(): Promise<EventoMetrics> {
-  const cached = getCached<EventoMetrics>(CACHE_KEY);
+export async function fetchEventoMetrics(
+  sheetTab: string,
+  range: string
+): Promise<EventoMetrics> {
+  const cacheKey = `evento-metrics-${sheetTab}`;
+  const cached = getCached<EventoMetrics>(cacheKey);
   if (cached) return cached;
 
-  const rows = await fetchSheetRows("'EVENTO MAIO'!CM17:CV79");
+  const rows = await fetchSheetRows(`'${sheetTab}'!${range}`);
 
   // Skip header row (first row)
   const dataRows = rows.slice(1);
@@ -95,6 +98,6 @@ export async function fetchEventoMetrics(): Promise<EventoMetrics> {
     lastUpdated: new Date().toISOString(),
   };
 
-  setCache(CACHE_KEY, metrics);
+  setCache(cacheKey, metrics);
   return metrics;
 }

@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import { RefreshCw, Calendar, Loader2, Sun, Moon } from 'lucide-react';
 import { EventoMetrics } from '@/types/metrics';
+import { EVENTS, getEventById } from '@/config/events';
 import StatCards from '@/components/StatCards';
 import ResumoGeral from '@/components/ResumoGeral';
 import DailyTable from '@/components/DailyTable';
 import ChartSection from '@/components/ChartSection';
+import TabNavigation, { TabId } from '@/components/TabNavigation';
+import EventPlaceholder from '@/components/EventPlaceholder';
+import ComparativoTab from '@/components/ComparativoTab';
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<TabId>(EVENTS[0].id);
   const [data, setData] = useState<EventoMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,50 +34,102 @@ export default function Home() {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async (eventId: string) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch('/api/metrics');
+      const res = await fetch(`/api/metrics?event=${eventId}`);
       if (!res.ok) throw new Error('Falha ao carregar dados');
-      const metrics: EventoMetrics = await res.json();
-      setData(metrics);
+      const json = await res.json();
+      if (json.placeholder) {
+        setData(null);
+      } else {
+        setData(json as EventoMetrics);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg">
-        <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (activeTab !== 'comparativo') {
+      const cfg = getEventById(activeTab);
+      if (cfg?.enabled) {
+        fetchData(activeTab);
+      } else {
+        setLoading(false);
+        setData(null);
+      }
+    }
+  }, [activeTab, fetchData]);
 
-  if (error || !data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg">
-        <div className="text-center">
+  const handleTabChange = (tab: TabId) => {
+    setActiveTab(tab);
+    if (tab !== 'comparativo') {
+      setData(null);
+      setError(null);
+    }
+  };
+
+  const currentEvent = getEventById(activeTab);
+  const headerLabel = currentEvent?.dateLabel || currentEvent?.label || '';
+
+  const renderContent = () => {
+    if (activeTab === 'comparativo') {
+      return <ComparativoTab />;
+    }
+
+    if (currentEvent && !currentEvent.enabled) {
+      return <EventPlaceholder label={currentEvent.label} />;
+    }
+
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+        </div>
+      );
+    }
+
+    if (error || !data) {
+      return (
+        <div className="text-center py-12">
           <p className="text-red-400 mb-4">{error || 'Erro ao carregar'}</p>
           <button
-            onClick={fetchData}
+            onClick={() => fetchData(activeTab)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             Tentar novamente
           </button>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  const lastUpdated = new Date(data.lastUpdated).toLocaleString('pt-BR');
+    return (
+      <>
+        <div className="mb-6">
+          <StatCards data={data} />
+        </div>
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-muted mb-3 tracking-wider">
+            RESUMO GERAL
+          </h2>
+          <ResumoGeral data={data} />
+        </div>
+        <div className="mb-6">
+          <ChartSection data={data.dailyData} />
+        </div>
+        <div className="mb-8">
+          <h2 className="text-sm font-semibold text-muted mb-3 tracking-wider">
+            DETALHAMENTO DIARIO
+          </h2>
+          <DailyTable data={data.dailyData} />
+        </div>
+      </>
+    );
+  };
 
   return (
     <>
@@ -83,15 +140,18 @@ export default function Home() {
 
       <div className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-fg flex items-center gap-2">
               <Calendar className="w-6 h-6 text-blue-400" />
-              Evento Presencial - Maio 2026
+              Evento Presencial
+              {activeTab !== 'comparativo' && headerLabel ? ` - ${headerLabel}` : ''}
             </h1>
-            <p className="text-xs text-muted-strong mt-1">
-              Atualizado: {lastUpdated}
-            </p>
+            {data?.lastUpdated && activeTab !== 'comparativo' && (
+              <p className="text-xs text-muted-strong mt-1">
+                Atualizado: {new Date(data.lastUpdated).toLocaleString('pt-BR')}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -105,45 +165,27 @@ export default function Home() {
                 <Moon className="w-4 h-4 text-slate-600" />
               )}
             </button>
-            <button
-              onClick={fetchData}
-              disabled={loading}
-              className="flex items-center gap-2 px-3 py-2 bg-surface border border-card-border rounded-lg hover:bg-surface-hover transition-colors text-xs text-muted"
-            >
-              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-              Atualizar
-            </button>
+            {activeTab !== 'comparativo' && currentEvent?.enabled && (
+              <button
+                onClick={() => fetchData(activeTab)}
+                disabled={loading}
+                className="flex items-center gap-2 px-3 py-2 bg-surface border border-card-border rounded-lg hover:bg-surface-hover transition-colors text-xs text-muted"
+              >
+                <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+                Atualizar
+              </button>
+            )}
           </div>
         </div>
 
-        {/* KPI Cards */}
-        <div className="mb-6">
-          <StatCards data={data} />
-        </div>
+        {/* Tab Navigation */}
+        <TabNavigation activeTab={activeTab} onTabChange={handleTabChange} />
 
-        {/* Resumo Geral */}
-        <div className="mb-6">
-          <h2 className="text-sm font-semibold text-muted mb-3 tracking-wider">
-            RESUMO GERAL
-          </h2>
-          <ResumoGeral data={data} />
-        </div>
-
-        {/* Chart */}
-        <div className="mb-6">
-          <ChartSection data={data.dailyData} />
-        </div>
-
-        {/* Daily Table */}
-        <div className="mb-8">
-          <h2 className="text-sm font-semibold text-muted mb-3 tracking-wider">
-            DETALHAMENTO DIARIO
-          </h2>
-          <DailyTable data={data.dailyData} />
-        </div>
+        {/* Content */}
+        {renderContent()}
 
         {/* Footer */}
-        <footer className="text-center text-xs text-subtle py-4 border-t border-border">
+        <footer className="text-center text-xs text-subtle py-4 border-t border-border mt-8">
           Dashboard Evento Presencial &mdash; Dados via Google Sheets
         </footer>
       </div>
