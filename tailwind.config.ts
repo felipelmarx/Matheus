@@ -4,13 +4,21 @@ const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        bg: "var(--bg)",
+        fg: "var(--fg)",
+        card: "var(--card)",
+        "card-border": "var(--card-border)",
+        surface: "var(--surface)",
+        "surface-hover": "var(--surface-hover)",
+        muted: "var(--muted)",
+        "muted-strong": "var(--muted-strong)",
+        subtle: "var(--subtle)",
+        border: "var(--border)",
+        "border-strong": "var(--border-strong)",
       },
     },
   },

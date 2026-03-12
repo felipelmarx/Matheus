@@ -36,7 +36,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
     {
       title: 'Vendas',
       icon: ShoppingCart,
-      iconColor: 'text-emerald-400',
+      iconColor: 'text-emerald-500',
       borderColor: 'border-emerald-500/20',
       metrics: [
         {
@@ -61,7 +61,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
     {
       title: 'Performance',
       icon: Target,
-      iconColor: 'text-blue-400',
+      iconColor: 'text-blue-500',
       borderColor: 'border-blue-500/20',
       metrics: [
         {
@@ -84,7 +84,7 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
     {
       title: 'Financeiro',
       icon: Receipt,
-      iconColor: 'text-amber-400',
+      iconColor: 'text-amber-500',
       borderColor: 'border-amber-500/20',
       metrics: [
         {
@@ -113,11 +113,11 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
         return (
           <div
             key={group.title}
-            className={`bg-[#111827] border ${group.borderColor} rounded-xl overflow-hidden`}
+            className={`bg-card border ${group.borderColor} rounded-xl overflow-hidden`}
           >
-            <div className="flex items-center gap-2 px-5 py-3 border-b border-slate-800">
+            <div className="flex items-center gap-2 px-5 py-3 border-b border-border">
               <Icon className={`w-4 h-4 ${group.iconColor}`} />
-              <h3 className="text-sm font-semibold text-white">
+              <h3 className="text-sm font-semibold text-fg">
                 {group.title}
               </h3>
             </div>
@@ -125,18 +125,18 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
               {group.metrics.map((metric) => (
                 <div
                   key={metric.label}
-                  className="flex items-center justify-between py-1 border-b border-dotted border-slate-800 last:border-0"
+                  className="flex items-center justify-between py-1 border-b border-dotted border-border last:border-0"
                 >
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-muted">
                     {metric.label}
                   </span>
                   <span
                     className={`text-sm font-mono ${
                       metric.destructive
-                        ? 'text-red-400 font-bold'
+                        ? 'text-red-500 font-bold'
                         : metric.highlight
-                        ? 'text-white font-bold'
-                        : 'text-slate-300'
+                        ? 'text-fg font-bold'
+                        : 'text-muted'
                     }`}
                   >
                     {metric.value}

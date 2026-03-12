@@ -24,7 +24,7 @@ export default function StatCards({ data }: StatCardsProps) {
       value: BRL.format(data.totalFaturamento),
       icon: DollarSign,
       gradient: 'from-emerald-500/10 to-emerald-600/5',
-      iconColor: 'text-emerald-400',
+      iconColor: 'text-emerald-500',
       borderColor: 'border-emerald-500/20',
     },
     {
@@ -36,7 +36,7 @@ export default function StatCards({ data }: StatCardsProps) {
           ? 'from-blue-500/10 to-blue-600/5'
           : 'from-red-500/10 to-red-600/5',
       iconColor:
-        data.totalLucroPrejuizo >= 0 ? 'text-blue-400' : 'text-red-400',
+        data.totalLucroPrejuizo >= 0 ? 'text-blue-500' : 'text-red-500',
       borderColor:
         data.totalLucroPrejuizo >= 0
           ? 'border-blue-500/20'
@@ -47,7 +47,7 @@ export default function StatCards({ data }: StatCardsProps) {
       value: BRL.format(data.totalInvestimento),
       icon: Megaphone,
       gradient: 'from-amber-500/10 to-amber-600/5',
-      iconColor: 'text-amber-400',
+      iconColor: 'text-amber-500',
       borderColor: 'border-amber-500/20',
     },
     {
@@ -55,7 +55,7 @@ export default function StatCards({ data }: StatCardsProps) {
       value: data.totalInscritos.toLocaleString('pt-BR'),
       icon: Users,
       gradient: 'from-violet-500/10 to-violet-600/5',
-      iconColor: 'text-violet-400',
+      iconColor: 'text-violet-500',
       borderColor: 'border-violet-500/20',
     },
   ];
@@ -67,15 +67,15 @@ export default function StatCards({ data }: StatCardsProps) {
         return (
           <div
             key={card.label}
-            className={`bg-gradient-to-br ${card.gradient} border ${card.borderColor} rounded-xl p-5 transition-transform hover:scale-[1.02]`}
+            className={`bg-gradient-to-br ${card.gradient} bg-card border ${card.borderColor} rounded-xl p-5 transition-transform hover:scale-[1.02]`}
           >
             <div className="flex items-center gap-2 mb-3">
               <Icon className={`w-4 h-4 ${card.iconColor}`} />
-              <span className="text-xs font-medium text-slate-400 tracking-wider">
+              <span className="text-xs font-medium text-muted tracking-wider">
                 {card.label}
               </span>
             </div>
-            <p className="text-sm font-bold font-mono text-white">
+            <p className="text-sm font-bold font-mono text-fg">
               {card.value}
             </p>
           </div>
