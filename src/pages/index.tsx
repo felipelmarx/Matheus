@@ -34,11 +34,13 @@ export default function Home() {
     }
   };
 
-  const fetchData = useCallback(async (eventId: string) => {
+  const fetchData = useCallback(async (eventId: string, forceRefresh = false) => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch(`/api/metrics?event=${eventId}`);
+      const params = new URLSearchParams({ event: eventId });
+      if (forceRefresh) params.set('refresh', 'true');
+      const res = await fetch(`/api/metrics?${params}`);
       if (!res.ok) throw new Error('Falha ao carregar dados');
       const json = await res.json();
       if (json.placeholder) {
@@ -98,7 +100,7 @@ export default function Home() {
         <div className="text-center py-12">
           <p className="text-red-400 mb-4">{error || 'Erro ao carregar'}</p>
           <button
-            onClick={() => fetchData(activeTab)}
+            onClick={() => fetchData(activeTab, true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
             Tentar novamente
@@ -168,7 +170,7 @@ export default function Home() {
             </button>
             {activeTab !== 'comparativo' && currentEvent?.enabled && (
               <button
-                onClick={() => fetchData(activeTab)}
+                onClick={() => fetchData(activeTab, true)}
                 disabled={loading}
                 className="flex items-center gap-2 px-3 py-2 bg-surface border border-card-border rounded-lg hover:bg-surface-hover transition-colors text-xs text-muted"
               >

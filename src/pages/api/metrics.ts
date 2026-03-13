@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchEventoMetrics } from '@/lib/googleSheets';
 import { getEnabledEvents, getEventById } from '@/config/events';
+import { clearCache } from '@/lib/cache';
 import { EventData, MultiEventResponse } from '@/types/metrics';
 
 export default async function handler(
@@ -12,7 +13,11 @@ export default async function handler(
   }
 
   try {
-    const { event } = req.query;
+    const { event, refresh } = req.query;
+
+    if (refresh === 'true') {
+      clearCache();
+    }
 
     if (event === 'all') {
       const enabledEvents = getEnabledEvents();
