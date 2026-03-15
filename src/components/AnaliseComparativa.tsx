@@ -3,8 +3,7 @@ import { Sparkles, RefreshCw, AlertTriangle } from 'lucide-react';
 import type { AllDesafiosData, DesafioKey } from '@/types/metrics';
 
 interface AnaliseComparativaProps {
-  leftKey: DesafioKey;
-  rightKey: DesafioKey;
+  selectedKeys: DesafioKey[];
   data: AllDesafiosData;
 }
 
@@ -85,30 +84,28 @@ function renderInline(text: string): React.ReactNode {
   return parts.length === 1 ? parts[0] : parts;
 }
 
-export default function AnaliseComparativa({ leftKey, rightKey, data }: AnaliseComparativaProps) {
+export default function AnaliseComparativa({ selectedKeys, data }: AnaliseComparativaProps) {
   const [analysis, setAnalysis] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isSame = leftKey === rightKey;
+  const keysRef = selectedKeys.slice().sort().join(',');
 
   const fetchAnalysis = useCallback(async () => {
-    if (isSame) return;
+    const keys = keysRef.split(',') as DesafioKey[];
+    if (keys.length < 2) return;
 
     setLoading(true);
     setError(null);
     setAnalysis(null);
 
     try {
+      const desafios = keys.map((key) => ({ key, data: data[key] }));
+
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          leftKey,
-          rightKey,
-          leftData: data[leftKey],
-          rightData: data[rightKey],
-        }),
+        body: JSON.stringify({ desafios }),
       });
 
       if (!res.ok) {
@@ -123,13 +120,13 @@ export default function AnaliseComparativa({ leftKey, rightKey, data }: AnaliseC
     } finally {
       setLoading(false);
     }
-  }, [leftKey, rightKey, data, isSame]);
+  }, [keysRef, data]);
 
   useEffect(() => {
     fetchAnalysis();
   }, [fetchAnalysis]);
 
-  if (isSame) return null;
+  if (selectedKeys.length < 2) return null;
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">

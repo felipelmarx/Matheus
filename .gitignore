@@ -43,3 +43,4 @@ Thumbs.db
 # Google Sheets credentials (if stored locally)
 credentials.json
 service-account-key.json
+.vercel

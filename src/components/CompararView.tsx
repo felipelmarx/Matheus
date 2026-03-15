@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { ArrowLeftRight, MousePointerClick, DollarSign, GitBranch, GraduationCap, AlertTriangle } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { MousePointerClick, DollarSign, GitBranch, GraduationCap, AlertTriangle } from 'lucide-react';
 import type { AllDesafiosData, DesafioData, DesafioKey } from '@/types/metrics';
+import AnaliseComparativa from './AnaliseComparativa';
 
 interface CompararViewProps {
   data: AllDesafiosData;
@@ -10,7 +11,7 @@ interface MetricRow {
   label: string;
   key: keyof DesafioData;
   format: 'brl' | 'num' | 'pct';
-  invertColor?: boolean; // true for cost metrics where lower = better
+  invertColor?: boolean;
 }
 
 interface MetricSection {
@@ -86,161 +87,172 @@ const sections: MetricSection[] = [
   },
 ];
 
-const desafioOptions: { key: DesafioKey; label: string }[] = [
-  { key: 'desafio1', label: 'Desafio 1' },
-  { key: 'desafio2', label: 'Desafio 2' },
-  { key: 'desafio3', label: 'Desafio 3' },
+const desafioOptions: { key: DesafioKey; label: string; num: string }[] = [
+  { key: 'desafio1', label: 'Desafio 1', num: '01' },
+  { key: 'desafio2', label: 'Desafio 2', num: '02' },
+  { key: 'desafio3', label: 'Desafio 3', num: '03' },
 ];
 
+function getValueColor(
+  value: number,
+  allValues: number[],
+  invertColor?: boolean
+): string {
+  const nonZero = allValues.filter((v) => v !== 0);
+  if (nonZero.length < 2 || value === 0) return 'text-foreground';
+
+  const best = invertColor ? Math.min(...nonZero) : Math.max(...nonZero);
+  const worst = invertColor ? Math.max(...nonZero) : Math.min(...nonZero);
+
+  if (value === best) return 'text-emerald-400';
+  if (value === worst && nonZero.length > 1) return 'text-red-400';
+  return 'text-foreground';
+}
+
 export default function CompararView({ data }: CompararViewProps) {
-  const [leftKey, setLeftKey] = useState<DesafioKey>('desafio1');
-  const [rightKey, setRightKey] = useState<DesafioKey>('desafio2');
+  const [selectedKeys, setSelectedKeys] = useState<DesafioKey[]>(['desafio1', 'desafio2']);
 
-  const isSame = leftKey === rightKey;
-  const leftData = data[leftKey];
-  const rightData = data[rightKey];
+  const tooFew = selectedKeys.length < 2;
 
-  function swap() {
-    setLeftKey(rightKey);
-    setRightKey(leftKey);
+  const selectedData = useMemo(
+    () => selectedKeys.map((k) => ({ key: k, data: data[k] })),
+    [selectedKeys, data]
+  );
+
+  function toggleKey(key: DesafioKey) {
+    setSelectedKeys((prev) => {
+      if (prev.includes(key)) {
+        return prev.filter((k) => k !== key);
+      }
+      return [...prev, key];
+    });
   }
 
-  function renderDelta(leftVal: number, rightVal: number, format: 'brl' | 'num' | 'pct', invertColor?: boolean) {
-    const diff = rightVal - leftVal;
-    if (diff === 0) return <span className="text-muted-foreground text-xs font-mono">--</span>;
-
-    const absDiff = Math.abs(diff);
-    const pctChange = leftVal !== 0 ? (diff / Math.abs(leftVal)) * 100 : 0;
-
-    const isPositiveDiff = diff > 0;
-    // For cost metrics, positive diff (higher cost) = bad (red), negative diff (lower cost) = good (green)
-    // For other metrics, positive diff = good (green), negative diff = bad (red)
-    const isGood = invertColor ? !isPositiveDiff : isPositiveDiff;
-    const arrow = isPositiveDiff ? '▲' : '▼';
-    const colorClass = isGood ? 'text-emerald-400' : 'text-red-400';
-
-    const formattedDiff = formatValue(absDiff, format);
-    const formattedPct = leftVal !== 0 ? `${Math.abs(pctChange).toFixed(1)}%` : '';
-
-    return (
-      <span className={`text-xs font-mono ${colorClass}`}>
-        {arrow} {formattedDiff}{formattedPct ? ` (${formattedPct})` : ''}
-      </span>
-    );
-  }
+  const colCount = selectedKeys.length;
+  const gridStyle = {
+    gridTemplateColumns: `1fr ${Array(colCount).fill('minmax(0,1fr)').join(' ')}`,
+  };
 
   return (
     <div className="space-y-6">
       {/* Selector Bar */}
       <div className="bg-card border border-border rounded-xl p-4">
-        <div className="flex flex-col sm:flex-row items-center gap-3 justify-center">
-          <select
-            value={leftKey}
-            onChange={(e) => setLeftKey(e.target.value as DesafioKey)}
-            className="bg-background border border-border rounded-lg px-4 py-2 text-sm font-heading text-foreground focus:outline-none focus:border-primary/60"
-          >
-            {desafioOptions.map((opt) => (
-              <option key={opt.key} value={opt.key}>{opt.label}</option>
-            ))}
-          </select>
-
-          <button
-            onClick={swap}
-            className="p-2 rounded-lg bg-background border border-border text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all"
-            title="Trocar"
-          >
-            <ArrowLeftRight className="w-4 h-4" />
-          </button>
-
-          <select
-            value={rightKey}
-            onChange={(e) => setRightKey(e.target.value as DesafioKey)}
-            className="bg-background border border-border rounded-lg px-4 py-2 text-sm font-heading text-foreground focus:outline-none focus:border-primary/60"
-          >
-            {desafioOptions.map((opt) => (
-              <option key={opt.key} value={opt.key}>{opt.label}</option>
-            ))}
-          </select>
+        <p className="text-xs text-muted-foreground font-heading text-center mb-3">
+          Selecione os desafios para comparar
+        </p>
+        <div className="flex flex-wrap items-center gap-3 justify-center">
+          {desafioOptions.map((opt) => {
+            const isSelected = selectedKeys.includes(opt.key);
+            return (
+              <button
+                key={opt.key}
+                onClick={() => toggleKey(opt.key)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-heading font-medium transition-all ${
+                  isSelected
+                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                    : 'bg-background border border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+                }`}
+              >
+                <span className={`text-base font-bold font-mono ${isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground/50'}`}>
+                  {opt.num}
+                </span>
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
 
-        {isSame && (
+        {tooFew && (
           <div className="flex items-center gap-2 justify-center mt-3 text-amber-400 text-xs font-heading">
             <AlertTriangle className="w-3.5 h-3.5" />
-            <span>Selecione desafios diferentes para comparar</span>
+            <span>Selecione pelo menos 2 desafios para comparar</span>
           </div>
         )}
       </div>
 
       {/* Comparison Tables */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {sections.map((section) => {
-          const Icon = section.icon;
-          return (
-            <div key={section.title} className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">
-              <div className={`px-5 py-3 border-b border-border bg-gradient-to-r ${section.headerBg}`}>
-                <div className="flex items-center gap-2">
-                  <Icon className={`w-4 h-4 ${section.accentColor}`} />
-                  <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
-                    {section.title}
-                  </h3>
-                </div>
-              </div>
-
-              {/* Column headers - hidden on mobile, visible on larger screens */}
-              <div className="hidden sm:block px-5 pt-3 pb-2 border-b border-border/50">
-                <div className="grid grid-cols-[1fr_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-2 text-xs text-muted-foreground/70 font-heading">
-                  <span />
-                  <span className="text-right">{desafioOptions.find((o) => o.key === leftKey)?.label}</span>
-                  <span className="text-right">{desafioOptions.find((o) => o.key === rightKey)?.label}</span>
-                  <span className="text-right">Delta</span>
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-5 space-y-3">
-                {section.rows.map((row) => {
-                  const lv = leftData[row.key] as number;
-                  const rv = rightData[row.key] as number;
-                  return (
-                    <div key={row.key}>
-                      {/* Desktop layout */}
-                      <div className="hidden sm:grid grid-cols-[1fr_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.2fr)] gap-2 items-baseline">
-                        <p className="text-xs text-muted-foreground font-heading truncate">{row.label}</p>
-                        <p className="text-sm font-mono font-medium text-foreground text-right whitespace-nowrap overflow-hidden text-ellipsis">
-                          {formatValue(lv, row.format)}
-                        </p>
-                        <p className="text-sm font-mono font-medium text-foreground text-right whitespace-nowrap overflow-hidden text-ellipsis">
-                          {formatValue(rv, row.format)}
-                        </p>
-                        <div className="text-right whitespace-nowrap overflow-hidden text-ellipsis">
-                          {renderDelta(lv, rv, row.format, row.invertColor)}
-                        </div>
-                      </div>
-                      {/* Mobile layout - stacked */}
-                      <div className="sm:hidden space-y-1">
-                        <p className="text-xs text-muted-foreground font-heading">{row.label}</p>
-                        <div className="grid grid-cols-3 gap-1">
-                          <div>
-                            <p className="text-[10px] text-muted-foreground/60 font-heading">{desafioOptions.find((o) => o.key === leftKey)?.label}</p>
-                            <p className="text-xs font-mono font-medium text-foreground">{formatValue(lv, row.format)}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] text-muted-foreground/60 font-heading">{desafioOptions.find((o) => o.key === rightKey)?.label}</p>
-                            <p className="text-xs font-mono font-medium text-foreground">{formatValue(rv, row.format)}</p>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[10px] text-muted-foreground/60 font-heading">Delta</p>
-                            <div>{renderDelta(lv, rv, row.format, row.invertColor)}</div>
-                          </div>
-                        </div>
-                      </div>
+      {!tooFew && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {sections.map((section) => {
+              const Icon = section.icon;
+              return (
+                <div key={section.title} className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">
+                  <div className={`px-5 py-3 border-b border-border bg-gradient-to-r ${section.headerBg}`}>
+                    <div className="flex items-center gap-2">
+                      <Icon className={`w-4 h-4 ${section.accentColor}`} />
+                      <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
+                        {section.title}
+                      </h3>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                  </div>
+
+                  {/* Column headers - desktop */}
+                  <div className="hidden sm:block px-5 pt-3 pb-2 border-b border-border/50">
+                    <div style={gridStyle} className="grid gap-2 text-xs text-muted-foreground/70 font-heading">
+                      <span />
+                      {selectedData.map((s) => (
+                        <span key={s.key} className="text-right">
+                          {desafioOptions.find((o) => o.key === s.key)?.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-4 sm:p-5 space-y-3">
+                    {section.rows.map((row) => {
+                      const values = selectedData.map((s) => s.data[row.key] as number);
+
+                      return (
+                        <div key={row.key}>
+                          {/* Desktop layout */}
+                          <div style={gridStyle} className="hidden sm:grid gap-2 items-baseline">
+                            <p className="text-xs text-muted-foreground font-heading truncate">{row.label}</p>
+                            {selectedData.map((s, i) => {
+                              const v = values[i];
+                              const color = getValueColor(v, values, row.invertColor);
+                              return (
+                                <p
+                                  key={s.key}
+                                  className={`text-sm font-mono font-medium text-right whitespace-nowrap overflow-hidden text-ellipsis ${color}`}
+                                >
+                                  {formatValue(v, row.format)}
+                                </p>
+                              );
+                            })}
+                          </div>
+                          {/* Mobile layout - stacked */}
+                          <div className="sm:hidden space-y-1">
+                            <p className="text-xs text-muted-foreground font-heading">{row.label}</p>
+                            <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}>
+                              {selectedData.map((s, i) => {
+                                const v = values[i];
+                                const color = getValueColor(v, values, row.invertColor);
+                                return (
+                                  <div key={s.key}>
+                                    <p className="text-[10px] text-muted-foreground/60 font-heading">
+                                      {desafioOptions.find((o) => o.key === s.key)?.label}
+                                    </p>
+                                    <p className={`text-xs font-mono font-medium ${color}`}>
+                                      {formatValue(v, row.format)}
+                                    </p>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <AnaliseComparativa selectedKeys={selectedKeys} data={data} />
+        </>
+      )}
     </div>
   );
 }
