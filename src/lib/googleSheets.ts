@@ -163,9 +163,9 @@ function extractAdsData(rows: string[][]): AdMetric[] {
 }
 
 // Extract daily metrics for Desafio 4 from FN4:JF16
-// Column indices (0-based from FN): 7=date, 9=investimento, 27=cliques, 30=viewPages,
-// 31=connectRate, 44=inscritosTotais, 79=vendasAds, 78=cortesias,
-// 83=CPA, 85=ticketMedio, 86=faturamento, 88=lucro
+// Column indices (0-based from FN):
+// 7=date, 9=investimento, 77=cortesias, 78=vendas ads,
+// 82=CPA, 84=ticketMedio, 85=faturamento ads total, 87=lucro
 function extractDesafio4Daily(rows: string[][]): DailyMetric[] {
   const p = parseSheetNumber;
   const daily: DailyMetric[] = [];
@@ -179,12 +179,12 @@ function extractDesafio4Daily(rows: string[][]): DailyMetric[] {
     daily.push({
       data: dateVal,
       investimento: p(row[9]),
-      vendas: p(row[79]),
-      cpa: p(row[83]),
-      ticketMedio: p(row[85]),
-      faturamento: p(row[86]),
-      lucroPrejuizo: p(row[88]),
-      cortesia: p(row[78]),
+      vendas: p(row[78]),
+      cpa: p(row[82]),
+      ticketMedio: p(row[84]),
+      faturamento: p(row[85]),
+      lucroPrejuizo: p(row[87]),
+      cortesia: p(row[77]),
     });
   }
 
