@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { MousePointerClick, DollarSign, GitBranch, GraduationCap, UserX, AlertTriangle } from 'lucide-react';
 import type { AllDesafiosData, DesafioData, DesafioKey } from '@/types/metrics';
-import AnaliseComparativa from './AnaliseComparativa';
 
 interface CompararViewProps {
   data: AllDesafiosData;
@@ -261,7 +260,6 @@ export default function CompararView({ data }: CompararViewProps) {
             })}
           </div>
 
-          <AnaliseComparativa selectedKeys={selectedKeys} data={data} />
         </>
       )}
     </div>
