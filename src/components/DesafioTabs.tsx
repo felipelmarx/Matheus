@@ -44,9 +44,12 @@ export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTab
             <div className="text-left">
               <span className="block">{tab.label}</span>
               {desafioData?.captacao && (
-                <span className={`block text-xs ${isActive ? 'text-primary-foreground/60' : 'text-muted-foreground/60'}`}>
-                  {desafioData.captacao.replace(/CAPTAÇÃO\s*-\s*/i, '')}
-                </span>
+                <div className={`text-[10px] leading-tight mt-0.5 ${isActive ? 'text-primary-foreground/60' : 'text-muted-foreground/60'}`}>
+                  <span className="block">{desafioData.captacao}</span>
+                  {desafioData.aoVivo && (
+                    <span className="block">{desafioData.aoVivo}</span>
+                  )}
+                </div>
               )}
             </div>
             {!hasData && (
