@@ -162,6 +162,89 @@ function extractAdsData(rows: string[][]): AdMetric[] {
     }));
 }
 
+// Extract daily metrics for Desafio 4 from FN4:JF16
+// Column indices (0-based from FN): 7=date, 9=investimento, 27=cliques, 30=viewPages,
+// 31=connectRate, 44=inscritosTotais, 79=vendasAds, 78=cortesias,
+// 83=CPA, 85=ticketMedio, 86=faturamento, 88=lucro
+function extractDesafio4Daily(rows: string[][]): DailyMetric[] {
+  const p = parseSheetNumber;
+  const daily: DailyMetric[] = [];
+
+  // Data rows start at index 4 (row 8 in spreadsheet)
+  for (let i = 4; i < rows.length; i++) {
+    const row = rows[i];
+    const dateVal = (row?.[7] ?? '').trim();
+    if (!dateVal || !/\d{2}\/\d{2}\/\d{4}/.test(dateVal)) continue;
+
+    daily.push({
+      data: dateVal,
+      investimento: p(row[9]),
+      vendas: p(row[79]),
+      cpa: p(row[83]),
+      ticketMedio: p(row[85]),
+      faturamento: p(row[86]),
+      lucroPrejuizo: p(row[88]),
+      cortesia: p(row[78]),
+    });
+  }
+
+  return daily;
+}
+
+// Build DesafioData summary from Desafio 4 daily rows
+function buildDesafio4Summary(rows: string[][], daily: DailyMetric[]): DesafioData {
+  const p = parseSheetNumber;
+  const base = getDefaultDesafio();
+
+  // Period info from header row (index 0, col 6)
+  base.captacao = '23/03 - 27/03';
+
+  // Check for "AO VIVO" marker
+  for (let i = 4; i < rows.length; i++) {
+    if ((rows[i]?.[6] ?? '').trim().toUpperCase() === 'AO VIVO') {
+      base.aoVivo = (rows[i]?.[7] ?? '').trim();
+      break;
+    }
+  }
+
+  // Aggregate from daily data
+  let totalInv = 0, totalVendas = 0, totalFat = 0, totalLucro = 0;
+  let totalCliques = 0, totalViewPages = 0;
+  let connectRateSum = 0, connectRateCount = 0;
+  let totalInscritos = 0, totalCortesias = 0;
+
+  for (let i = 4; i < rows.length; i++) {
+    const row = rows[i];
+    const dateVal = (row?.[7] ?? '').trim();
+    if (!dateVal || !/\d{2}\/\d{2}\/\d{4}/.test(dateVal)) continue;
+
+    totalInv += p(row[9]);
+    totalCliques += p(row[27]);
+    totalViewPages += p(row[30]);
+    const cr = p(row[31]);
+    if (cr > 0) { connectRateSum += cr; connectRateCount++; }
+    totalInscritos += p(row[44]);
+    totalCortesias += p(row[78]);
+    totalVendas += p(row[79]);
+    totalFat += p(row[86]);
+    totalLucro += p(row[88]);
+  }
+
+  base.investimento = totalInv;
+  base.cliques = totalCliques;
+  base.viewPages = totalViewPages;
+  base.conectRate = connectRateCount > 0 ? Math.round((connectRateSum / connectRateCount) * 100) / 100 : 0;
+  base.vendas = totalVendas;
+  base.ingressosTotais = totalInscritos;
+  base.faturamento = totalFat;
+  base.lucroPrejuizo = totalLucro;
+  base.cpa = totalVendas > 0 ? Math.round(totalInv / totalVendas) : 0;
+  base.ticketMedio = totalVendas > 0 ? Math.round(totalFat / totalVendas) : 0;
+  base.faturamentoTotal = totalFat;
+
+  return base;
+}
+
 function getDefaultData(): AllDesafiosData {
   return {
     geral: getDefaultDesafio(),
@@ -169,6 +252,8 @@ function getDefaultData(): AllDesafiosData {
     desafio2: getDefaultDesafio(),
     desafio3: getDefaultDesafio(),
     desafio3Daily: [],
+    desafio4: getDefaultDesafio(),
+    desafio4Daily: [],
     topAds: [],
     lastUpdated: new Date().toISOString(),
     fromCache: false,
@@ -206,6 +291,15 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Daily metrics fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
+    // Desafio 4 fetch is independent
+    let desafio4Rows: string[][] = [];
+    try {
+      desafio4Rows = await fetchSheetRows("'MAR/ABR - METRICAS GERAIS'!FN4:JF16");
+      console.log(`[sheets] Desafio 4: ${desafio4Rows.length} rows loaded`);
+    } catch (err) {
+      console.warn('[sheets] Desafio 4 fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
     // Ads fetch is independent - don't let it break the main data
     let adsRows: string[][] = [];
     try {
@@ -224,6 +318,10 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const desafio3Daily = extractDailyMetrics(dailyRows);
     console.log(`[sheets] desafio3Daily: ${desafio3Daily.length} days loaded`);
 
+    const desafio4Daily = extractDesafio4Daily(desafio4Rows);
+    const desafio4Summary = buildDesafio4Summary(desafio4Rows, desafio4Daily);
+    console.log(`[sheets] desafio4Daily: ${desafio4Daily.length} days, inv=${desafio4Summary.investimento} vendas=${desafio4Summary.vendas}`);
+
     const topAds = extractAdsData(adsRows);
     console.log(`[sheets] topAds: ${topAds.length} ads ranked`);
 
@@ -233,6 +331,8 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio2: getDefaultDesafio(),
       desafio3: getDefaultDesafio(),
       desafio3Daily,
+      desafio4: desafio4Summary,
+      desafio4Daily,
       topAds,
       lastUpdated: new Date().toISOString(),
       fromCache: false,

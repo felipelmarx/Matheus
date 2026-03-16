@@ -138,6 +138,9 @@ export default function DashboardPage() {
                 {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
                   <DetalhamentoDia daily={data.desafio3Daily} />
                 )}
+                {activeTab === 'desafio4' && data.desafio4Daily.length > 0 && (
+                  <DetalhamentoDia daily={data.desafio4Daily} />
+                )}
               </>
             ) : null}
           </>

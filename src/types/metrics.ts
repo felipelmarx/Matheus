@@ -42,7 +42,7 @@ export interface DesafioData {
   ticketMedioFormacao: number;
 }
 
-export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3';
+export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4';
 export type TabKey = 'geral' | DesafioKey | 'comparar';
 
 export interface DailyMetric {
@@ -71,6 +71,8 @@ export interface AllDesafiosData {
   desafio2: DesafioData;
   desafio3: DesafioData;
   desafio3Daily: DailyMetric[];
+  desafio4: DesafioData;
+  desafio4Daily: DailyMetric[];
   topAds: AdMetric[];
   lastUpdated: string;
   fromCache: boolean;
