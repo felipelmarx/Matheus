@@ -191,60 +191,6 @@ function extractDesafio4Daily(rows: string[][]): DailyMetric[] {
   return daily;
 }
 
-// Build DesafioData summary from Desafio 4 daily rows
-function buildDesafio4Summary(rows: string[][], daily: DailyMetric[]): DesafioData {
-  const p = parseSheetNumber;
-  const base = getDefaultDesafio();
-
-  // Period info from header row (index 0, col 6)
-  base.captacao = '23/03 - 27/03';
-
-  // Check for "AO VIVO" marker
-  for (let i = 4; i < rows.length; i++) {
-    if ((rows[i]?.[6] ?? '').trim().toUpperCase() === 'AO VIVO') {
-      base.aoVivo = (rows[i]?.[7] ?? '').trim();
-      break;
-    }
-  }
-
-  // Aggregate from daily data
-  let totalInv = 0, totalVendas = 0, totalFat = 0, totalLucro = 0;
-  let totalCliques = 0, totalViewPages = 0;
-  let connectRateSum = 0, connectRateCount = 0;
-  let totalInscritos = 0, totalCortesias = 0;
-
-  for (let i = 4; i < rows.length; i++) {
-    const row = rows[i];
-    const dateVal = (row?.[7] ?? '').trim();
-    if (!dateVal || !/\d{2}\/\d{2}\/\d{4}/.test(dateVal)) continue;
-
-    totalInv += p(row[9]);
-    totalCliques += p(row[27]);
-    totalViewPages += p(row[30]);
-    const cr = p(row[31]);
-    if (cr > 0) { connectRateSum += cr; connectRateCount++; }
-    totalInscritos += p(row[44]);
-    totalCortesias += p(row[78]);
-    totalVendas += p(row[79]);
-    totalFat += p(row[86]);
-    totalLucro += p(row[88]);
-  }
-
-  base.investimento = totalInv;
-  base.cliques = totalCliques;
-  base.viewPages = totalViewPages;
-  base.conectRate = connectRateCount > 0 ? Math.round((connectRateSum / connectRateCount) * 100) / 100 : 0;
-  base.vendas = totalVendas;
-  base.ingressosTotais = totalInscritos;
-  base.faturamento = totalFat;
-  base.lucroPrejuizo = totalLucro;
-  base.cpa = totalVendas > 0 ? Math.round(totalInv / totalVendas) : 0;
-  base.ticketMedio = totalVendas > 0 ? Math.round(totalFat / totalVendas) : 0;
-  base.faturamentoTotal = totalFat;
-
-  return base;
-}
-
 function getDefaultData(): AllDesafiosData {
   return {
     geral: getDefaultDesafio(),
@@ -260,14 +206,16 @@ function getDefaultData(): AllDesafiosData {
   };
 }
 
-// Column mappings for DASH AUTO (C1:R35 → indices 0-15)
+// Column mappings for RESUMO - GERAL (C1:X77 → indices 0-21)
 // DESAFIO 1: label=0 (C), value=1 (D)
 // DESAFIO 2: label=6 (I), value=7 (J)
 // DESAFIO 3: label=12 (O), value=13 (P)
+// DESAFIO 4: label=18 (U), value=19 (V)
 const DESAFIO_COLS = [
   { key: 'desafio1' as const, labelCol: 0, valueCol: 1 },
   { key: 'desafio2' as const, labelCol: 6, valueCol: 7 },
   { key: 'desafio3' as const, labelCol: 12, valueCol: 13 },
+  { key: 'desafio4' as const, labelCol: 18, valueCol: 19 },
 ];
 
 export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
@@ -281,7 +229,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
   try {
     console.log('[sheets] Fetching from RESUMO - GERAL, MAR/ABR MÉTRICAS GERAIS, and ADS...');
-    const resumoRows = await fetchSheetRows('RESUMO - GERAL!C1:R77');
+    const resumoRows = await fetchSheetRows('RESUMO - GERAL!C1:X77');
 
     // Daily fetch is independent - don't let it break the main data
     let dailyRows: string[][] = [];
@@ -319,8 +267,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     console.log(`[sheets] desafio3Daily: ${desafio3Daily.length} days loaded`);
 
     const desafio4Daily = extractDesafio4Daily(desafio4Rows);
-    const desafio4Summary = buildDesafio4Summary(desafio4Rows, desafio4Daily);
-    console.log(`[sheets] desafio4Daily: ${desafio4Daily.length} days, inv=${desafio4Summary.investimento} vendas=${desafio4Summary.vendas}`);
+    console.log(`[sheets] desafio4Daily: ${desafio4Daily.length} days loaded`);
 
     const topAds = extractAdsData(adsRows);
     console.log(`[sheets] topAds: ${topAds.length} ads ranked`);
@@ -331,7 +278,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio2: getDefaultDesafio(),
       desafio3: getDefaultDesafio(),
       desafio3Daily,
-      desafio4: desafio4Summary,
+      desafio4: getDefaultDesafio(),
       desafio4Daily,
       topAds,
       lastUpdated: new Date().toISOString(),
