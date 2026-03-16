@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import type { AllDesafiosData, DesafioData, TabKey } from '@/types/metrics';
+import type { AllDesafiosData, DesafioData, TabKey, GeralMode } from '@/types/metrics';
 import DashboardHeader from '@/components/DashboardHeader';
 import DesafioTabs from '@/components/DesafioTabs';
 import StatCards from '@/components/StatCards';
@@ -11,41 +11,54 @@ import MetasCard from '@/components/MetasCard';
 import CompararView from '@/components/CompararView';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
-function buildGeralData(data: AllDesafiosData): DesafioData {
-  const d1 = data.desafio1;
-  const d2 = data.desafio2;
+function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
+  const desafios: DesafioData[] = mode === 'meta1'
+    ? [data.desafio1, data.desafio2]
+    : mode === 'meta2'
+      ? [data.desafio3, data.desafio4]
+      : [data.desafio1, data.desafio2, data.desafio3, data.desafio4];
 
-  // Sum Desafio 1 + 2 only (exclude Desafio 3)
-  const inv = d1.investimento + d2.investimento;
-  const fat = d1.faturamento + d2.faturamento;
-  const vendasForm = d1.vendasFormacao + d2.vendasFormacao;
-  const fatTotal = d1.faturamentoTotal + d2.faturamentoTotal;
-  const vendas = d1.vendas + d2.vendas;
-  const aplicacoes = d1.aplicacoes + d2.aplicacoes;
-  const agendamentos = d1.agendamentos + d2.agendamentos;
-  const entrevistas = d1.entrevistas + d2.entrevistas;
+  const sum = (fn: (d: DesafioData) => number) => desafios.reduce((acc, d) => acc + fn(d), 0);
 
-  const lucroPrejuizo = d1.lucroPrejuizo + d2.lucroPrejuizo;
-  const cac = vendasForm > 0 ? lucroPrejuizo / vendasForm : 0;
+  const inv = sum(d => d.investimento);
+  const fat = sum(d => d.faturamento);
+  const vendasForm = sum(d => d.vendasFormacao);
+  const fatTotal = sum(d => d.faturamentoTotal);
+  const vendas = sum(d => d.vendas);
+  const aplicacoes = sum(d => d.aplicacoes);
+  const agendamentos = sum(d => d.agendamentos);
+  const entrevistas = sum(d => d.entrevistas);
+  const cliques = sum(d => d.cliques);
+  const viewPages = sum(d => d.viewPages);
+  const ingressosTotais = sum(d => d.ingressosTotais);
+  const cancelamentos = sum(d => d.cancelamentos);
+  const noShow = sum(d => d.noShow);
   const tmFormacao = vendasForm > 0 ? fatTotal / vendasForm : 0;
 
   return {
-    ...data.geral,
+    captacao: '',
+    aoVivo: '',
+    cliques,
+    viewPages,
+    conectRate: cliques > 0 ? Math.round((viewPages / cliques) * 100) : 0,
     investimento: inv,
-    faturamento: fat,
     vendas,
-    aplicacoes,
-    agendamentos,
-    entrevistas,
-    vendasFormacao: vendasForm,
-    faturamentoTotal: fatTotal,
-    ticketMedioFormacao: Math.round(tmFormacao),
-    custoVendasFormacao: cac,
+    ingressosTotais,
     cpa: vendas > 0 ? Math.round(inv / vendas) : 0,
     ticketMedio: vendas > 0 ? Math.round(fat / vendas) : 0,
-    custoPorAplicacao: aplicacoes > 0 ? inv / aplicacoes : 0,
-    custoEntrevista: entrevistas > 0 ? inv / entrevistas : 0,
+    faturamento: fat,
     lucroPrejuizo: fat - inv,
+    aplicacoes,
+    custoPorAplicacao: aplicacoes > 0 ? inv / aplicacoes : 0,
+    agendamentos,
+    entrevistas,
+    custoEntrevista: entrevistas > 0 ? inv / entrevistas : 0,
+    vendasFormacao: vendasForm,
+    custoVendasFormacao: vendasForm > 0 ? inv / vendasForm : 0,
+    faturamentoTotal: fatTotal,
+    ticketMedioFormacao: Math.round(tmFormacao),
+    cancelamentos,
+    noShow,
   };
 }
 
@@ -55,6 +68,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>('geral');
+  const [geralMode, setGeralMode] = useState<GeralMode>('total');
 
   const fetchData = useCallback(async (force = false) => {
     try {
@@ -82,9 +96,9 @@ export default function DashboardPage() {
   const activeData = useMemo(() => {
     if (!data) return null;
     if (activeTab === 'comparar') return null;
-    if (activeTab === 'geral') return buildGeralData(data);
+    if (activeTab === 'geral') return buildGeralData(data, geralMode);
     return data[activeTab];
-  }, [data, activeTab]);
+  }, [data, activeTab, geralMode]);
 
   if (error && !data) {
     return (
@@ -130,6 +144,27 @@ export default function DashboardPage() {
               <CompararView data={data} />
             ) : activeData ? (
               <>
+                {activeTab === 'geral' && (
+                  <div className="flex items-center justify-center gap-1 bg-card border border-border rounded-xl p-1.5">
+                    {([
+                      { key: 'total' as GeralMode, label: 'Total (D1-D4)' },
+                      { key: 'meta1' as GeralMode, label: 'Meta 1 (D1+D2)' },
+                      { key: 'meta2' as GeralMode, label: 'Meta 2 (D3+D4)' },
+                    ]).map((opt) => (
+                      <button
+                        key={opt.key}
+                        onClick={() => setGeralMode(opt.key)}
+                        className={`px-4 py-2 rounded-lg text-xs font-heading font-medium transition-all ${
+                          geralMode === opt.key
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <StatCards data={activeData} />
                 <MetasCard data={activeData} />
                 <ResumoGeral data={activeData} />
