@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { MousePointerClick, DollarSign, GitBranch, GraduationCap, AlertTriangle } from 'lucide-react';
+import { MousePointerClick, DollarSign, GitBranch, GraduationCap, UserX, AlertTriangle } from 'lucide-react';
 import type { AllDesafiosData, DesafioData, DesafioKey } from '@/types/metrics';
 import AnaliseComparativa from './AnaliseComparativa';
 
@@ -83,6 +83,16 @@ const sections: MetricSection[] = [
       { label: 'CAC Formacao', key: 'custoVendasFormacao', format: 'brl', invertColor: true },
       { label: 'Faturamento Total', key: 'faturamentoTotal', format: 'brl' },
       { label: 'TM Formacao', key: 'ticketMedioFormacao', format: 'brl' },
+    ],
+  },
+  {
+    title: 'Cancelamentos & No-show',
+    icon: UserX,
+    accentColor: 'text-red-400',
+    headerBg: 'from-red-500/10 to-transparent',
+    rows: [
+      { label: 'Cancelamentos', key: 'cancelamentos', format: 'num', invertColor: true },
+      { label: 'No-show', key: 'noShow', format: 'num', invertColor: true },
     ],
   },
 ];

@@ -72,6 +72,13 @@ const metricSections: { title: string; metrics: MetricDef[] }[] = [
       { label: 'TM Formacao', key: 'ticketMedioFormacao', format: fmt },
     ],
   },
+  {
+    title: 'CANCELAMENTOS & NO-SHOW',
+    metrics: [
+      { label: 'Cancelamentos', key: 'cancelamentos', format: fmtNum },
+      { label: 'No-show', key: 'noShow', format: fmtNum },
+    ],
+  },
 ];
 
 function buildPrompt(desafios: DesafioEntry[]): string {
@@ -143,7 +150,8 @@ Estruture sua analise em:
 
 Use formatacao markdown. Seja direto e objetivo. Nao repita os numeros brutos — foque na interpretacao e nos insights acionaveis.
 Para metricas de custo (CPA, Custo/Aplicacao, Custo/Entrevista, CAC), valores menores sao melhores.
-Para metricas de receita/volume (Faturamento, Vendas, Cliques), valores maiores sao melhores.`,
+Para metricas de receita/volume (Faturamento, Vendas, Cliques), valores maiores sao melhores.
+Para Cancelamentos e No-show, valores menores sao melhores — indique tendencias e impacto no funil.`,
       messages: [{ role: 'user', content: userPrompt }],
     });
 
