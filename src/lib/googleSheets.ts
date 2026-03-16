@@ -73,6 +73,8 @@ function extractDesafioData(rows: string[][], labelCol: number, valueCol: number
     custoVendasFormacao: p(findValue(rows, /custo\s*por\s*vendas\s*(da\s*)?forma[cç][aã]o/i, labelCol, valueCol)),
     faturamentoTotal: p(findValue(rows, /faturamento\s*total/i, labelCol, valueCol)),
     ticketMedioFormacao: 0,
+    cancelamentos: 0,
+    noShow: 0,
   };
 
   // ticketMedioFormacao: try sheet extraction, fallback to computed value
@@ -93,6 +95,7 @@ function getDefaultDesafio(): DesafioData {
     aplicacoes: 0, custoPorAplicacao: 0,
     agendamentos: 0, entrevistas: 0, custoEntrevista: 0,
     vendasFormacao: 0, custoVendasFormacao: 0, faturamentoTotal: 0, ticketMedioFormacao: 0,
+    cancelamentos: 0, noShow: 0,
   };
 }
 
@@ -290,6 +293,26 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       const desafioData = extractDesafioData(resumoRows, col.labelCol, col.valueCol);
       data[col.key] = desafioData;
       console.log(`[sheets] ${col.key}: inv=${desafioData.investimento} vendas=${desafioData.vendas} fat=${desafioData.faturamentoTotal}`);
+    }
+
+    // Cancelamentos & No-show from RESUMO - GERAL B35:T39
+    // Columns: B=0, H=6, N=12, T=18 (0-indexed from B)
+    // Rows: 0=header, 1="cancelamento", 2=cancel value, 3="no-show", 4=noshow value
+    try {
+      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:T39');
+      const cancelCols: { key: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4'; col: number }[] = [
+        { key: 'desafio1', col: 0 },   // B
+        { key: 'desafio2', col: 6 },   // H
+        { key: 'desafio3', col: 12 },  // N
+        { key: 'desafio4', col: 18 },  // T
+      ];
+      for (const cc of cancelCols) {
+        data[cc.key].cancelamentos = parseSheetNumber(cancelRows[2]?.[cc.col] ?? '');
+        data[cc.key].noShow = parseSheetNumber(cancelRows[4]?.[cc.col] ?? '');
+      }
+      console.log('[sheets] Cancelamentos/No-show loaded');
+    } catch (err) {
+      console.warn('[sheets] Cancelamentos fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
     // Sum ingressosTotais for geral from desafio1 + desafio2

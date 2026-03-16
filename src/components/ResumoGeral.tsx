@@ -1,4 +1,4 @@
-import { MousePointerClick, GitBranch } from 'lucide-react';
+import { MousePointerClick, GitBranch, UserX } from 'lucide-react';
 import type { DesafioData } from '@/types/metrics';
 
 interface ResumoGeralProps {
@@ -77,6 +77,20 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
       ],
     },
   ];
+
+  // Only show cancelamentos group if there's data
+  if (data.cancelamentos > 0 || data.noShow > 0) {
+    groups.push({
+      title: 'Cancelamentos & No-show',
+      icon: UserX,
+      accentColor: 'text-red-400',
+      headerBg: 'from-red-500/10 to-transparent',
+      metrics: [
+        { label: 'Cancelamentos', value: fmtNum(data.cancelamentos), isNegative: data.cancelamentos > 0 },
+        { label: 'No-show', value: fmtNum(data.noShow), isNegative: data.noShow > 0 },
+      ],
+    });
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

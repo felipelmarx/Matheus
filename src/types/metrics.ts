@@ -40,6 +40,10 @@ export interface DesafioData {
   custoVendasFormacao: number;
   faturamentoTotal: number;
   ticketMedioFormacao: number;
+
+  // Cancellations & No-show
+  cancelamentos: number;
+  noShow: number;
 }
 
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4';
