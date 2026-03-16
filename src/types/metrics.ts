@@ -47,7 +47,7 @@ export interface DesafioData {
 }
 
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4';
-export type TabKey = 'geral' | DesafioKey | 'comparar';
+export type TabKey = 'geral' | DesafioKey | 'comparar' | 'analises';
 export type GeralMode = 'total' | 'meta1' | 'meta2';
 
 export interface DailyMetric {
@@ -79,6 +79,7 @@ export interface AllDesafiosData {
   desafio4: DesafioData;
   desafio4Daily: DailyMetric[];
   topAds: AdMetric[];
+  visaoEstrategica: string[];
   lastUpdated: string;
   fromCache: boolean;
 }

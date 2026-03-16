@@ -204,6 +204,7 @@ function getDefaultData(): AllDesafiosData {
     desafio4: getDefaultDesafio(),
     desafio4Daily: [],
     topAds: [],
+    visaoEstrategica: [],
     lastUpdated: new Date().toISOString(),
     fromCache: false,
   };
@@ -284,6 +285,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio4: getDefaultDesafio(),
       desafio4Daily,
       topAds,
+      visaoEstrategica: [],
       lastUpdated: new Date().toISOString(),
       fromCache: false,
     };
@@ -313,6 +315,15 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log('[sheets] Cancelamentos/No-show loaded');
     } catch (err) {
       console.warn('[sheets] Cancelamentos fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    // Visao Estrategica from VISAO-ESTRATEGICA tab
+    try {
+      const veRows = await fetchSheetRows('VISAO-ESTRATEGICA!A1:J29');
+      data.visaoEstrategica = veRows.map((row) => (row[0] ?? '').trim()).filter((line) => line.length > 0);
+      console.log(`[sheets] Visao Estrategica: ${data.visaoEstrategica.length} lines loaded`);
+    } catch (err) {
+      console.warn('[sheets] Visao Estrategica fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
     // Sum ingressosTotais for geral from desafio1 + desafio2

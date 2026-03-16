@@ -9,6 +9,7 @@ import ListaAnuncios from '@/components/ListaAnuncios';
 import DetalhamentoDia from '@/components/DetalhamentoDia';
 import MetasCard from '@/components/MetasCard';
 import CompararView from '@/components/CompararView';
+import AnalisesDesafios from '@/components/AnalisesDesafios';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
@@ -95,7 +96,7 @@ export default function DashboardPage() {
 
   const activeData = useMemo(() => {
     if (!data) return null;
-    if (activeTab === 'comparar') return null;
+    if (activeTab === 'comparar' || activeTab === 'analises') return null;
     if (activeTab === 'geral') return buildGeralData(data, geralMode);
     return data[activeTab];
   }, [data, activeTab, geralMode]);
@@ -140,7 +141,9 @@ export default function DashboardPage() {
         ) : data ? (
           <>
             <DesafioTabs activeTab={activeTab} onTabChange={setActiveTab} data={data} />
-            {activeTab === 'comparar' ? (
+            {activeTab === 'analises' ? (
+              <AnalisesDesafios lines={data.visaoEstrategica} />
+            ) : activeTab === 'comparar' ? (
               <CompararView data={data} />
             ) : activeData ? (
               <>
