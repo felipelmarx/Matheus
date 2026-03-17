@@ -204,6 +204,7 @@ function getDefaultData(): AllDesafiosData {
     desafio4: getDefaultDesafio(),
     desafio4Daily: [],
     topAds: [],
+    topAdsDesafio4: [],
     visaoEstrategica: [],
     lastUpdated: new Date().toISOString(),
     fromCache: false,
@@ -263,6 +264,18 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Ads fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
+    // Desafio 4 ads from AT tab (from 16/03/2026 onwards)
+    let adsD4Rows: string[][] = [];
+    try {
+      if (ADS_SPREADSHEET_ID) {
+        const allAtRows = await fetchSheetRows('AT!A2:D1000', ADS_SPREADSHEET_ID);
+        adsD4Rows = allAtRows.filter(r => (r[0] ?? '') >= '2026-03-16');
+        console.log(`[sheets] Ads D4: ${adsD4Rows.length} rows loaded (from AT tab, >= 2026-03-16)`);
+      }
+    } catch (err) {
+      console.warn('[sheets] Ads D4 fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
     // Extract geral data from RESUMO - GERAL (label=col0/C, value=col1/D)
     const geralData = extractDesafioData(resumoRows, 0, 1);
     console.log(`[sheets] geral: inv=${geralData.investimento} vendas=${geralData.vendas} fat=${geralData.faturamentoTotal}`);
@@ -276,6 +289,9 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const topAds = extractAdsData(adsRows);
     console.log(`[sheets] topAds: ${topAds.length} ads ranked`);
 
+    const topAdsDesafio4 = extractAdsData(adsD4Rows);
+    console.log(`[sheets] topAdsDesafio4: ${topAdsDesafio4.length} ads ranked`);
+
     const data: AllDesafiosData = {
       geral: geralData,
       desafio1: getDefaultDesafio(),
@@ -285,6 +301,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio4: getDefaultDesafio(),
       desafio4Daily,
       topAds,
+      topAdsDesafio4,
       visaoEstrategica: [],
       lastUpdated: new Date().toISOString(),
       fromCache: false,

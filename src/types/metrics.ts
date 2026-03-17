@@ -79,6 +79,7 @@ export interface AllDesafiosData {
   desafio4: DesafioData;
   desafio4Daily: DailyMetric[];
   topAds: AdMetric[];
+  topAdsDesafio4: AdMetric[];
   visaoEstrategica: string[];
   lastUpdated: string;
   fromCache: boolean;

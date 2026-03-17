@@ -173,6 +173,7 @@ export default function DashboardPage() {
                 <ResumoGeral data={activeData} activeTab={activeTab} />
                 <FunilVisual data={activeData} />
                 {activeTab === 'desafio3' && <ListaAnuncios ads={data.topAds} />}
+                {activeTab === 'desafio4' && <ListaAnuncios ads={data.topAdsDesafio4} />}
                 {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
                   <DetalhamentoDia daily={data.desafio3Daily} />
                 )}
