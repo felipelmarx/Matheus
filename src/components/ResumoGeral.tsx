@@ -1,8 +1,24 @@
-import { MousePointerClick, GitBranch, UserX } from 'lucide-react';
-import type { DesafioData } from '@/types/metrics';
+import { MousePointerClick, GitBranch, UserX, ExternalLink } from 'lucide-react';
+import type { DesafioData, TabKey } from '@/types/metrics';
+
+const LANDING_PAGES: Partial<Record<TabKey, { url: string; label: string }>> = {
+  desafio1: {
+    url: 'https://lp.felipemarx.com.br/imersao-desafio-breathwork-aovivo-vsl12-8-6l/',
+    label: 'LP Desafio 1',
+  },
+  desafio2: {
+    url: 'https://lp.felipemarx.com.br/imersao-desafio-5d-pago-5d-pago-perpetuo-v4/',
+    label: 'LP Desafio 2',
+  },
+  desafio3: {
+    url: 'https://lp.felipemarx.com.br/imersao-desafio-5d-pago-5d-pago-perpetuo-2-2/',
+    label: 'LP Desafio 3',
+  },
+};
 
 interface ResumoGeralProps {
   data: DesafioData;
+  activeTab?: TabKey;
 }
 
 interface MetricItem {
@@ -20,7 +36,7 @@ interface MetricGroup {
   metrics: MetricItem[];
 }
 
-export default function ResumoGeral({ data }: ResumoGeralProps) {
+export default function ResumoGeral({ data, activeTab }: ResumoGeralProps) {
   const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmt = (v: number) => (v === 0 ? '--' : BRL.format(v));
   const fmtNum = (v: number) => (v === 0 ? '--' : v.toLocaleString('pt-BR'));
@@ -99,11 +115,24 @@ export default function ResumoGeral({ data }: ResumoGeralProps) {
         return (
           <div key={group.title} className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">
             <div className={`px-5 py-3 border-b border-border bg-gradient-to-r ${group.headerBg}`}>
-              <div className="flex items-center gap-2">
-                <Icon className={`w-4 h-4 ${group.accentColor}`} />
-                <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
-                  {group.title}
-                </h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Icon className={`w-4 h-4 ${group.accentColor}`} />
+                  <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
+                    {group.title}
+                  </h3>
+                </div>
+                {group.title === 'Tráfego' && activeTab && LANDING_PAGES[activeTab] && (
+                  <a
+                    href={LANDING_PAGES[activeTab]!.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-[10px] font-heading font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                    {LANDING_PAGES[activeTab]!.label}
+                  </a>
+                )}
               </div>
             </div>
             <div className="p-5 space-y-4">

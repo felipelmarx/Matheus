@@ -170,7 +170,7 @@ export default function DashboardPage() {
                 )}
                 <StatCards data={activeData} />
                 <MetasCard data={activeData} />
-                <ResumoGeral data={activeData} />
+                <ResumoGeral data={activeData} activeTab={activeTab} />
                 <FunilVisual data={activeData} />
                 {activeTab === 'desafio3' && <ListaAnuncios ads={data.topAds} />}
                 {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
