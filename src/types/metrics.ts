@@ -81,6 +81,7 @@ export interface AllDesafiosData {
   topAds: AdMetric[];
   topAdsDesafio4: AdMetric[];
   visaoEstrategica: string[];
+  resumoTecnico: { metrics: ResumoTecnicoMetric[]; analysis: string[] };
   lastUpdated: string;
   fromCache: boolean;
 }
@@ -104,6 +105,14 @@ export interface DashboardData {
   periodo: string;
   lastUpdated: string;
   fromCache: boolean;
+}
+
+export interface ResumoTecnicoMetric {
+  label: string;
+  desafio1: string;
+  desafio2: string;
+  comparacaoIA: string;
+  desafio3: string;
 }
 
 export interface CacheEntry {

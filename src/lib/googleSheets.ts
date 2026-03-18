@@ -1,4 +1,4 @@
-import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData } from '@/types/metrics';
+import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
 
@@ -206,6 +206,7 @@ function getDefaultData(): AllDesafiosData {
     topAds: [],
     topAdsDesafio4: [],
     visaoEstrategica: [],
+    resumoTecnico: { metrics: [], analysis: [] },
     lastUpdated: new Date().toISOString(),
     fromCache: false,
   };
@@ -303,6 +304,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       topAds,
       topAdsDesafio4,
       visaoEstrategica: [],
+      resumoTecnico: { metrics: [], analysis: [] },
       lastUpdated: new Date().toISOString(),
       fromCache: false,
     };
@@ -341,6 +343,34 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log(`[sheets] Visao Estrategica: ${data.visaoEstrategica.length} lines loaded`);
     } catch (err) {
       console.warn('[sheets] Visao Estrategica fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    // RESUMO-TECNICO: metrics (rows 1-65) + analysis (rows 72+)
+    try {
+      const rtRows = await fetchSheetRows('RESUMO-TECNICO!A1:K112');
+      const metrics: ResumoTecnicoMetric[] = [];
+      const maxMetricRow = Math.min(65, rtRows.length);
+      for (let i = 0; i < maxMetricRow; i++) {
+        const row = rtRows[i];
+        const label = (row?.[0] ?? '').trim();
+        if (!label) continue;
+        metrics.push({
+          label,
+          desafio1: (row?.[1] ?? '').trim(),
+          desafio2: (row?.[5] ?? '').trim(),
+          comparacaoIA: (row?.[7] ?? '').trim(),
+          desafio3: (row?.[10] ?? '').trim(),
+        });
+      }
+      const analysis: string[] = [];
+      for (let i = 71; i < rtRows.length; i++) {
+        const line = (rtRows[i]?.[0] ?? '').trim();
+        if (line.length > 0) analysis.push(line);
+      }
+      data.resumoTecnico = { metrics, analysis };
+      console.log(`[sheets] Resumo Tecnico: ${metrics.length} metrics, ${analysis.length} analysis lines`);
+    } catch (err) {
+      console.warn('[sheets] Resumo Tecnico fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
     // Sum ingressosTotais for geral from desafio1 + desafio2

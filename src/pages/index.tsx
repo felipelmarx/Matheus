@@ -142,7 +142,10 @@ export default function DashboardPage() {
           <>
             <DesafioTabs activeTab={activeTab} onTabChange={setActiveTab} data={data} />
             {activeTab === 'analises' ? (
-              <AnalisesDesafios lines={data.visaoEstrategica} />
+              <AnalisesDesafios
+                visaoEstrategica={data.visaoEstrategica}
+                resumoTecnico={data.resumoTecnico}
+              />
             ) : activeTab === 'comparar' ? (
               <CompararView data={data} />
             ) : activeData ? (
