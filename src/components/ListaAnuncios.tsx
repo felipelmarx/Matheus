@@ -17,6 +17,7 @@ const AD_LINKS: { pattern: string; link: string; type: 'video' | 'image' }[] = [
   { pattern: '[EDU] hook 3 cta 1', link: 'https://drive.google.com/file/d/19kwXNw2SvojAClMVzAmgV_Lwy_dHsVZs/view', type: 'video' },
   { pattern: 'EDU REELS 4 AYAHUASCA', link: 'https://drive.google.com/file/d/1N2uoWPLxr1n01ZJ_CNheEiDQ6Ad3JP0I/view', type: 'video' },
   { pattern: 'AD 1 LOTE 6 COLOMBIA', link: 'https://drive.google.com/file/d/10nuEa388a5EzfX8cRFcYEmRubBv9H6u-/view', type: 'video' },
+  { pattern: 'AD 12 LOTE 8', link: 'https://drive.google.com/file/d/186szavOZqJNyArttPkpy9j4eTi_9tdLS/view', type: 'video' },
 ];
 
 function findAdLink(adName: string) {
