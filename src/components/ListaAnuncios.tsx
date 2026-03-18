@@ -14,6 +14,9 @@ const AD_LINKS: { pattern: string; link: string; type: 'video' | 'image' }[] = [
   { pattern: 'AD 1 ( Gabriel Editor )', link: 'https://drive.google.com/file/d/13PnThFv8IrMaSToc4Yq7uQRMCPuw-wPA/view', type: 'video' },
   { pattern: 'FELIPE MARX - AD 4', link: 'https://drive.google.com/file/d/1_dZk3jO-N9opesTrPfutZN0fKOe4zkrE/view', type: 'video' },
   { pattern: '[EDU] Luciano Hulk', link: 'https://drive.google.com/file/d/1989tkozLpv2dfV_5Q_c2Jj03qbIBfnWW/view', type: 'video' },
+  { pattern: '[EDU] hook 3 cta 1', link: 'https://drive.google.com/file/d/19kwXNw2SvojAClMVzAmgV_Lwy_dHsVZs/view', type: 'video' },
+  { pattern: 'EDU REELS 4 AYAHUASCA', link: 'https://drive.google.com/file/d/1N2uoWPLxr1n01ZJ_CNheEiDQ6Ad3JP0I/view', type: 'video' },
+  { pattern: 'AD 1 LOTE 6 COLOMBIA', link: 'https://drive.google.com/file/d/10nuEa388a5EzfX8cRFcYEmRubBv9H6u-/view', type: 'video' },
 ];
 
 function findAdLink(adName: string) {
