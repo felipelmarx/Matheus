@@ -10,7 +10,7 @@ export default function SimuladorKPIs({ outputs }: SimuladorKPIsProps) {
   const saldoPos = outputs.saldoFrontEnd >= 0;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
       {/* Saldo Front-End */}
       <div
         className={`bg-gradient-to-br ${saldoPos ? 'from-emerald-500/15 to-emerald-600/5' : 'from-red-500/15 to-red-600/5'} border ${saldoPos ? 'border-emerald-500/30' : 'border-red-500/30'} rounded-xl p-4 transition-all hover:scale-[1.02]`}
@@ -30,6 +30,16 @@ export default function SimuladorKPIs({ outputs }: SimuladorKPIsProps) {
         </p>
         <p className="text-lg font-bold font-mono text-violet-400">
           {BRL.format(outputs.faturamentoBackEnd)}
+        </p>
+      </div>
+
+      {/* CPA */}
+      <div className="bg-gradient-to-br from-amber-500/10 to-amber-600/5 border border-amber-500/20 rounded-xl p-4 transition-all hover:scale-[1.02]">
+        <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-heading mb-1">
+          CPA
+        </p>
+        <p className="text-lg font-bold font-mono text-foreground">
+          {BRL.format(outputs.cpa)}
         </p>
       </div>
 

@@ -77,3 +77,48 @@
 .animate-fade-in {
   animation: fadeIn 0.3s ease-in-out;
 }
+
+/* Simulator slider */
+.sim-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+  outline: none;
+  cursor: pointer;
+}
+
+.sim-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.sim-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 4px hsl(var(--primary) / 0.2);
+}
+
+.sim-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
+  cursor: pointer;
+}
+
+.sim-slider::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+}

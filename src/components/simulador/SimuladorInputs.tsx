@@ -126,13 +126,7 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
                       {formatDisplay(value, field.unit, field.decimal)}
                     </span>
                   </div>
-                  <div className="relative">
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all bg-primary/70"
-                        style={{ width: `${Math.min(pct, 100)}%` }}
-                      />
-                    </div>
+                  <div className="relative flex items-center">
                     <input
                       type="range"
                       min={field.min}
@@ -140,7 +134,7 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
                       step={field.step}
                       value={value}
                       onChange={(e) => onUpdate(field.key, parseFloat(e.target.value))}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      className="sim-slider w-full"
                     />
                   </div>
                 </div>

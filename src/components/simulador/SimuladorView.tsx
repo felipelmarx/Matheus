@@ -24,12 +24,7 @@ export default function SimuladorView() {
 
         {/* Funil - Right */}
         <div className="lg:col-span-8">
-          <SimuladorFunil
-            outputs={outputs}
-            investimento={inputs.investimento}
-            cpc={inputs.cpc}
-            taxaConversao={inputs.taxaConversao}
-          />
+          <SimuladorFunil outputs={outputs} />
         </div>
       </div>
     </div>
