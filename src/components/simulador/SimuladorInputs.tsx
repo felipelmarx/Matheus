@@ -66,6 +66,23 @@ const sections: { title: string; color: string; fields: FieldConfig[] }[] = [
       { key: 'taxaDownsell', label: 'Taxa de Aceitacao', min: 0, max: 100, step: 1, unit: '%' },
     ],
   },
+  {
+    title: 'Qualificacao',
+    color: 'text-pink-400',
+    fields: [
+      { key: 'taxaAplicacao', label: 'Taxa de Aplicacao', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'taxaAgendamento', label: 'Taxa de Agendamento', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'taxaEntrevista', label: 'Taxa de Entrevista', min: 0, max: 100, step: 1, unit: '%' },
+    ],
+  },
+  {
+    title: 'Formacao (High-Ticket)',
+    color: 'text-violet-400',
+    fields: [
+      { key: 'taxaVendaFormacao', label: 'Taxa de Venda', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'ticketFormacao', label: 'Ticket Formacao', min: 0, max: 50000, step: 500, unit: 'R$' },
+    ],
+  },
 ];
 
 function formatDisplay(value: number, unit: string, decimal?: number): string {

@@ -1,4 +1,4 @@
-import { MousePointerClick, FileText, ShoppingCart, Plus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { MousePointerClick, FileText, ShoppingCart, Plus, ArrowUpRight, ArrowDownRight, ClipboardList, CalendarCheck, Users, Award } from 'lucide-react';
 import type { SimuladorOutputs } from '@/hooks/useSimulador';
 
 interface SimuladorFunilProps {
@@ -63,6 +63,16 @@ function Connector({ rate, label }: { rate: string; label?: string }) {
   );
 }
 
+function SectionDivider({ title, color }: { title: string; color: string }) {
+  return (
+    <div className="flex items-center gap-3 py-2 w-full">
+      <div className="h-px flex-1 bg-border" />
+      <span className={`text-[9px] uppercase tracking-widest font-heading font-semibold ${color}`}>{title}</span>
+      <div className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
+
 export default function SimuladorFunil({ outputs, investimento, cpc, taxaConversao }: SimuladorFunilProps) {
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
@@ -73,6 +83,10 @@ export default function SimuladorFunil({ outputs, investimento, cpc, taxaConvers
       </div>
 
       <div className="p-5 flex flex-col items-center">
+
+        {/* ═══ FRONT-END ═══ */}
+        <SectionDivider title="Front-End" color="text-blue-400" />
+
         {/* Tráfego */}
         <Stage
           icon={<MousePointerClick className="w-3.5 h-3.5 text-blue-400" />}
@@ -86,10 +100,10 @@ export default function SimuladorFunil({ outputs, investimento, cpc, taxaConvers
 
         <Connector rate={`${taxaConversao}%`} label="conversao" />
 
-        {/* Página → Vendas */}
+        {/* Vendas */}
         <Stage
-          icon={<FileText className="w-3.5 h-3.5 text-cyan-400" />}
-          label="Pagina de Vendas"
+          icon={<ShoppingCart className="w-3.5 h-3.5 text-cyan-400" />}
+          label="Vendas (Ingresso)"
           sublabel={`${fmtNum(outputs.cliques)} visitantes`}
           count={outputs.vendas}
           countLabel="vendas"
@@ -101,8 +115,6 @@ export default function SimuladorFunil({ outputs, investimento, cpc, taxaConvers
         {outputs.vendasBump > 0 && (
           <>
             <Connector rate={`${outputs.vendas > 0 ? ((outputs.vendasBump / outputs.vendas) * 100).toFixed(0) : 0}%`} label="bump" />
-
-            {/* Order Bump */}
             <Stage
               icon={<Plus className="w-3.5 h-3.5 text-amber-400" />}
               label="Order Bump"
@@ -115,15 +127,13 @@ export default function SimuladorFunil({ outputs, investimento, cpc, taxaConvers
           </>
         )}
 
-        {/* Split: Upsell / Downsell */}
+        {/* Upsell / Downsell split */}
         {(outputs.vendasUpsell > 0 || outputs.vendasDownsell > 0) && (
           <>
             <div className="flex flex-col items-center py-1">
               <div className="w-px h-4 bg-border" />
             </div>
-
             <div className="grid grid-cols-2 gap-3 w-full">
-              {/* Upsell */}
               <div className="flex flex-col items-center">
                 <div className="flex items-center gap-1 mb-2">
                   <ArrowUpRight className="w-3 h-3 text-emerald-400" />
@@ -141,13 +151,11 @@ export default function SimuladorFunil({ outputs, investimento, cpc, taxaConvers
                   borderColor="border-emerald-500/20"
                 />
               </div>
-
-              {/* Downsell */}
               <div className="flex flex-col items-center">
                 <div className="flex items-center gap-1 mb-2">
                   <ArrowDownRight className="w-3 h-3 text-orange-400" />
                   <span className="text-[10px] font-mono font-semibold text-orange-400">
-                    {outputs.recusaramUpsell > 0 ? ((outputs.vendasDownsell / outputs.recusaramUpsell) * 100).toFixed(0) : 0}% dos que recusaram
+                    {outputs.recusaramUpsell > 0 ? ((outputs.vendasDownsell / outputs.recusaramUpsell) * 100).toFixed(0) : 0}% recusaram
                   </span>
                 </div>
                 <Stage
@@ -165,28 +173,89 @@ export default function SimuladorFunil({ outputs, investimento, cpc, taxaConvers
           </>
         )}
 
-        {/* Receita Total */}
+        {/* Saldo Front-End */}
+        <div className="flex flex-col items-center py-1">
+          <div className="w-px h-4 bg-border" />
+        </div>
+        <div className={`w-full border rounded-lg p-3 ${outputs.saldoFrontEnd >= 0 ? 'border-emerald-500/30 bg-gradient-to-r from-emerald-500/10 to-transparent' : 'border-red-500/30 bg-gradient-to-r from-red-500/10 to-transparent'}`}>
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground">Saldo Front-End</span>
+            <span className={`text-sm font-mono font-bold ${outputs.saldoFrontEnd >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+              {BRL.format(outputs.saldoFrontEnd)}
+            </span>
+          </div>
+        </div>
+
+        {/* ═══ BACK-END ═══ */}
+        <SectionDivider title="Back-End (Qualificacao)" color="text-pink-400" />
+
+        {/* Aplicações */}
+        <Stage
+          icon={<ClipboardList className="w-3.5 h-3.5 text-pink-400" />}
+          label="Aplicacoes"
+          sublabel={`${outputs.vendas > 0 ? ((outputs.aplicacoes / outputs.vendas) * 100).toFixed(0) : 0}% dos compradores`}
+          count={outputs.aplicacoes}
+          countLabel="aplicacoes"
+          color="from-pink-500/10"
+          borderColor="border-pink-500/20"
+        />
+
+        <Connector rate={`${outputs.aplicacoes > 0 ? ((outputs.agendamentos / outputs.aplicacoes) * 100).toFixed(0) : 0}%`} label="agendamento" />
+
+        {/* Agendamentos */}
+        <Stage
+          icon={<CalendarCheck className="w-3.5 h-3.5 text-pink-400" />}
+          label="Agendamentos"
+          count={outputs.agendamentos}
+          countLabel="agendados"
+          color="from-pink-500/10"
+          borderColor="border-pink-500/20"
+        />
+
+        <Connector rate={`${outputs.agendamentos > 0 ? ((outputs.entrevistas / outputs.agendamentos) * 100).toFixed(0) : 0}%`} label="entrevista" />
+
+        {/* Entrevistas */}
+        <Stage
+          icon={<Users className="w-3.5 h-3.5 text-pink-400" />}
+          label="Entrevistas"
+          count={outputs.entrevistas}
+          countLabel="realizadas"
+          color="from-pink-500/10"
+          borderColor="border-pink-500/20"
+        />
+
+        <Connector rate={`${outputs.entrevistas > 0 ? ((outputs.vendasFormacao / outputs.entrevistas) * 100).toFixed(0) : 0}%`} label="venda" />
+
+        {/* ═══ FORMAÇÃO ═══ */}
+        <SectionDivider title="Formacao (High-Ticket)" color="text-violet-400" />
+
+        <Stage
+          icon={<Award className="w-3.5 h-3.5 text-violet-400" />}
+          label="Vendas da Formacao"
+          sublabel={`Ticket: ${BRL.format(outputs.vendasFormacao > 0 ? outputs.faturamentoBackEnd / outputs.vendasFormacao : 0)}`}
+          count={outputs.vendasFormacao}
+          countLabel="vendas"
+          receita={outputs.faturamentoBackEnd}
+          color="from-violet-500/10"
+          borderColor="border-violet-500/20"
+        />
+
+        {/* RESULTADO FINAL */}
         <div className="flex flex-col items-center py-2">
           <div className="w-px h-4 bg-border" />
         </div>
-        <div className="w-full border border-primary/30 rounded-lg p-3 bg-gradient-to-r from-primary/10 to-transparent">
-          <div className="flex items-center justify-between">
+        <div className="w-full border border-primary/30 rounded-lg p-4 bg-gradient-to-r from-primary/10 to-transparent">
+          <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Receita Bruta</p>
-              <p className="text-sm font-mono font-bold text-foreground">{BRL.format(outputs.receitaBruta)}</p>
+              <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Front-End</p>
+              <p className="text-xs font-mono font-bold text-foreground">{BRL.format(outputs.faturamentoFrontEnd)}</p>
             </div>
-            {(outputs.reembolsos > 0 || outputs.custosProduto > 0) && (
-              <div className="text-right">
-                <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Deducoes</p>
-                <p className="text-[11px] font-mono text-red-400">
-                  {outputs.reembolsos > 0 && `Reemb: -${BRL.format(outputs.reembolsos)}`}
-                  {outputs.reembolsos > 0 && outputs.custosProduto > 0 && ' | '}
-                  {outputs.custosProduto > 0 && `Custo: -${BRL.format(outputs.custosProduto)}`}
-                </p>
-              </div>
-            )}
-            <div className="text-right">
-              <p className="text-[9px] uppercase tracking-wider text-muted-foreground">Lucro</p>
+            <div>
+              <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Back-End</p>
+              <p className="text-xs font-mono font-bold text-foreground">{BRL.format(outputs.faturamentoBackEnd)}</p>
+            </div>
+            <div>
+              <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Lucro Total</p>
               <p className={`text-sm font-mono font-bold ${outputs.lucro >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                 {BRL.format(outputs.lucro)}
               </p>

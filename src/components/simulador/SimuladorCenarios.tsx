@@ -22,7 +22,7 @@ interface Row {
 const rows: Row[] = [
   { label: 'Cliques', get: (c) => c.outputs.cliques.toLocaleString('pt-BR') },
   { label: 'Vendas', get: (c) => c.outputs.vendas.toLocaleString('pt-BR') },
-  { label: 'Receita', get: (c) => BRL.format(c.outputs.receitaLiquida) },
+  { label: 'Receita', get: (c) => BRL.format(c.outputs.faturamentoTotal) },
   { label: 'CPA', get: (c) => BRL.format(c.outputs.cpa) },
   { label: 'EPC', get: (c) => `R$ ${c.outputs.epc.toFixed(2)}` },
   { label: 'Lucro', get: (c) => BRL.format(c.outputs.lucro), color: (c) => c.outputs.lucro >= 0 ? 'text-emerald-400' : 'text-red-400' },

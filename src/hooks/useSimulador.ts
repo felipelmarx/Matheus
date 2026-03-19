@@ -9,7 +9,7 @@ export interface SimuladorInputs {
   // Conversão da Página
   taxaConversao: number;
 
-  // Produto Principal
+  // Produto Principal (Ingresso)
   precoProduto: number;
   custoProduto: number;
   taxaReembolso: number;
@@ -25,6 +25,15 @@ export interface SimuladorInputs {
   // Downsell
   precoDownsell: number;
   taxaDownsell: number;
+
+  // Qualificação (Back-end)
+  taxaAplicacao: number;
+  taxaAgendamento: number;
+  taxaEntrevista: number;
+
+  // Formação (High-Ticket)
+  taxaVendaFormacao: number;
+  ticketFormacao: number;
 }
 
 // ─── Outputs ────────────────────────────────────────────
@@ -32,10 +41,8 @@ export interface SimuladorOutputs {
   // Tráfego
   cliques: number;
 
-  // Vendas
+  // Front-end: Vendas
   vendas: number;
-
-  // Receitas por etapa
   receitaProduto: number;
   vendasBump: number;
   receitaBump: number;
@@ -45,16 +52,32 @@ export interface SimuladorOutputs {
   vendasDownsell: number;
   receitaDownsell: number;
 
+  // Front-end: Totais
+  faturamentoFrontEnd: number;
+  ticketMedioFrontEnd: number;
+  saldoFrontEnd: number;
+
+  // Back-end: Qualificação
+  aplicacoes: number;
+  agendamentos: number;
+  entrevistas: number;
+
+  // Back-end: Formação
+  vendasFormacao: number;
+  faturamentoBackEnd: number;
+
   // Custos
   receitaBruta: number;
   reembolsos: number;
   custosProduto: number;
 
-  // Totais
-  receitaLiquida: number;
-  ticketMedio: number;
+  // Totais Gerais
+  faturamentoTotal: number;
+  ticketMedioGeral: number;
   cpa: number;
   epc: number;
+  custoEntrevista: number;
+  custoVendaFormacao: number;
   lucro: number;
   roi: number;
   roas: number;
@@ -63,11 +86,7 @@ export interface SimuladorOutputs {
 
 // ─── Alertas ────────────────────────────────────────────
 export type AlertLevel = 'danger' | 'warning' | 'info';
-
-export interface SimuladorAlert {
-  level: AlertLevel;
-  message: string;
-}
+export interface SimuladorAlert { level: AlertLevel; message: string; }
 
 // ─── Dream Goal ─────────────────────────────────────────
 export interface DreamGoalResult {
@@ -77,77 +96,91 @@ export interface DreamGoalResult {
 }
 
 // ─── Cenários ───────────────────────────────────────────
-export interface CenarioResult {
-  label: string;
-  outputs: SimuladorOutputs;
-}
+export interface CenarioResult { label: string; outputs: SimuladorOutputs; }
 
 // ─── Defaults ───────────────────────────────────────────
 const DEFAULTS: SimuladorInputs = {
-  investimento: 10000,
+  investimento: 50000,
   cpc: 2,
   taxaConversao: 3,
-  precoProduto: 97,
+  precoProduto: 7,
   custoProduto: 0,
   taxaReembolso: 0,
-  precoBump: 37,
-  taxaBump: 25,
-  precoUpsell: 197,
+  precoBump: 27,
+  taxaBump: 20,
+  precoUpsell: 47,
   taxaUpsell: 15,
-  precoDownsell: 47,
+  precoDownsell: 17,
   taxaDownsell: 30,
+  taxaAplicacao: 30,
+  taxaAgendamento: 60,
+  taxaEntrevista: 80,
+  taxaVendaFormacao: 20,
+  ticketFormacao: 5000,
 };
 
 // ─── Compute ────────────────────────────────────────────
 export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
   const { investimento, cpc, taxaConversao, precoProduto, custoProduto, taxaReembolso } = inputs;
 
-  // Tráfego
+  // === TRÁFEGO ===
   const cliques = cpc > 0 ? Math.round(investimento / cpc) : 0;
 
-  // Vendas
+  // === FRONT-END ===
   const vendas = Math.round(cliques * (taxaConversao / 100));
-
-  // Produto principal
   const receitaProduto = vendas * precoProduto;
 
-  // Order Bump (% dos compradores aceita)
   const vendasBump = Math.round(vendas * (inputs.taxaBump / 100));
   const receitaBump = vendasBump * inputs.precoBump;
 
-  // Upsell (% dos compradores aceita)
   const vendasUpsell = Math.round(vendas * (inputs.taxaUpsell / 100));
   const receitaUpsell = vendasUpsell * inputs.precoUpsell;
 
-  // Downsell (apenas quem recusou upsell)
   const recusaramUpsell = vendas - vendasUpsell;
   const vendasDownsell = Math.round(recusaramUpsell * (inputs.taxaDownsell / 100));
   const receitaDownsell = vendasDownsell * inputs.precoDownsell;
 
-  // Receita bruta
-  const receitaBruta = receitaProduto + receitaBump + receitaUpsell + receitaDownsell;
+  const faturamentoFrontEnd = receitaProduto + receitaBump + receitaUpsell + receitaDownsell;
+  const ticketMedioFrontEnd = vendas > 0 ? faturamentoFrontEnd / vendas : 0;
+  const saldoFrontEnd = faturamentoFrontEnd - investimento;
 
-  // Custos e reembolsos
+  // === BACK-END: QUALIFICAÇÃO ===
+  const aplicacoes = Math.round(vendas * (inputs.taxaAplicacao / 100));
+  const agendamentos = Math.round(aplicacoes * (inputs.taxaAgendamento / 100));
+  const entrevistas = Math.round(agendamentos * (inputs.taxaEntrevista / 100));
+
+  // === BACK-END: FORMAÇÃO ===
+  const vendasFormacao = Math.round(entrevistas * (inputs.taxaVendaFormacao / 100));
+  const faturamentoBackEnd = vendasFormacao * inputs.ticketFormacao;
+
+  // === CUSTOS ===
+  const receitaBruta = faturamentoFrontEnd + faturamentoBackEnd;
   const reembolsos = Math.round(vendas * (taxaReembolso / 100)) * precoProduto;
   const custosProduto = vendas * custoProduto;
 
-  // Líquido
-  const receitaLiquida = receitaBruta - reembolsos - custosProduto;
-  const ticketMedio = vendas > 0 ? receitaBruta / vendas : 0;
+  // === TOTAIS ===
+  const faturamentoTotal = receitaBruta - reembolsos - custosProduto;
+  const ticketMedioGeral = vendas > 0 ? faturamentoTotal / vendas : 0;
   const cpa = vendas > 0 ? investimento / vendas : 0;
-  const epc = cliques > 0 ? receitaLiquida / cliques : 0;
-  const lucro = receitaLiquida - investimento;
+  const epc = cliques > 0 ? faturamentoTotal / cliques : 0;
+  const custoEntrevista = entrevistas > 0 ? investimento / entrevistas : 0;
+  const custoVendaFormacao = vendasFormacao > 0 ? investimento / vendasFormacao : 0;
+  const lucro = faturamentoTotal - investimento;
   const roi = investimento > 0 ? (lucro / investimento) * 100 : 0;
-  const roas = investimento > 0 ? receitaLiquida / investimento : 0;
-  const breakevenVendas = ticketMedio > 0 ? Math.ceil(investimento / ticketMedio) : 0;
+  const roas = investimento > 0 ? faturamentoTotal / investimento : 0;
+  const breakevenVendas = ticketMedioGeral > 0 ? Math.ceil(investimento / ticketMedioGeral) : 0;
 
   return {
     cliques, vendas,
     receitaProduto, vendasBump, receitaBump,
     vendasUpsell, receitaUpsell, recusaramUpsell,
     vendasDownsell, receitaDownsell,
+    faturamentoFrontEnd, ticketMedioFrontEnd, saldoFrontEnd,
+    aplicacoes, agendamentos, entrevistas,
+    vendasFormacao, faturamentoBackEnd,
     receitaBruta, reembolsos, custosProduto,
-    receitaLiquida, ticketMedio, cpa, epc,
+    faturamentoTotal, ticketMedioGeral, cpa, epc,
+    custoEntrevista, custoVendaFormacao,
     lucro, roi, roas, breakevenVendas,
   };
 }
@@ -163,11 +196,15 @@ export function computeAlerts(inputs: SimuladorInputs, outputs: SimuladorOutputs
   }
 
   if (outputs.cpa > inputs.precoProduto && outputs.vendas > 0) {
-    alerts.push({ level: 'danger', message: `CPA (R$ ${outputs.cpa.toFixed(2)}) > preco do produto. Insustentavel sem bump/upsell` });
+    alerts.push({ level: 'danger', message: `CPA (R$ ${outputs.cpa.toFixed(2)}) > preco do ingresso. Front-end no prejuizo` });
   }
 
   if (inputs.taxaConversao < 1) {
     alerts.push({ level: 'warning', message: `Conversao em ${inputs.taxaConversao}% — gargalo na pagina` });
+  }
+
+  if (outputs.saldoFrontEnd < 0 && outputs.faturamentoBackEnd > 0) {
+    alerts.push({ level: 'info', message: `Front-end: -R$ ${Math.abs(outputs.saldoFrontEnd).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}. Back-end cobre com R$ ${outputs.faturamentoBackEnd.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}` });
   }
 
   return alerts;
@@ -186,12 +223,10 @@ export function computeCenarios(inputs: SimuladorInputs, variacao: number = 20):
 // ─── Dream Goal ─────────────────────────────────────────
 export function computeDreamGoal(inputs: SimuladorInputs, outputs: SimuladorOutputs, lucroDesejado: number): DreamGoalResult | null {
   if (outputs.lucro <= 0 || outputs.vendas <= 0) return null;
-
   const lucroPorVenda = outputs.lucro / outputs.vendas;
   const vendasNecessarias = Math.ceil(lucroDesejado / lucroPorVenda);
   const cliquesNecessarios = Math.ceil(vendasNecessarias / (inputs.taxaConversao / 100));
   const investimentoNecessario = Math.ceil(cliquesNecessarios * inputs.cpc);
-
   return { vendasNecessarias, cliquesNecessarios, investimentoNecessario };
 }
 
