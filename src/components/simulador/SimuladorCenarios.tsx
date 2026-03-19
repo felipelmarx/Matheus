@@ -10,21 +10,18 @@ const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' 
 
 const cenarioStyles = [
   {
-    border: 'border-red-500/30',
     bg: 'bg-gradient-to-b from-red-500/5 to-transparent',
     header: 'bg-red-500/10',
     headerText: 'text-red-400',
     icon: TrendingDown,
   },
   {
-    border: 'border-primary/40',
     bg: 'bg-gradient-to-b from-primary/5 to-transparent',
     header: 'bg-primary/10',
     headerText: 'text-primary',
     icon: Minus,
   },
   {
-    border: 'border-blue-500/30',
     bg: 'bg-gradient-to-b from-blue-500/5 to-transparent',
     header: 'bg-blue-500/10',
     headerText: 'text-blue-400',
@@ -35,14 +32,17 @@ const cenarioStyles = [
 interface MetricRow {
   label: string;
   getValue: (c: CenarioResult) => string;
+  isLucro?: boolean;
 }
 
 const metrics: MetricRow[] = [
   { label: 'Ingressos', getValue: (c) => c.outputs.ingressos.toLocaleString('pt-BR') },
-  { label: 'Entrevistas', getValue: (c) => c.outputs.entrevistas.toLocaleString('pt-BR') },
+  { label: 'Fat. Front-End', getValue: (c) => BRL.format(c.outputs.faturamentoFrontEnd) },
+  { label: 'TM Front', getValue: (c) => BRL.format(c.outputs.ticketMedioFrontEnd) },
   { label: 'Vendas Form.', getValue: (c) => c.outputs.vendasFormacao.toLocaleString('pt-BR') },
-  { label: 'Faturamento', getValue: (c) => BRL.format(c.outputs.faturamentoTotal) },
-  { label: 'Lucro', getValue: (c) => BRL.format(c.outputs.lucro) },
+  { label: 'Fat. Back-End', getValue: (c) => BRL.format(c.outputs.faturamentoBackEnd) },
+  { label: 'Fat. Total', getValue: (c) => BRL.format(c.outputs.faturamentoTotal) },
+  { label: 'Lucro', getValue: (c) => BRL.format(c.outputs.lucro), isLucro: true },
   { label: 'ROI', getValue: (c) => `${c.outputs.roi.toFixed(1)}%` },
   { label: 'ROAS', getValue: (c) => `${c.outputs.roas.toFixed(2)}x` },
 ];
@@ -77,7 +77,7 @@ export default function SimuladorCenarios({ cenarios, variacao }: SimuladorCenar
                       {metric.label}
                     </p>
                     <p className={`text-xs font-mono font-bold ${
-                      metric.label === 'Lucro'
+                      metric.isLucro
                         ? isPositive ? 'text-emerald-400' : 'text-red-400'
                         : 'text-foreground'
                     }`}>

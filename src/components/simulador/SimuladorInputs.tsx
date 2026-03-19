@@ -14,7 +14,6 @@ interface FieldConfig {
   max: number;
   step: number;
   unit: string;
-  isPercentage?: boolean;
 }
 
 const sections: { title: string; fields: FieldConfig[] }[] = [
@@ -23,40 +22,52 @@ const sections: { title: string; fields: FieldConfig[] }[] = [
     fields: [
       { key: 'investimento', label: 'Investimento', min: 100, max: 50000, step: 100, unit: 'R$' },
       { key: 'cpc', label: 'CPC', min: 0.1, max: 10, step: 0.1, unit: 'R$' },
-      { key: 'taxaConexao', label: 'Taxa de Conexao', min: 0, max: 100, step: 1, unit: '%', isPercentage: true },
+      { key: 'conectRate', label: 'Connect Rate', min: 0, max: 100, step: 1, unit: '%' },
     ],
   },
   {
-    title: 'Conversao Front-End',
+    title: 'Checkout',
     fields: [
-      { key: 'taxaConversaoIngresso', label: 'Taxa Conv. Ingresso', min: 0, max: 20, step: 0.5, unit: '%', isPercentage: true },
-      { key: 'ticketIngresso', label: 'Ticket Ingresso', min: 0, max: 97, step: 1, unit: 'R$' },
+      { key: 'taxaCheckout', label: 'Conv. Checkout', min: 0, max: 30, step: 0.5, unit: '%' },
+      { key: 'ticketIngresso', label: 'Ticket Ingresso', min: 0, max: 197, step: 1, unit: 'R$' },
+    ],
+  },
+  {
+    title: 'Bump (Order Bump)',
+    fields: [
+      { key: 'taxaBump', label: 'Conv. Bump', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'ticketBump', label: 'Ticket Bump', min: 0, max: 497, step: 1, unit: 'R$' },
+    ],
+  },
+  {
+    title: 'Upsell',
+    fields: [
+      { key: 'taxaUpsell', label: 'Conv. Upsell', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'ticketUpsell', label: 'Ticket Upsell', min: 0, max: 997, step: 1, unit: 'R$' },
     ],
   },
   {
     title: 'Qualificacao',
     fields: [
-      { key: 'taxaAplicacao', label: 'Taxa Aplicacao', min: 0, max: 100, step: 1, unit: '%', isPercentage: true },
-      { key: 'taxaAgendamento', label: 'Taxa Agendamento', min: 0, max: 100, step: 1, unit: '%', isPercentage: true },
-      { key: 'taxaEntrevista', label: 'Taxa Entrevista', min: 0, max: 100, step: 1, unit: '%', isPercentage: true },
+      { key: 'taxaAplicacao', label: 'Taxa Aplicacao', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'taxaAgendamento', label: 'Taxa Agendamento', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'taxaEntrevista', label: 'Taxa Entrevista', min: 0, max: 100, step: 1, unit: '%' },
     ],
   },
   {
     title: 'Back-End (Formacao)',
     fields: [
-      { key: 'taxaVendaFormacao', label: 'Taxa Venda Formacao', min: 0, max: 100, step: 1, unit: '%', isPercentage: true },
+      { key: 'taxaVendaFormacao', label: 'Taxa Venda', min: 0, max: 100, step: 1, unit: '%' },
       { key: 'ticketFormacao', label: 'Ticket Formacao', min: 500, max: 30000, step: 500, unit: 'R$' },
-      { key: 'variacao', label: 'Variacao Cenarios', min: 5, max: 50, step: 5, unit: '%', isPercentage: true },
+    ],
+  },
+  {
+    title: 'Cenarios',
+    fields: [
+      { key: 'variacao', label: 'Variacao', min: 5, max: 50, step: 5, unit: '%' },
     ],
   },
 ];
-
-function formatValue(value: number, unit: string): string {
-  if (unit === 'R$') {
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
-  return `${value}%`;
-}
 
 export default function SimuladorInputs({ inputs, onUpdate, onReset }: SimuladorInputsProps) {
   return (
@@ -90,9 +101,26 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
                       <label className="text-xs text-muted-foreground font-heading">
                         {field.label}
                       </label>
-                      <span className="text-xs font-mono font-bold text-foreground">
-                        {formatValue(value, field.unit)}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        {field.unit === 'R$' && (
+                          <span className="text-[10px] text-muted-foreground/60">R$</span>
+                        )}
+                        <input
+                          type="number"
+                          min={field.min}
+                          max={field.max}
+                          step={field.step}
+                          value={value}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value);
+                            if (!isNaN(v)) onUpdate(field.key, Math.min(field.max, Math.max(field.min, v)));
+                          }}
+                          className="w-16 text-right text-xs font-mono font-bold text-foreground bg-muted/50 border border-border rounded px-1.5 py-0.5 focus:outline-none focus:border-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        {field.unit === '%' && (
+                          <span className="text-[10px] text-muted-foreground/60">%</span>
+                        )}
+                      </div>
                     </div>
                     <div className="relative">
                       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
