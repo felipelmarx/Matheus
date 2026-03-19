@@ -14,24 +14,20 @@ interface FieldConfig {
   max: number;
   step: number;
   unit: string;
-  hint?: string;
 }
 
 const sections: { title: string; fields: FieldConfig[] }[] = [
   {
-    title: 'Investimento & Trafego',
+    title: 'Investimento',
     fields: [
       { key: 'investimento', label: 'Investimento', min: 100, max: 1000000, step: 500, unit: 'R$' },
-      { key: 'cpc', label: 'CPC', min: 0.1, max: 20, step: 0.1, unit: 'R$' },
-      { key: 'conectRate', label: 'Connect Rate', min: 0, max: 100, step: 1, unit: '%' },
     ],
   },
   {
-    title: 'Checkout',
+    title: 'Ingressos',
     fields: [
-      { key: 'taxaCheckout', label: 'Conv. Checkout', min: 0, max: 100, step: 0.5, unit: '%' },
+      { key: 'ingressos', label: 'Qtd Ingressos', min: 1, max: 100000, step: 1, unit: 'un' },
       { key: 'ticketIngresso', label: 'Ticket Ingresso', min: 0, max: 997, step: 1, unit: 'R$' },
-      { key: 'ingressosManuais', label: 'Ingressos (manual)', min: 0, max: 100000, step: 1, unit: 'un', hint: '0 = calcula pelo trafego' },
     ],
   },
   {
@@ -99,22 +95,12 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
                 const pct = field.max > field.min
                   ? ((value - field.min) / (field.max - field.min)) * 100
                   : 0;
-                const isOverrideActive = field.key === 'ingressosManuais' && value > 0;
-                const overrideMode = inputs.ingressosManuais > 0;
-                const isDimmed = overrideMode && ['cpc', 'conectRate', 'taxaCheckout'].includes(field.key as string);
                 return (
-                  <div key={field.key} className={isDimmed ? 'opacity-40 pointer-events-none' : ''}>
+                  <div key={field.key}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-1.5">
-                        <label className="text-xs text-muted-foreground font-heading">
-                          {field.label}
-                        </label>
-                        {isOverrideActive && (
-                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-heading font-semibold">
-                            ATIVO
-                          </span>
-                        )}
-                      </div>
+                      <label className="text-xs text-muted-foreground font-heading">
+                        {field.label}
+                      </label>
                       <div className="flex items-center gap-1">
                         {field.unit === 'R$' && (
                           <span className="text-[10px] text-muted-foreground/60">R$</span>
@@ -129,13 +115,11 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
                             let v = parseFloat(e.target.value);
                             if (!isNaN(v)) {
                               v = Math.max(field.min, Math.min(field.max, v));
-                              if (field.key === 'ingressosManuais') v = Math.round(v);
+                              if (field.unit === 'un') v = Math.round(v);
                               onUpdate(field.key, v);
                             }
                           }}
-                          className={`w-20 text-right text-xs font-mono font-bold text-foreground bg-muted/50 border rounded px-1.5 py-0.5 focus:outline-none focus:border-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                            isOverrideActive ? 'border-primary/40' : 'border-border'
-                          }`}
+                          className="w-20 text-right text-xs font-mono font-bold text-foreground bg-muted/50 border border-border rounded px-1.5 py-0.5 focus:outline-none focus:border-primary/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                         {field.unit === '%' && (
                           <span className="text-[10px] text-muted-foreground/60">%</span>
@@ -145,9 +129,6 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
                         )}
                       </div>
                     </div>
-                    {field.hint && (
-                      <p className="text-[9px] text-muted-foreground/40 mb-1">{field.hint}</p>
-                    )}
                     <div className="relative">
                       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                         <div

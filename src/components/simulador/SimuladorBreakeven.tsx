@@ -4,7 +4,6 @@ import type { BreakevenPoint } from '@/hooks/useSimulador';
 
 interface SimuladorBreakevenProps {
   data: BreakevenPoint[];
-  isOverride?: boolean;
 }
 
 const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -21,7 +20,7 @@ function findBreakeven(data: BreakevenPoint[]): number | null {
   return null;
 }
 
-export default function SimuladorBreakeven({ data, isOverride }: SimuladorBreakevenProps) {
+export default function SimuladorBreakeven({ data }: SimuladorBreakevenProps) {
   const breakeven = findBreakeven(data);
   const allNegative = data.every(d => d.lucro < 0);
   const allPositive = data.every(d => d.lucro >= 0);
@@ -53,11 +52,6 @@ export default function SimuladorBreakeven({ data, isOverride }: SimuladorBreake
       </div>
 
       <div className="p-4">
-        {isOverride && (
-          <p className="text-[9px] text-muted-foreground/50 font-mono text-center mb-2">
-            Volume fixo de ingressos — curva mostra limite de investimento lucrativo
-          </p>
-        )}
         <ResponsiveContainer width="100%" height={250}>
           <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
             <defs>

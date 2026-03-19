@@ -32,17 +32,18 @@ const cenarioStyles = [
 interface MetricRow {
   label: string;
   getValue: (c: CenarioResult) => string;
-  isLucro?: boolean;
+  getColor?: (c: CenarioResult) => 'positive' | 'negative';
 }
 
 const metrics: MetricRow[] = [
   { label: 'Ingressos', getValue: (c) => c.outputs.ingressos.toLocaleString('pt-BR') },
   { label: 'Fat. Front-End', getValue: (c) => BRL.format(c.outputs.faturamentoFrontEnd) },
   { label: 'TM Front', getValue: (c) => BRL.format(c.outputs.ticketMedioFrontEnd) },
+  { label: 'Saldo Front', getValue: (c) => BRL.format(c.outputs.saldoFrontEnd), getColor: (c) => c.outputs.saldoFrontEnd >= 0 ? 'positive' : 'negative' },
   { label: 'Vendas Form.', getValue: (c) => c.outputs.vendasFormacao.toLocaleString('pt-BR') },
   { label: 'Fat. Back-End', getValue: (c) => BRL.format(c.outputs.faturamentoBackEnd) },
   { label: 'Fat. Total', getValue: (c) => BRL.format(c.outputs.faturamentoTotal) },
-  { label: 'Lucro', getValue: (c) => BRL.format(c.outputs.lucro), isLucro: true },
+  { label: 'Lucro', getValue: (c) => BRL.format(c.outputs.lucro), getColor: (c) => c.outputs.lucro >= 0 ? 'positive' : 'negative' },
   { label: 'ROI', getValue: (c) => `${c.outputs.roi.toFixed(1)}%` },
   { label: 'ROAS', getValue: (c) => `${c.outputs.roas.toFixed(2)}x` },
 ];
@@ -60,8 +61,6 @@ export default function SimuladorCenarios({ cenarios, variacao }: SimuladorCenar
         {cenarios.map((cenario, idx) => {
           const style = cenarioStyles[idx];
           const Icon = style.icon;
-          const isPositive = cenario.outputs.lucro >= 0;
-
           return (
             <div key={cenario.label} className={`${style.bg}`}>
               <div className={`px-3 py-2.5 ${style.header} flex items-center justify-center gap-1.5`}>
@@ -77,8 +76,8 @@ export default function SimuladorCenarios({ cenarios, variacao }: SimuladorCenar
                       {metric.label}
                     </p>
                     <p className={`text-xs font-mono font-bold ${
-                      metric.isLucro
-                        ? isPositive ? 'text-emerald-400' : 'text-red-400'
+                      metric.getColor
+                        ? metric.getColor(cenario) === 'positive' ? 'text-emerald-400' : 'text-red-400'
                         : 'text-foreground'
                     }`}>
                       {metric.getValue(cenario)}

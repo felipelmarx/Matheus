@@ -44,6 +44,15 @@ export default function SimuladorKPIs({ outputs }: SimuladorKPIsProps) {
       borderColor: 'border-primary/20',
     },
     {
+      label: 'SALDO FRONT-END',
+      value: BRL.format(outputs.saldoFrontEnd),
+      sub: outputs.saldoFrontEnd < 0 ? 'Deficit recuperado pelo back-end' : 'Front-end ja cobre o investimento',
+      icon: outputs.saldoFrontEnd >= 0 ? TrendingUp : TrendingDown,
+      color: outputs.saldoFrontEnd >= 0 ? 'from-emerald-500/10 to-emerald-600/5' : 'from-red-500/10 to-red-600/5',
+      iconColor: outputs.saldoFrontEnd >= 0 ? 'text-emerald-400' : 'text-red-400',
+      borderColor: outputs.saldoFrontEnd >= 0 ? 'border-emerald-500/20' : 'border-red-500/20',
+    },
+    {
       label: 'TICKET MEDIO FRONT',
       value: BRL.format(outputs.ticketMedioFrontEnd),
       icon: ShoppingBag,

@@ -1,17 +1,12 @@
 import { useState, useMemo, useCallback } from 'react';
 
 export interface SimuladorInputs {
-  // Investimento & Trafego
+  // Investimento
   investimento: number;
-  cpc: number;
 
-  // Pagina de Captura
-  conectRate: number;
-
-  // Checkout
-  taxaCheckout: number;
+  // Ingressos
+  ingressos: number;
   ticketIngresso: number;
-  ingressosManuais: number; // 0 = calcula pelo trafego, >0 = override
 
   // Bump (oferta no checkout)
   ticketBump: number;
@@ -35,15 +30,13 @@ export interface SimuladorInputs {
 }
 
 export interface SimuladorOutputs {
-  cliques: number;
-  viewPages: number;
   ingressos: number;
-  usandoOverride: boolean;
   receitaIngresso: number;
   receitaBump: number;
   receitaUpsell: number;
   faturamentoFrontEnd: number;
   ticketMedioFrontEnd: number;
+  saldoFrontEnd: number;
   aplicacoes: number;
   agendamentos: number;
   entrevistas: number;
@@ -70,14 +63,11 @@ export interface BreakevenPoint {
 }
 
 const DEFAULTS: SimuladorInputs = {
-  investimento: 2000,
-  cpc: 1.5,
-  conectRate: 75,
-  taxaCheckout: 3,
+  investimento: 50000,
+  ingressos: 1000,
   ticketIngresso: 7,
-  ingressosManuais: 0,
   ticketBump: 27,
-  taxaBump: 30,
+  taxaBump: 20,
   ticketUpsell: 47,
   taxaUpsell: 15,
   taxaAplicacao: 30,
@@ -92,15 +82,8 @@ function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorO
   const inv = inputs.investimento;
   const clamp = (rate: number) => Math.min(rate * taxaMultiplier, 100);
 
-  // Trafego
-  const cliques = inputs.cpc > 0 ? Math.round(inv / inputs.cpc) : 0;
-  const viewPages = Math.round(cliques * clamp(inputs.conectRate) / 100);
-
-  // Ingressos: manual override ou calculo por trafego
-  const usandoOverride = inputs.ingressosManuais > 0;
-  const ingressos = usandoOverride
-    ? Math.round(inputs.ingressosManuais * taxaMultiplier)
-    : Math.round(viewPages * clamp(inputs.taxaCheckout) / 100);
+  // Ingressos (manual, variados por cenario)
+  const ingressos = Math.round(inputs.ingressos * taxaMultiplier);
   const receitaIngresso = ingressos * inputs.ticketIngresso;
 
   // Bump & Upsell
@@ -112,6 +95,7 @@ function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorO
   // Front-end total
   const faturamentoFrontEnd = receitaIngresso + receitaBump + receitaUpsell;
   const ticketMedioFrontEnd = ingressos > 0 ? faturamentoFrontEnd / ingressos : 0;
+  const saldoFrontEnd = faturamentoFrontEnd - inv;
 
   // Qualificacao
   const aplicacoes = Math.round(ingressos * clamp(inputs.taxaAplicacao) / 100);
@@ -132,15 +116,13 @@ function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorO
   const custoVendaFormacao = vendasFormacao > 0 ? inv / vendasFormacao : 0;
 
   return {
-    cliques,
-    viewPages,
     ingressos,
-    usandoOverride,
     receitaIngresso,
     receitaBump,
     receitaUpsell,
     faturamentoFrontEnd,
     ticketMedioFrontEnd,
+    saldoFrontEnd,
     aplicacoes,
     agendamentos,
     entrevistas,
@@ -180,7 +162,6 @@ export function useSimulador() {
 
   const breakevenCurve = useMemo((): BreakevenPoint[] => {
     const points: BreakevenPoint[] = [];
-    // Escala dinamica: ate 5x o investimento atual, minimo 20k
     const maxInv = Math.max(inputs.investimento * 5, 20000);
     const step = maxInv <= 50000 ? 1000 : maxInv <= 200000 ? 5000 : 10000;
     for (let inv = step; inv <= maxInv; inv += step) {
