@@ -6,11 +6,13 @@ export interface SimuladorInputs {
   investimento: number;
   cpc: number;
 
-  // Conversão
+  // Conversão da Página
   taxaConversao: number;
 
   // Produto Principal
   precoProduto: number;
+  custoProduto: number;
+  taxaReembolso: number;
 
   // Order Bump
   precoBump: number;
@@ -43,10 +45,16 @@ export interface SimuladorOutputs {
   vendasDownsell: number;
   receitaDownsell: number;
 
+  // Custos
+  receitaBruta: number;
+  reembolsos: number;
+  custosProduto: number;
+
   // Totais
-  receitaTotal: number;
+  receitaLiquida: number;
   ticketMedio: number;
   cpa: number;
+  epc: number;
   lucro: number;
   roi: number;
   roas: number;
@@ -61,12 +69,27 @@ export interface SimuladorAlert {
   message: string;
 }
 
+// ─── Dream Goal ─────────────────────────────────────────
+export interface DreamGoalResult {
+  vendasNecessarias: number;
+  cliquesNecessarios: number;
+  investimentoNecessario: number;
+}
+
+// ─── Cenários ───────────────────────────────────────────
+export interface CenarioResult {
+  label: string;
+  outputs: SimuladorOutputs;
+}
+
 // ─── Defaults ───────────────────────────────────────────
 const DEFAULTS: SimuladorInputs = {
   investimento: 10000,
   cpc: 2,
   taxaConversao: 3,
   precoProduto: 97,
+  custoProduto: 0,
+  taxaReembolso: 0,
   precoBump: 37,
   taxaBump: 25,
   precoUpsell: 197,
@@ -77,7 +100,7 @@ const DEFAULTS: SimuladorInputs = {
 
 // ─── Compute ────────────────────────────────────────────
 export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
-  const { investimento, cpc, taxaConversao, precoProduto } = inputs;
+  const { investimento, cpc, taxaConversao, precoProduto, custoProduto, taxaReembolso } = inputs;
 
   // Tráfego
   const cliques = cpc > 0 ? Math.round(investimento / cpc) : 0;
@@ -88,11 +111,11 @@ export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
   // Produto principal
   const receitaProduto = vendas * precoProduto;
 
-  // Order Bump
+  // Order Bump (% dos compradores aceita)
   const vendasBump = Math.round(vendas * (inputs.taxaBump / 100));
   const receitaBump = vendasBump * inputs.precoBump;
 
-  // Upsell
+  // Upsell (% dos compradores aceita)
   const vendasUpsell = Math.round(vendas * (inputs.taxaUpsell / 100));
   const receitaUpsell = vendasUpsell * inputs.precoUpsell;
 
@@ -101,33 +124,31 @@ export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
   const vendasDownsell = Math.round(recusaramUpsell * (inputs.taxaDownsell / 100));
   const receitaDownsell = vendasDownsell * inputs.precoDownsell;
 
-  // Totais
-  const receitaTotal = receitaProduto + receitaBump + receitaUpsell + receitaDownsell;
-  const ticketMedio = vendas > 0 ? receitaTotal / vendas : 0;
+  // Receita bruta
+  const receitaBruta = receitaProduto + receitaBump + receitaUpsell + receitaDownsell;
+
+  // Custos e reembolsos
+  const reembolsos = Math.round(vendas * (taxaReembolso / 100)) * precoProduto;
+  const custosProduto = vendas * custoProduto;
+
+  // Líquido
+  const receitaLiquida = receitaBruta - reembolsos - custosProduto;
+  const ticketMedio = vendas > 0 ? receitaBruta / vendas : 0;
   const cpa = vendas > 0 ? investimento / vendas : 0;
-  const lucro = receitaTotal - investimento;
+  const epc = cliques > 0 ? receitaLiquida / cliques : 0;
+  const lucro = receitaLiquida - investimento;
   const roi = investimento > 0 ? (lucro / investimento) * 100 : 0;
-  const roas = investimento > 0 ? receitaTotal / investimento : 0;
+  const roas = investimento > 0 ? receitaLiquida / investimento : 0;
   const breakevenVendas = ticketMedio > 0 ? Math.ceil(investimento / ticketMedio) : 0;
 
   return {
-    cliques,
-    vendas,
-    receitaProduto,
-    vendasBump,
-    receitaBump,
-    vendasUpsell,
-    receitaUpsell,
-    recusaramUpsell,
-    vendasDownsell,
-    receitaDownsell,
-    receitaTotal,
-    ticketMedio,
-    cpa,
-    lucro,
-    roi,
-    roas,
-    breakevenVendas,
+    cliques, vendas,
+    receitaProduto, vendasBump, receitaBump,
+    vendasUpsell, receitaUpsell, recusaramUpsell,
+    vendasDownsell, receitaDownsell,
+    receitaBruta, reembolsos, custosProduto,
+    receitaLiquida, ticketMedio, cpa, epc,
+    lucro, roi, roas, breakevenVendas,
   };
 }
 
@@ -135,82 +156,60 @@ export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
 export function computeAlerts(inputs: SimuladorInputs, outputs: SimuladorOutputs): SimuladorAlert[] {
   const alerts: SimuladorAlert[] = [];
 
-  if (outputs.lucro < 0) {
-    alerts.push({ level: 'danger', message: `Prejuizo de R$ ${Math.abs(outputs.lucro).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}. Revise CPC, conversao ou ticket.` });
+  if (outputs.vendas > 0 && outputs.lucro < 0) {
+    alerts.push({ level: 'danger', message: `Prejuizo de R$ ${Math.abs(outputs.lucro).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` });
   } else if (outputs.roi > 0 && outputs.roi < 30) {
-    alerts.push({ level: 'warning', message: `ROI de ${outputs.roi.toFixed(1)}% — margem apertada. Considere otimizar o funil.` });
+    alerts.push({ level: 'warning', message: `ROI de ${outputs.roi.toFixed(1)}% — margem apertada` });
   }
 
   if (outputs.cpa > inputs.precoProduto && outputs.vendas > 0) {
-    alerts.push({ level: 'danger', message: `CPA (R$ ${outputs.cpa.toFixed(2)}) maior que o preco do produto (R$ ${inputs.precoProduto}). Funil insustentavel sem bump/upsell.` });
+    alerts.push({ level: 'danger', message: `CPA (R$ ${outputs.cpa.toFixed(2)}) > preco do produto. Insustentavel sem bump/upsell` });
   }
 
   if (inputs.taxaConversao < 1) {
-    alerts.push({ level: 'warning', message: `Taxa de conversao abaixo de 1% — gargalo na pagina de vendas.` });
-  }
-
-  if (inputs.taxaBump < 5 && inputs.precoBump > 0) {
-    alerts.push({ level: 'info', message: `Taxa de bump em ${inputs.taxaBump}%. Benchmark: 15-30%. Revise a oferta.` });
-  }
-
-  if (inputs.taxaUpsell < 5 && inputs.precoUpsell > 0) {
-    alerts.push({ level: 'info', message: `Taxa de upsell em ${inputs.taxaUpsell}%. Benchmark: 10-20%. Revise a oferta.` });
+    alerts.push({ level: 'warning', message: `Conversao em ${inputs.taxaConversao}% — gargalo na pagina` });
   }
 
   return alerts;
 }
 
 // ─── Cenários ───────────────────────────────────────────
-export interface CenarioResult {
-  label: string;
-  outputs: SimuladorOutputs;
+export function computeCenarios(inputs: SimuladorInputs, variacao: number = 20): CenarioResult[] {
+  const f = variacao / 100;
+  return [
+    { label: 'Pessimista', outputs: computeOutputs({ ...inputs, taxaConversao: inputs.taxaConversao * (1 - f), cpc: inputs.cpc * (1 + f) }) },
+    { label: 'Base', outputs: computeOutputs(inputs) },
+    { label: 'Otimista', outputs: computeOutputs({ ...inputs, taxaConversao: inputs.taxaConversao * (1 + f), cpc: inputs.cpc * (1 - f) }) },
+  ];
 }
 
-export function computeCenarios(inputs: SimuladorInputs, variacao: number = 20): CenarioResult[] {
-  const fator = variacao / 100;
+// ─── Dream Goal ─────────────────────────────────────────
+export function computeDreamGoal(inputs: SimuladorInputs, outputs: SimuladorOutputs, lucroDesejado: number): DreamGoalResult | null {
+  if (outputs.lucro <= 0 || outputs.vendas <= 0) return null;
 
-  const pessimista: SimuladorInputs = {
-    ...inputs,
-    taxaConversao: inputs.taxaConversao * (1 - fator),
-    cpc: inputs.cpc * (1 + fator),
-  };
+  const lucroPorVenda = outputs.lucro / outputs.vendas;
+  const vendasNecessarias = Math.ceil(lucroDesejado / lucroPorVenda);
+  const cliquesNecessarios = Math.ceil(vendasNecessarias / (inputs.taxaConversao / 100));
+  const investimentoNecessario = Math.ceil(cliquesNecessarios * inputs.cpc);
 
-  const otimista: SimuladorInputs = {
-    ...inputs,
-    taxaConversao: inputs.taxaConversao * (1 + fator),
-    cpc: inputs.cpc * (1 - fator),
-  };
-
-  return [
-    { label: 'Pessimista', outputs: computeOutputs(pessimista) },
-    { label: 'Base', outputs: computeOutputs(inputs) },
-    { label: 'Otimista', outputs: computeOutputs(otimista) },
-  ];
+  return { vendasNecessarias, cliquesNecessarios, investimentoNecessario };
 }
 
 // ─── Hook ───────────────────────────────────────────────
 export function useSimulador() {
   const [inputs, setInputs] = useState<SimuladorInputs>(DEFAULTS);
+  const [lucroDesejado, setLucroDesejado] = useState(50000);
 
   const updateInput = useCallback(<K extends keyof SimuladorInputs>(key: K, value: SimuladorInputs[K]) => {
     setInputs(prev => ({ ...prev, [key]: value }));
   }, []);
 
-  const resetDefaults = useCallback(() => {
-    setInputs(DEFAULTS);
-  }, []);
+  const resetDefaults = useCallback(() => setInputs(DEFAULTS), []);
 
   const outputs = useMemo(() => computeOutputs(inputs), [inputs]);
   const alerts = useMemo(() => computeAlerts(inputs, outputs), [inputs, outputs]);
   const cenarios = useMemo(() => computeCenarios(inputs), [inputs]);
+  const dreamGoal = useMemo(() => computeDreamGoal(inputs, outputs, lucroDesejado), [inputs, outputs, lucroDesejado]);
 
-  return {
-    inputs,
-    outputs,
-    alerts,
-    cenarios,
-    updateInput,
-    resetDefaults,
-    defaults: DEFAULTS,
-  };
+  return { inputs, outputs, alerts, cenarios, dreamGoal, lucroDesejado, setLucroDesejado, updateInput, resetDefaults, defaults: DEFAULTS };
 }
