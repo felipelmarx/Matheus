@@ -2,9 +2,11 @@ import { useSimulador } from '@/hooks/useSimulador';
 import SimuladorInputs from './SimuladorInputs';
 import SimuladorKPIs from './SimuladorKPIs';
 import SimuladorFunil from './SimuladorFunil';
+import SimuladorAlertas from './SimuladorAlertas';
+import SimuladorCenarios from './SimuladorCenarios';
 
 export default function SimuladorView() {
-  const { inputs, outputs, updateInput, resetDefaults } = useSimulador();
+  const { inputs, outputs, alerts, cenarios, updateInput, resetDefaults } = useSimulador();
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -18,6 +20,9 @@ export default function SimuladorView() {
           </span>
         </div>
       </div>
+
+      {/* Alertas */}
+      <SimuladorAlertas alerts={alerts} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Inputs - Left Panel */}
@@ -33,6 +38,7 @@ export default function SimuladorView() {
         <div className="lg:col-span-8 space-y-6">
           <SimuladorKPIs outputs={outputs} />
           <SimuladorFunil outputs={outputs} />
+          <SimuladorCenarios cenarios={cenarios} />
         </div>
       </div>
     </div>

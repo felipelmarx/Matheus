@@ -17,45 +17,43 @@ interface FieldConfig {
 
 const sections: { title: string; fields: FieldConfig[] }[] = [
   {
-    title: 'Investimento',
+    title: 'Trafego',
     fields: [
-      { key: 'investimento', label: 'Investimento', min: 100, max: 1000000, step: 500, unit: 'R$' },
+      { key: 'investimento', label: 'Investimento', min: 100, max: 500000, step: 100, unit: 'R$' },
+      { key: 'cpc', label: 'CPC', min: 0.1, max: 50, step: 0.1, unit: 'R$' },
     ],
   },
   {
-    title: 'Ingressos',
+    title: 'Conversao',
     fields: [
-      { key: 'ingressos', label: 'Qtd Ingressos', min: 1, max: 100000, step: 1, unit: 'un' },
-      { key: 'ticketIngresso', label: 'Ticket Ingresso', min: 0, max: 997, step: 1, unit: 'R$' },
+      { key: 'taxaConversao', label: 'Conv. Pagina', min: 0.1, max: 30, step: 0.1, unit: '%' },
     ],
   },
   {
-    title: 'Bump (Order Bump)',
+    title: 'Produto Principal',
+    fields: [
+      { key: 'precoProduto', label: 'Preco', min: 1, max: 10000, step: 1, unit: 'R$' },
+    ],
+  },
+  {
+    title: 'Order Bump',
     fields: [
       { key: 'taxaBump', label: 'Conv. Bump', min: 0, max: 100, step: 1, unit: '%' },
-      { key: 'ticketBump', label: 'Ticket Bump', min: 0, max: 2000, step: 1, unit: 'R$' },
+      { key: 'precoBump', label: 'Preco Bump', min: 0, max: 5000, step: 1, unit: 'R$' },
     ],
   },
   {
     title: 'Upsell',
     fields: [
       { key: 'taxaUpsell', label: 'Conv. Upsell', min: 0, max: 100, step: 1, unit: '%' },
-      { key: 'ticketUpsell', label: 'Ticket Upsell', min: 0, max: 5000, step: 1, unit: 'R$' },
+      { key: 'precoUpsell', label: 'Preco Upsell', min: 0, max: 10000, step: 1, unit: 'R$' },
     ],
   },
   {
-    title: 'Qualificacao',
+    title: 'Downsell',
     fields: [
-      { key: 'taxaAplicacao', label: 'Taxa Aplicacao', min: 0, max: 100, step: 1, unit: '%' },
-      { key: 'taxaAgendamento', label: 'Taxa Agendamento', min: 0, max: 100, step: 1, unit: '%' },
-      { key: 'taxaEntrevista', label: 'Taxa Entrevista', min: 0, max: 100, step: 1, unit: '%' },
-    ],
-  },
-  {
-    title: 'Back-End (Formacao)',
-    fields: [
-      { key: 'taxaVendaFormacao', label: 'Taxa Venda', min: 0, max: 100, step: 1, unit: '%' },
-      { key: 'ticketFormacao', label: 'Ticket Formacao', min: 0, max: 100000, step: 500, unit: 'R$' },
+      { key: 'taxaDownsell', label: 'Conv. Downsell', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'precoDownsell', label: 'Preco Downsell', min: 0, max: 5000, step: 1, unit: 'R$' },
     ],
   },
 ];
@@ -107,7 +105,6 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
                             let v = parseFloat(e.target.value);
                             if (!isNaN(v)) {
                               v = Math.max(field.min, Math.min(field.max, v));
-                              if (field.unit === 'un') v = Math.round(v);
                               onUpdate(field.key, v);
                             }
                           }}
@@ -115,9 +112,6 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
                         />
                         {field.unit === '%' && (
                           <span className="text-[10px] text-muted-foreground/60">%</span>
-                        )}
-                        {field.unit === 'un' && (
-                          <span className="text-[10px] text-muted-foreground/60">un</span>
                         )}
                       </div>
                     </div>

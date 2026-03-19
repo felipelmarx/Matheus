@@ -1,16 +1,8 @@
 import { TrendingDown, Minus, TrendingUp } from 'lucide-react';
-import type { SimuladorOutputs } from '@/hooks/useSimulador';
-
-/** @deprecated This component is no longer used in SimuladorView. Kept for reference. */
-
-interface CenarioResult {
-  label: string;
-  outputs: SimuladorOutputs;
-}
+import type { CenarioResult } from '@/hooks/useSimulador';
 
 interface SimuladorCenariosProps {
   cenarios: CenarioResult[];
-  variacao: number;
 }
 
 const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -29,9 +21,9 @@ const cenarioStyles = [
     icon: Minus,
   },
   {
-    bg: 'bg-gradient-to-b from-blue-500/5 to-transparent',
-    header: 'bg-blue-500/10',
-    headerText: 'text-blue-400',
+    bg: 'bg-gradient-to-b from-emerald-500/5 to-transparent',
+    header: 'bg-emerald-500/10',
+    headerText: 'text-emerald-400',
     icon: TrendingUp,
   },
 ];
@@ -43,24 +35,23 @@ interface MetricRow {
 }
 
 const metrics: MetricRow[] = [
-  { label: 'Ingressos', getValue: (c) => c.outputs.ingressos.toLocaleString('pt-BR') },
-  { label: 'Fat. Front-End', getValue: (c) => BRL.format(c.outputs.faturamentoFrontEnd) },
-  { label: 'TM Front', getValue: (c) => BRL.format(c.outputs.ticketMedioFrontEnd) },
-  { label: 'Saldo Front', getValue: (c) => BRL.format(c.outputs.saldoFrontEnd), getColor: (c) => c.outputs.saldoFrontEnd >= 0 ? 'positive' : 'negative' },
-  { label: 'Vendas Form.', getValue: (c) => c.outputs.vendasFormacao.toLocaleString('pt-BR') },
-  { label: 'Fat. Back-End', getValue: (c) => BRL.format(c.outputs.faturamentoBackEnd) },
-  { label: 'Fat. Total', getValue: (c) => BRL.format(c.outputs.faturamentoTotal) },
+  { label: 'Cliques', getValue: (c) => c.outputs.cliques.toLocaleString('pt-BR') },
+  { label: 'Vendas', getValue: (c) => c.outputs.vendas.toLocaleString('pt-BR') },
+  { label: 'Receita', getValue: (c) => BRL.format(c.outputs.receitaTotal) },
+  { label: 'Ticket Medio', getValue: (c) => BRL.format(c.outputs.ticketMedio) },
+  { label: 'CPA', getValue: (c) => BRL.format(c.outputs.cpa) },
   { label: 'Lucro', getValue: (c) => BRL.format(c.outputs.lucro), getColor: (c) => c.outputs.lucro >= 0 ? 'positive' : 'negative' },
-  { label: 'ROI', getValue: (c) => `${c.outputs.roi.toFixed(1)}%` },
-  { label: 'ROAS', getValue: (c) => `${c.outputs.roas.toFixed(2)}x` },
+  { label: 'ROI', getValue: (c) => `${c.outputs.roi.toFixed(1)}%`, getColor: (c) => c.outputs.roi >= 0 ? 'positive' : 'negative' },
+  { label: 'ROAS', getValue: (c) => `${c.outputs.roas.toFixed(2)}x`, getColor: (c) => c.outputs.roas >= 1 ? 'positive' : 'negative' },
+  { label: 'Break-even', getValue: (c) => `${c.outputs.breakevenVendas} vendas` },
 ];
 
-export default function SimuladorCenarios({ cenarios, variacao }: SimuladorCenariosProps) {
+export default function SimuladorCenarios({ cenarios }: SimuladorCenariosProps) {
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div className="px-5 py-3 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
         <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
-          Comparacao de Cenarios ({variacao}% variacao)
+          Cenarios (variacao de 20% em conversao e CPC)
         </h3>
       </div>
 

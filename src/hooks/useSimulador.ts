@@ -1,140 +1,194 @@
 import { useState, useMemo, useCallback } from 'react';
 
+// ─── Inputs ─────────────────────────────────────────────
 export interface SimuladorInputs {
-  // Investimento
+  // Tráfego
   investimento: number;
+  cpc: number;
 
-  // Ingressos
-  ingressos: number;
-  ticketIngresso: number;
+  // Conversão
+  taxaConversao: number;
 
-  // Bump (oferta no checkout)
-  ticketBump: number;
+  // Produto Principal
+  precoProduto: number;
+
+  // Order Bump
+  precoBump: number;
   taxaBump: number;
 
-  // Upsell (oferta pos-compra)
-  ticketUpsell: number;
+  // Upsell
+  precoUpsell: number;
   taxaUpsell: number;
 
-  // Qualificacao
-  taxaAplicacao: number;
-  taxaAgendamento: number;
-  taxaEntrevista: number;
-
-  // Back-end (Formacao)
-  taxaVendaFormacao: number;
-  ticketFormacao: number;
+  // Downsell
+  precoDownsell: number;
+  taxaDownsell: number;
 }
 
+// ─── Outputs ────────────────────────────────────────────
 export interface SimuladorOutputs {
-  // Front-end
-  ingressos: number;
-  receitaIngresso: number;
-  bumpVendas: number;
+  // Tráfego
+  cliques: number;
+
+  // Vendas
+  vendas: number;
+
+  // Receitas por etapa
+  receitaProduto: number;
+  vendasBump: number;
   receitaBump: number;
-  upsellVendas: number;
+  vendasUpsell: number;
   receitaUpsell: number;
-  faturamentoFrontEnd: number;
-  ticketMedioFrontEnd: number;
-  saldoFrontEnd: number;
-
-  // Qualificacao
-  aplicacoes: number;
-  agendamentos: number;
-  entrevistas: number;
-
-  // Back-end
-  vendasFormacao: number;
-  faturamentoBackEnd: number;
+  recusaramUpsell: number;
+  vendasDownsell: number;
+  receitaDownsell: number;
 
   // Totais
-  faturamentoTotal: number;
+  receitaTotal: number;
+  ticketMedio: number;
+  cpa: number;
   lucro: number;
   roi: number;
   roas: number;
-  cpa: number;
-  custoEntrevista: number;
-  custoVendaFormacao: number;
+  breakevenVendas: number;
 }
 
+// ─── Alertas ────────────────────────────────────────────
+export type AlertLevel = 'danger' | 'warning' | 'info';
+
+export interface SimuladorAlert {
+  level: AlertLevel;
+  message: string;
+}
+
+// ─── Defaults ───────────────────────────────────────────
 const DEFAULTS: SimuladorInputs = {
-  investimento: 50000,
-  ingressos: 1000,
-  ticketIngresso: 7,
-  ticketBump: 27,
-  taxaBump: 20,
-  ticketUpsell: 47,
+  investimento: 10000,
+  cpc: 2,
+  taxaConversao: 3,
+  precoProduto: 97,
+  precoBump: 37,
+  taxaBump: 25,
+  precoUpsell: 197,
   taxaUpsell: 15,
-  taxaAplicacao: 30,
-  taxaAgendamento: 60,
-  taxaEntrevista: 80,
-  taxaVendaFormacao: 20,
-  ticketFormacao: 5000,
+  precoDownsell: 47,
+  taxaDownsell: 30,
 };
 
+// ─── Compute ────────────────────────────────────────────
 export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
-  const inv = inputs.investimento;
-  const ingressos = inputs.ingressos;
+  const { investimento, cpc, taxaConversao, precoProduto } = inputs;
 
-  // Front-end: Ingresso
-  const receitaIngresso = ingressos * inputs.ticketIngresso;
+  // Tráfego
+  const cliques = cpc > 0 ? Math.round(investimento / cpc) : 0;
 
-  // Front-end: Bump
-  const bumpVendas = Math.round(ingressos * (inputs.taxaBump / 100));
-  const receitaBump = bumpVendas * inputs.ticketBump;
+  // Vendas
+  const vendas = Math.round(cliques * (taxaConversao / 100));
 
-  // Front-end: Upsell
-  const upsellVendas = Math.round(ingressos * (inputs.taxaUpsell / 100));
-  const receitaUpsell = upsellVendas * inputs.ticketUpsell;
+  // Produto principal
+  const receitaProduto = vendas * precoProduto;
 
-  // Front-end: Totais
-  const faturamentoFrontEnd = receitaIngresso + receitaBump + receitaUpsell;
-  const ticketMedioFrontEnd = ingressos > 0 ? faturamentoFrontEnd / ingressos : 0;
-  const saldoFrontEnd = faturamentoFrontEnd - inv;
+  // Order Bump
+  const vendasBump = Math.round(vendas * (inputs.taxaBump / 100));
+  const receitaBump = vendasBump * inputs.precoBump;
 
-  // Qualificacao
-  const aplicacoes = Math.round(ingressos * (inputs.taxaAplicacao / 100));
-  const agendamentos = Math.round(aplicacoes * (inputs.taxaAgendamento / 100));
-  const entrevistas = Math.round(agendamentos * (inputs.taxaEntrevista / 100));
+  // Upsell
+  const vendasUpsell = Math.round(vendas * (inputs.taxaUpsell / 100));
+  const receitaUpsell = vendasUpsell * inputs.precoUpsell;
 
-  // Back-end
-  const vendasFormacao = Math.round(entrevistas * (inputs.taxaVendaFormacao / 100));
-  const faturamentoBackEnd = vendasFormacao * inputs.ticketFormacao;
+  // Downsell (apenas quem recusou upsell)
+  const recusaramUpsell = vendas - vendasUpsell;
+  const vendasDownsell = Math.round(recusaramUpsell * (inputs.taxaDownsell / 100));
+  const receitaDownsell = vendasDownsell * inputs.precoDownsell;
 
   // Totais
-  const faturamentoTotal = faturamentoFrontEnd + faturamentoBackEnd;
-  const lucro = faturamentoTotal - inv;
-  const roi = inv > 0 ? (lucro / inv) * 100 : 0;
-  const roas = inv > 0 ? faturamentoTotal / inv : 0;
-  const cpa = ingressos > 0 ? inv / ingressos : 0;
-  const custoEntrevista = entrevistas > 0 ? inv / entrevistas : 0;
-  const custoVendaFormacao = vendasFormacao > 0 ? inv / vendasFormacao : 0;
+  const receitaTotal = receitaProduto + receitaBump + receitaUpsell + receitaDownsell;
+  const ticketMedio = vendas > 0 ? receitaTotal / vendas : 0;
+  const cpa = vendas > 0 ? investimento / vendas : 0;
+  const lucro = receitaTotal - investimento;
+  const roi = investimento > 0 ? (lucro / investimento) * 100 : 0;
+  const roas = investimento > 0 ? receitaTotal / investimento : 0;
+  const breakevenVendas = ticketMedio > 0 ? Math.ceil(investimento / ticketMedio) : 0;
 
   return {
-    ingressos,
-    receitaIngresso,
-    bumpVendas,
+    cliques,
+    vendas,
+    receitaProduto,
+    vendasBump,
     receitaBump,
-    upsellVendas,
+    vendasUpsell,
     receitaUpsell,
-    faturamentoFrontEnd,
-    ticketMedioFrontEnd,
-    saldoFrontEnd,
-    aplicacoes,
-    agendamentos,
-    entrevistas,
-    vendasFormacao,
-    faturamentoBackEnd,
-    faturamentoTotal,
+    recusaramUpsell,
+    vendasDownsell,
+    receitaDownsell,
+    receitaTotal,
+    ticketMedio,
+    cpa,
     lucro,
     roi,
     roas,
-    cpa,
-    custoEntrevista,
-    custoVendaFormacao,
+    breakevenVendas,
   };
 }
 
+// ─── Alertas ────────────────────────────────────────────
+export function computeAlerts(inputs: SimuladorInputs, outputs: SimuladorOutputs): SimuladorAlert[] {
+  const alerts: SimuladorAlert[] = [];
+
+  if (outputs.lucro < 0) {
+    alerts.push({ level: 'danger', message: `Prejuizo de R$ ${Math.abs(outputs.lucro).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}. Revise CPC, conversao ou ticket.` });
+  } else if (outputs.roi > 0 && outputs.roi < 30) {
+    alerts.push({ level: 'warning', message: `ROI de ${outputs.roi.toFixed(1)}% — margem apertada. Considere otimizar o funil.` });
+  }
+
+  if (outputs.cpa > inputs.precoProduto && outputs.vendas > 0) {
+    alerts.push({ level: 'danger', message: `CPA (R$ ${outputs.cpa.toFixed(2)}) maior que o preco do produto (R$ ${inputs.precoProduto}). Funil insustentavel sem bump/upsell.` });
+  }
+
+  if (inputs.taxaConversao < 1) {
+    alerts.push({ level: 'warning', message: `Taxa de conversao abaixo de 1% — gargalo na pagina de vendas.` });
+  }
+
+  if (inputs.taxaBump < 5 && inputs.precoBump > 0) {
+    alerts.push({ level: 'info', message: `Taxa de bump em ${inputs.taxaBump}%. Benchmark: 15-30%. Revise a oferta.` });
+  }
+
+  if (inputs.taxaUpsell < 5 && inputs.precoUpsell > 0) {
+    alerts.push({ level: 'info', message: `Taxa de upsell em ${inputs.taxaUpsell}%. Benchmark: 10-20%. Revise a oferta.` });
+  }
+
+  return alerts;
+}
+
+// ─── Cenários ───────────────────────────────────────────
+export interface CenarioResult {
+  label: string;
+  outputs: SimuladorOutputs;
+}
+
+export function computeCenarios(inputs: SimuladorInputs, variacao: number = 20): CenarioResult[] {
+  const fator = variacao / 100;
+
+  const pessimista: SimuladorInputs = {
+    ...inputs,
+    taxaConversao: inputs.taxaConversao * (1 - fator),
+    cpc: inputs.cpc * (1 + fator),
+  };
+
+  const otimista: SimuladorInputs = {
+    ...inputs,
+    taxaConversao: inputs.taxaConversao * (1 + fator),
+    cpc: inputs.cpc * (1 - fator),
+  };
+
+  return [
+    { label: 'Pessimista', outputs: computeOutputs(pessimista) },
+    { label: 'Base', outputs: computeOutputs(inputs) },
+    { label: 'Otimista', outputs: computeOutputs(otimista) },
+  ];
+}
+
+// ─── Hook ───────────────────────────────────────────────
 export function useSimulador() {
   const [inputs, setInputs] = useState<SimuladorInputs>(DEFAULTS);
 
@@ -147,10 +201,14 @@ export function useSimulador() {
   }, []);
 
   const outputs = useMemo(() => computeOutputs(inputs), [inputs]);
+  const alerts = useMemo(() => computeAlerts(inputs, outputs), [inputs, outputs]);
+  const cenarios = useMemo(() => computeCenarios(inputs), [inputs]);
 
   return {
     inputs,
     outputs,
+    alerts,
+    cenarios,
     updateInput,
     resetDefaults,
     defaults: DEFAULTS,
