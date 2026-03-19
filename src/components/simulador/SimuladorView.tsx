@@ -38,7 +38,7 @@ export default function SimuladorView() {
           <SimuladorKPIs outputs={outputs} />
           <SimuladorFunil outputs={outputs} />
           <SimuladorCenarios cenarios={cenarios} variacao={inputs.variacao} />
-          <SimuladorBreakeven data={breakevenCurve} />
+          <SimuladorBreakeven data={breakevenCurve} isOverride={outputs.usandoOverride} />
         </div>
       </div>
     </div>

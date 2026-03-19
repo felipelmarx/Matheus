@@ -11,6 +11,7 @@ export interface SimuladorInputs {
   // Checkout
   taxaCheckout: number;
   ticketIngresso: number;
+  ingressosManuais: number; // 0 = calcula pelo trafego, >0 = override
 
   // Bump (oferta no checkout)
   ticketBump: number;
@@ -37,6 +38,7 @@ export interface SimuladorOutputs {
   cliques: number;
   viewPages: number;
   ingressos: number;
+  usandoOverride: boolean;
   receitaIngresso: number;
   receitaBump: number;
   receitaUpsell: number;
@@ -73,6 +75,7 @@ const DEFAULTS: SimuladorInputs = {
   conectRate: 75,
   taxaCheckout: 3,
   ticketIngresso: 7,
+  ingressosManuais: 0,
   ticketBump: 27,
   taxaBump: 30,
   ticketUpsell: 47,
@@ -93,8 +96,11 @@ function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorO
   const cliques = inputs.cpc > 0 ? Math.round(inv / inputs.cpc) : 0;
   const viewPages = Math.round(cliques * clamp(inputs.conectRate) / 100);
 
-  // Checkout
-  const ingressos = Math.round(viewPages * clamp(inputs.taxaCheckout) / 100);
+  // Ingressos: manual override ou calculo por trafego
+  const usandoOverride = inputs.ingressosManuais > 0;
+  const ingressos = usandoOverride
+    ? Math.round(inputs.ingressosManuais * taxaMultiplier)
+    : Math.round(viewPages * clamp(inputs.taxaCheckout) / 100);
   const receitaIngresso = ingressos * inputs.ticketIngresso;
 
   // Bump & Upsell
@@ -129,6 +135,7 @@ function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorO
     cliques,
     viewPages,
     ingressos,
+    usandoOverride,
     receitaIngresso,
     receitaBump,
     receitaUpsell,
@@ -173,7 +180,10 @@ export function useSimulador() {
 
   const breakevenCurve = useMemo((): BreakevenPoint[] => {
     const points: BreakevenPoint[] = [];
-    for (let inv = 500; inv <= 20000; inv += 500) {
+    // Escala dinamica: ate 5x o investimento atual, minimo 20k
+    const maxInv = Math.max(inputs.investimento * 5, 20000);
+    const step = maxInv <= 50000 ? 1000 : maxInv <= 200000 ? 5000 : 10000;
+    for (let inv = step; inv <= maxInv; inv += step) {
       const simInputs = { ...inputs, investimento: inv };
       const result = computeOutputs(simInputs);
       points.push({

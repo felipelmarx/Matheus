@@ -13,25 +13,29 @@ interface FunnelStage {
   extra?: string;
   width: string;
   color: string;
+  dimmed?: boolean;
 }
 
 export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
   const fmtNum = (v: number) => (v === 0 ? '--' : v.toLocaleString('pt-BR'));
+  const override = outputs.usandoOverride;
 
   const stages: FunnelStage[] = [
-    { label: 'Cliques', value: outputs.cliques, width: '100%', color: 'bg-primary' },
-    { label: 'View Pages', value: outputs.viewPages, width: '88%', color: 'bg-primary/90' },
+    ...(override ? [] : [
+      { label: 'Cliques', value: outputs.cliques, width: '100%', color: 'bg-primary' },
+      { label: 'View Pages', value: outputs.viewPages, width: '88%', color: 'bg-primary/90' },
+    ]),
     {
-      label: 'Ingressos (Checkout)',
+      label: override ? 'Ingressos (manual)' : 'Ingressos (Checkout)',
       value: outputs.ingressos,
       extra: `TM Front: ${BRL.format(outputs.ticketMedioFrontEnd)}`,
-      width: '70%',
-      color: 'bg-primary/80',
+      width: override ? '100%' : '70%',
+      color: override ? 'bg-primary' : 'bg-primary/80',
     },
-    { label: 'Aplicacoes', value: outputs.aplicacoes, width: '52%', color: 'bg-primary/70' },
-    { label: 'Agendamentos', value: outputs.agendamentos, width: '40%', color: 'bg-primary/60' },
-    { label: 'Entrevistas', value: outputs.entrevistas, width: '30%', color: 'bg-primary/50' },
-    { label: 'Vendas Formacao', value: outputs.vendasFormacao, width: '20%', color: 'bg-emerald-500' },
+    { label: 'Aplicacoes', value: outputs.aplicacoes, width: override ? '70%' : '52%', color: 'bg-primary/70' },
+    { label: 'Agendamentos', value: outputs.agendamentos, width: override ? '50%' : '40%', color: 'bg-primary/60' },
+    { label: 'Entrevistas', value: outputs.entrevistas, width: override ? '35%' : '30%', color: 'bg-primary/50' },
+    { label: 'Vendas Formacao', value: outputs.vendasFormacao, width: override ? '22%' : '20%', color: 'bg-emerald-500' },
   ];
 
   const conversionRate = (from: number, to: number) => {
@@ -48,6 +52,11 @@ export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
             <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
               Funil Projetado
             </h3>
+            {override && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/15 text-primary font-heading font-semibold">
+                INGRESSOS MANUAIS
+              </span>
+            )}
           </div>
           <div className="flex gap-4 text-[10px] font-mono text-muted-foreground">
             <span>Bump: {BRL.format(outputs.receitaBump)}</span>
