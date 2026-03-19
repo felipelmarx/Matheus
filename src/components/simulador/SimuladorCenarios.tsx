@@ -56,7 +56,7 @@ export default function SimuladorCenarios({ cenarios, variacao }: SimuladorCenar
         </h3>
       </div>
 
-      <div className="grid grid-cols-3 divide-x divide-border">
+      <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border">
         {cenarios.map((cenario, idx) => {
           const style = cenarioStyles[idx];
           const Icon = style.icon;

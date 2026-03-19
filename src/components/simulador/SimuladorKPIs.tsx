@@ -36,6 +36,14 @@ export default function SimuladorKPIs({ outputs }: SimuladorKPIsProps) {
       borderColor: isPositive ? 'border-emerald-500/20' : 'border-red-500/20',
     },
     {
+      label: 'FAT. TOTAL',
+      value: BRL.format(outputs.faturamentoTotal),
+      icon: TrendingUp,
+      color: 'from-primary/10 to-primary/5',
+      iconColor: 'text-primary',
+      borderColor: 'border-primary/20',
+    },
+    {
       label: 'TICKET MEDIO FRONT',
       value: BRL.format(outputs.ticketMedioFrontEnd),
       icon: ShoppingBag,

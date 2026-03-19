@@ -87,19 +87,20 @@ const DEFAULTS: SimuladorInputs = {
 
 function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorOutputs {
   const inv = inputs.investimento;
+  const clamp = (rate: number) => Math.min(rate * taxaMultiplier, 100);
 
   // Trafego
   const cliques = inputs.cpc > 0 ? Math.round(inv / inputs.cpc) : 0;
-  const viewPages = Math.round(cliques * (inputs.conectRate * taxaMultiplier) / 100);
+  const viewPages = Math.round(cliques * clamp(inputs.conectRate) / 100);
 
   // Checkout
-  const ingressos = Math.round(viewPages * (inputs.taxaCheckout * taxaMultiplier) / 100);
+  const ingressos = Math.round(viewPages * clamp(inputs.taxaCheckout) / 100);
   const receitaIngresso = ingressos * inputs.ticketIngresso;
 
   // Bump & Upsell
-  const bumpVendas = Math.round(ingressos * (inputs.taxaBump * taxaMultiplier) / 100);
+  const bumpVendas = Math.round(ingressos * clamp(inputs.taxaBump) / 100);
   const receitaBump = bumpVendas * inputs.ticketBump;
-  const upsellVendas = Math.round(ingressos * (inputs.taxaUpsell * taxaMultiplier) / 100);
+  const upsellVendas = Math.round(ingressos * clamp(inputs.taxaUpsell) / 100);
   const receitaUpsell = upsellVendas * inputs.ticketUpsell;
 
   // Front-end total
@@ -107,12 +108,12 @@ function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorO
   const ticketMedioFrontEnd = ingressos > 0 ? faturamentoFrontEnd / ingressos : 0;
 
   // Qualificacao
-  const aplicacoes = Math.round(ingressos * (inputs.taxaAplicacao * taxaMultiplier) / 100);
-  const agendamentos = Math.round(aplicacoes * (inputs.taxaAgendamento * taxaMultiplier) / 100);
-  const entrevistas = Math.round(agendamentos * (inputs.taxaEntrevista * taxaMultiplier) / 100);
+  const aplicacoes = Math.round(ingressos * clamp(inputs.taxaAplicacao) / 100);
+  const agendamentos = Math.round(aplicacoes * clamp(inputs.taxaAgendamento) / 100);
+  const entrevistas = Math.round(agendamentos * clamp(inputs.taxaEntrevista) / 100);
 
   // Back-end
-  const vendasFormacao = Math.round(entrevistas * (inputs.taxaVendaFormacao * taxaMultiplier) / 100);
+  const vendasFormacao = Math.round(entrevistas * clamp(inputs.taxaVendaFormacao) / 100);
   const faturamentoBackEnd = vendasFormacao * inputs.ticketFormacao;
 
   // Totais

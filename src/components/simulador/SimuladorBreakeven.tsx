@@ -82,11 +82,11 @@ export default function SimuladorBreakeven({ data }: SimuladorBreakevenProps) {
                 fontSize: '11px',
                 fontFamily: 'monospace',
               }}
-              formatter={(value: number, name: string) => [
-                BRL.format(value),
+              formatter={(value: number | string, name: string) => [
+                BRL.format(Number(value)),
                 name === 'lucro' ? 'Lucro' : 'Faturamento',
               ]}
-              labelFormatter={(label) => `Investimento: ${BRL.format(label)}`}
+              labelFormatter={(label: string) => `Investimento: ${BRL.format(Number(label))}`}
             />
             <ReferenceLine y={0} stroke="hsl(215, 15%, 40%)" strokeDasharray="4 4" />
             {breakeven !== null && (
