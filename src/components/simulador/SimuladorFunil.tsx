@@ -1,4 +1,3 @@
-import { GitBranch, ChevronDown } from 'lucide-react';
 import type { SimuladorOutputs } from '@/hooks/useSimulador';
 
 interface SimuladorFunilProps {
@@ -41,12 +40,9 @@ export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
     <div className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">
       <div className="px-5 py-3 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <GitBranch className="w-4 h-4 text-primary" />
-            <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
-              Funil Projetado
-            </h3>
-          </div>
+          <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
+            Funil Projetado
+          </h3>
           <div className="flex gap-4 text-[10px] font-mono text-muted-foreground">
             <span>Bump: {BRL.format(outputs.receitaBump)}</span>
             <span>Upsell: {BRL.format(outputs.receitaUpsell)}</span>
@@ -75,7 +71,7 @@ export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
             </div>
             {i < stages.length - 1 && (
               <div className="flex items-center gap-1.5 py-0.5 text-muted-foreground">
-                <ChevronDown className="w-3.5 h-3.5" />
+                <span className="text-xs">&#9660;</span>
                 <span className="text-[10px] font-mono font-medium">
                   {conversionRate(stages[i].value, stages[i + 1].value)}
                 </span>

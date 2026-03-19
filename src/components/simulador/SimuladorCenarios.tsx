@@ -1,5 +1,12 @@
 import { TrendingDown, Minus, TrendingUp } from 'lucide-react';
-import type { CenarioResult } from '@/hooks/useSimulador';
+import type { SimuladorOutputs } from '@/hooks/useSimulador';
+
+/** @deprecated This component is no longer used in SimuladorView. Kept for reference. */
+
+interface CenarioResult {
+  label: string;
+  outputs: SimuladorOutputs;
+}
 
 interface SimuladorCenariosProps {
   cenarios: CenarioResult[];

@@ -1,4 +1,3 @@
-import { RotateCcw } from 'lucide-react';
 import type { SimuladorInputs as InputsType } from '@/hooks/useSimulador';
 
 interface SimuladorInputsProps {
@@ -59,12 +58,6 @@ const sections: { title: string; fields: FieldConfig[] }[] = [
       { key: 'ticketFormacao', label: 'Ticket Formacao', min: 0, max: 100000, step: 500, unit: 'R$' },
     ],
   },
-  {
-    title: 'Cenarios',
-    fields: [
-      { key: 'variacao', label: 'Variacao', min: 5, max: 50, step: 5, unit: '%' },
-    ],
-  },
 ];
 
 export default function SimuladorInputs({ inputs, onUpdate, onReset }: SimuladorInputsProps) {
@@ -76,9 +69,8 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
         </h3>
         <button
           onClick={onReset}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
-          <RotateCcw className="w-3 h-3" />
           Resetar
         </button>
       </div>

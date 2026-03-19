@@ -1,6 +1,13 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from 'recharts';
 import { Crosshair } from 'lucide-react';
-import type { BreakevenPoint } from '@/hooks/useSimulador';
+
+/** @deprecated This component is no longer used in SimuladorView. Kept for reference. */
+
+interface BreakevenPoint {
+  investimento: number;
+  lucro: number;
+  faturamento: number;
+}
 
 interface SimuladorBreakevenProps {
   data: BreakevenPoint[];

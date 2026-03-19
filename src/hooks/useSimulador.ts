@@ -24,24 +24,30 @@ export interface SimuladorInputs {
   // Back-end (Formacao)
   taxaVendaFormacao: number;
   ticketFormacao: number;
-
-  // Cenarios
-  variacao: number;
 }
 
 export interface SimuladorOutputs {
+  // Front-end
   ingressos: number;
   receitaIngresso: number;
+  bumpVendas: number;
   receitaBump: number;
+  upsellVendas: number;
   receitaUpsell: number;
   faturamentoFrontEnd: number;
   ticketMedioFrontEnd: number;
   saldoFrontEnd: number;
+
+  // Qualificacao
   aplicacoes: number;
   agendamentos: number;
   entrevistas: number;
+
+  // Back-end
   vendasFormacao: number;
   faturamentoBackEnd: number;
+
+  // Totais
   faturamentoTotal: number;
   lucro: number;
   roi: number;
@@ -49,17 +55,6 @@ export interface SimuladorOutputs {
   cpa: number;
   custoEntrevista: number;
   custoVendaFormacao: number;
-}
-
-export interface CenarioResult {
-  label: string;
-  outputs: SimuladorOutputs;
-}
-
-export interface BreakevenPoint {
-  investimento: number;
-  lucro: number;
-  faturamento: number;
 }
 
 const DEFAULTS: SimuladorInputs = {
@@ -75,35 +70,35 @@ const DEFAULTS: SimuladorInputs = {
   taxaEntrevista: 80,
   taxaVendaFormacao: 20,
   ticketFormacao: 5000,
-  variacao: 20,
 };
 
-function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorOutputs {
+export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
   const inv = inputs.investimento;
-  const clamp = (rate: number) => Math.min(rate * taxaMultiplier, 100);
+  const ingressos = inputs.ingressos;
 
-  // Ingressos (manual, variados por cenario)
-  const ingressos = Math.round(inputs.ingressos * taxaMultiplier);
+  // Front-end: Ingresso
   const receitaIngresso = ingressos * inputs.ticketIngresso;
 
-  // Bump & Upsell
-  const bumpVendas = Math.round(ingressos * clamp(inputs.taxaBump) / 100);
+  // Front-end: Bump
+  const bumpVendas = Math.round(ingressos * (inputs.taxaBump / 100));
   const receitaBump = bumpVendas * inputs.ticketBump;
-  const upsellVendas = Math.round(ingressos * clamp(inputs.taxaUpsell) / 100);
+
+  // Front-end: Upsell
+  const upsellVendas = Math.round(ingressos * (inputs.taxaUpsell / 100));
   const receitaUpsell = upsellVendas * inputs.ticketUpsell;
 
-  // Front-end total
+  // Front-end: Totais
   const faturamentoFrontEnd = receitaIngresso + receitaBump + receitaUpsell;
   const ticketMedioFrontEnd = ingressos > 0 ? faturamentoFrontEnd / ingressos : 0;
   const saldoFrontEnd = faturamentoFrontEnd - inv;
 
   // Qualificacao
-  const aplicacoes = Math.round(ingressos * clamp(inputs.taxaAplicacao) / 100);
-  const agendamentos = Math.round(aplicacoes * clamp(inputs.taxaAgendamento) / 100);
-  const entrevistas = Math.round(agendamentos * clamp(inputs.taxaEntrevista) / 100);
+  const aplicacoes = Math.round(ingressos * (inputs.taxaAplicacao / 100));
+  const agendamentos = Math.round(aplicacoes * (inputs.taxaAgendamento / 100));
+  const entrevistas = Math.round(agendamentos * (inputs.taxaEntrevista / 100));
 
   // Back-end
-  const vendasFormacao = Math.round(entrevistas * clamp(inputs.taxaVendaFormacao) / 100);
+  const vendasFormacao = Math.round(entrevistas * (inputs.taxaVendaFormacao / 100));
   const faturamentoBackEnd = vendasFormacao * inputs.ticketFormacao;
 
   // Totais
@@ -118,7 +113,9 @@ function computeOutputs(inputs: SimuladorInputs, taxaMultiplier = 1): SimuladorO
   return {
     ingressos,
     receitaIngresso,
+    bumpVendas,
     receitaBump,
+    upsellVendas,
     receitaUpsell,
     faturamentoFrontEnd,
     ticketMedioFrontEnd,
@@ -151,36 +148,9 @@ export function useSimulador() {
 
   const outputs = useMemo(() => computeOutputs(inputs), [inputs]);
 
-  const cenarios = useMemo((): CenarioResult[] => {
-    const v = inputs.variacao / 100;
-    return [
-      { label: 'Pessimista', outputs: computeOutputs(inputs, 1 - v) },
-      { label: 'Realista', outputs: computeOutputs(inputs, 1) },
-      { label: 'Otimista', outputs: computeOutputs(inputs, 1 + v) },
-    ];
-  }, [inputs]);
-
-  const breakevenCurve = useMemo((): BreakevenPoint[] => {
-    const points: BreakevenPoint[] = [];
-    const maxInv = Math.max(inputs.investimento * 5, 20000);
-    const step = maxInv <= 50000 ? 1000 : maxInv <= 200000 ? 5000 : 10000;
-    for (let inv = step; inv <= maxInv; inv += step) {
-      const simInputs = { ...inputs, investimento: inv };
-      const result = computeOutputs(simInputs);
-      points.push({
-        investimento: inv,
-        lucro: result.lucro,
-        faturamento: result.faturamentoTotal,
-      });
-    }
-    return points;
-  }, [inputs]);
-
   return {
     inputs,
     outputs,
-    cenarios,
-    breakevenCurve,
     updateInput,
     resetDefaults,
     defaults: DEFAULTS,
