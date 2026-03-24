@@ -8,7 +8,8 @@ interface CompararViewProps {
 
 interface MetricRow {
   label: string;
-  key: keyof DesafioData;
+  key?: keyof DesafioData;
+  compute?: (d: DesafioData) => number;
   format: 'brl' | 'num' | 'pct';
   invertColor?: boolean;
 }
@@ -66,10 +67,14 @@ const sections: MetricSection[] = [
     headerBg: 'from-violet-500/10 to-transparent',
     rows: [
       { label: 'Aplicacoes', key: 'aplicacoes', format: 'num' },
+      { label: 'Conv. Ingressos → Aplicacoes', compute: (d) => d.ingressosTotais > 0 ? parseFloat(((d.aplicacoes / d.ingressosTotais) * 100).toFixed(2)) : 0, format: 'pct' },
       { label: 'Custo / Aplicacao', key: 'custoPorAplicacao', format: 'brl', invertColor: true },
       { label: 'Agendamentos', key: 'agendamentos', format: 'num' },
+      { label: 'Conv. Aplicacoes → Agendamentos', compute: (d) => d.aplicacoes > 0 ? parseFloat(((d.agendamentos / d.aplicacoes) * 100).toFixed(2)) : 0, format: 'pct' },
       { label: 'Entrevistas', key: 'entrevistas', format: 'num' },
+      { label: 'Conv. Agendamentos → Entrevistas', compute: (d) => d.agendamentos > 0 ? parseFloat(((d.entrevistas / d.agendamentos) * 100).toFixed(2)) : 0, format: 'pct' },
       { label: 'Custo / Entrevista', key: 'custoEntrevista', format: 'brl', invertColor: true },
+      { label: 'Conv. Entrevistas → Vendas', compute: (d) => d.entrevistas > 0 ? parseFloat(((d.vendasFormacao / d.entrevistas) * 100).toFixed(2)) : 0, format: 'pct' },
     ],
   },
   {
@@ -210,11 +215,11 @@ export default function CompararView({ data }: CompararViewProps) {
                   </div>
 
                   <div className="p-4 sm:p-5 space-y-3">
-                    {section.rows.map((row) => {
-                      const values = selectedData.map((s) => s.data[row.key] as number);
+                    {section.rows.map((row, rowIdx) => {
+                      const values = selectedData.map((s) => row.compute ? row.compute(s.data) : s.data[row.key!] as number);
 
                       return (
-                        <div key={row.key}>
+                        <div key={row.key ?? `computed-${rowIdx}`}>
                           {/* Desktop layout */}
                           <div style={gridStyle} className="hidden sm:grid gap-2 items-baseline">
                             <p className="text-xs text-muted-foreground font-heading truncate">{row.label}</p>
