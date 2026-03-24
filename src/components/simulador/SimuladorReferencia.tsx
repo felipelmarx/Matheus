@@ -10,10 +10,10 @@ interface ConversionRates {
 }
 
 function calcRates(d: DesafioData, label: string): ConversionRates | null {
-  if (d.vendas <= 0 || d.aplicacoes <= 0) return null;
+  if (d.ingressosTotais <= 0 || d.aplicacoes <= 0) return null;
   return {
     label,
-    taxaAplicacao: (d.aplicacoes / d.vendas) * 100,
+    taxaAplicacao: (d.aplicacoes / d.ingressosTotais) * 100,
     taxaAgendamento: d.aplicacoes > 0 ? (d.agendamentos / d.aplicacoes) * 100 : 0,
     taxaEntrevista: d.agendamentos > 0 ? (d.entrevistas / d.agendamentos) * 100 : 0,
     taxaVendaFormacao: d.entrevistas > 0 ? (d.vendasFormacao / d.entrevistas) * 100 : 0,
