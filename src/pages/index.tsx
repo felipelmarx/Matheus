@@ -143,7 +143,7 @@ export default function DashboardPage() {
           <>
             <DesafioTabs activeTab={activeTab} onTabChange={setActiveTab} data={data} />
             {activeTab === 'simulador' ? (
-              <SimuladorView />
+              <SimuladorView data={data} />
             ) : activeTab === 'analises' ? (
               <AnalisesDesafios
                 visaoEstrategica={data.visaoEstrategica}
