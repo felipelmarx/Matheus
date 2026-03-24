@@ -1,7 +1,7 @@
 import type { CacheEntry, AllDesafiosData } from '@/types/metrics';
 
 const CACHE_TTL_MS =
-  parseInt(process.env.CACHE_TTL_HOURS ?? '12', 10) * 60 * 60 * 1000;
+  parseInt(process.env.CACHE_TTL_MINUTES ?? '5', 10) * 60 * 1000;
 
 const store = new Map<string, CacheEntry>();
 

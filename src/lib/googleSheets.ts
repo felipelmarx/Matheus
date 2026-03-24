@@ -258,7 +258,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     let adsRows: string[][] = [];
     try {
       if (ADS_SPREADSHEET_ID) {
-        adsRows = await fetchSheetRows('ADD!A2:D1000', ADS_SPREADSHEET_ID);
+        adsRows = await fetchSheetRows('ADD!A2:D10000', ADS_SPREADSHEET_ID);
         console.log(`[sheets] Ads: ${adsRows.length} rows loaded`);
       }
     } catch (err) {
@@ -269,7 +269,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     let adsD4Rows: string[][] = [];
     try {
       if (ADS_SPREADSHEET_ID) {
-        const allAtRows = await fetchSheetRows('AT!A2:D1000', ADS_SPREADSHEET_ID);
+        const allAtRows = await fetchSheetRows('AT!A2:D10000', ADS_SPREADSHEET_ID);
         adsD4Rows = allAtRows.filter(r => (r[0] ?? '') >= '2026-03-16');
         console.log(`[sheets] Ads D4: ${adsD4Rows.length} rows loaded (from AT tab, >= 2026-03-16)`);
       }
