@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 
 // ─── Inputs ─────────────────────────────────────────────
 export interface SimuladorInputs {
@@ -240,10 +240,29 @@ export function computeDreamGoal(inputs: SimuladorInputs, outputs: SimuladorOutp
   return { vendasNecessarias, cliquesNecessarios, investimentoNecessario };
 }
 
+// ─── Storage ──────────────────────────────────────────────
+const STORAGE_KEY = 'simulador-inputs';
+
+function loadSaved(): SimuladorInputs {
+  if (typeof window === 'undefined') return DEFAULTS;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return DEFAULTS;
+    const parsed = JSON.parse(raw);
+    return { ...DEFAULTS, ...parsed };
+  } catch {
+    return DEFAULTS;
+  }
+}
+
 // ─── Hook ───────────────────────────────────────────────
 export function useSimulador() {
-  const [inputs, setInputs] = useState<SimuladorInputs>(DEFAULTS);
+  const [inputs, setInputs] = useState<SimuladorInputs>(loadSaved);
   const [lucroDesejado, setLucroDesejado] = useState(50000);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(inputs));
+  }, [inputs]);
 
   const updateInput = useCallback(<K extends keyof SimuladorInputs>(key: K, value: SimuladorInputs[K]) => {
     setInputs(prev => ({ ...prev, [key]: value }));
