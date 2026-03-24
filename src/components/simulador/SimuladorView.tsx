@@ -3,7 +3,6 @@ import { useSimulador } from '@/hooks/useSimulador';
 import SimuladorInputs from './SimuladorInputs';
 import SimuladorKPIs from './SimuladorKPIs';
 import SimuladorFunil from './SimuladorFunil';
-import SimuladorAlertas from './SimuladorAlertas';
 import SimuladorReferencia from './SimuladorReferencia';
 
 interface SimuladorViewProps {
@@ -11,7 +10,7 @@ interface SimuladorViewProps {
 }
 
 export default function SimuladorView({ data }: SimuladorViewProps) {
-  const { inputs, outputs, alerts, updateInput, resetDefaults } = useSimulador();
+  const { inputs, outputs, updateInput, resetDefaults } = useSimulador();
 
   const desafios = data ? [
     { key: 'desafio1', label: 'Desafio 1', data: data.desafio1 },
@@ -33,9 +32,6 @@ export default function SimuladorView({ data }: SimuladorViewProps) {
       {desafios.length > 0 && (
         <SimuladorReferencia desafios={desafios} onApply={handleApplyRates} />
       )}
-
-      {/* Alertas */}
-      <SimuladorAlertas alerts={alerts} />
 
       {/* KPIs - Full width */}
       <SimuladorKPIs outputs={outputs} />
