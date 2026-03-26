@@ -170,15 +170,15 @@ export default function GuiaDesafio() {
       </div>
 
       {/* INTERNAL ALERT */}
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-start gap-3">
+        <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
         <div>
-          <span className="text-xs font-heading font-bold text-amber-400 uppercase tracking-wider">
+          <span className="text-xs font-heading font-bold text-red-400 uppercase tracking-wider">
             Uso Interno — Confidencial
           </span>
-          <p className="text-sm text-amber-200/80 mt-1 leading-relaxed">
-            No sabado, liberamos o acesso as gravacoes para <strong>todos os participantes</strong>, inclusive quem nao comprou o Passaporte VIP.
-            Esta informacao <strong>nao pode ser divulgada ao publico</strong>. Externamente, gravacoes = Passaporte VIP (R$ 57).
+          <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+            No sabado, liberamos o acesso as gravacoes para <strong className="text-foreground">todos os participantes</strong>, inclusive quem nao comprou o Passaporte VIP.
+            Esta informacao <strong className="text-red-400">nao pode ser divulgada ao publico</strong>. Externamente, gravacoes = Passaporte VIP (R$ 57).
           </p>
         </div>
       </div>
@@ -191,21 +191,28 @@ export default function GuiaDesafio() {
         defaultOpen={true}
       >
         <p className="text-sm text-muted-foreground leading-relaxed">
-          O <strong className="text-foreground">Desafio de 5 Dias de Neurociencia da Respiracao</strong> e um evento online pago onde os participantes assistem a 5 sessoes ao vivo (segunda a sexta), uma por dia.
-          O ingresso da acesso ao evento + um link para 7 dias gratis dos Protocolos Respiratorios (audios de nivel 1).
+          O <strong className="text-foreground">Desafio de 5 Dias de Neurociencia da Respiracao</strong> e um evento que fazemos 2 vezes por mes, onde convidamos terapeutas e profissionais da saude para consumirem o conteudo.
+          Sao 5 sessoes gravadas, transmitidas via <strong className="text-foreground">Zoom</strong> e <strong className="text-foreground">Hotwebinar</strong>, uma por dia (segunda a sexta). Cada gravacao fica disponivel por 24 horas.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
+        <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+          A partir do <strong className="text-foreground">dia 3</strong> do desafio, liberamos o link de aplicacao para gerar vendas da Formacao.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-4">
           <div className="bg-muted/30 rounded-lg p-3 text-center">
-            <span className="text-2xl font-mono font-bold text-primary">5</span>
-            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Sessoes ao vivo</p>
+            <span className="text-2xl font-mono font-bold text-primary">2x</span>
+            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Por mes</p>
+          </div>
+          <div className="bg-muted/30 rounded-lg p-3 text-center">
+            <span className="text-2xl font-mono font-bold text-violet-400">5</span>
+            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Sessoes gravadas</p>
           </div>
           <div className="bg-muted/30 rounded-lg p-3 text-center">
             <span className="text-2xl font-mono font-bold text-emerald-400">24h</span>
             <p className="text-[10px] text-muted-foreground mt-1 font-heading">Gravacao disponivel por dia</p>
           </div>
           <div className="bg-muted/30 rounded-lg p-3 text-center">
-            <span className="text-2xl font-mono font-bold text-amber-400">7d</span>
-            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Gratis Protocolos (nivel 1)</p>
+            <span className="text-2xl font-mono font-bold text-amber-400">Dia 3</span>
+            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Link de aplicacao liberado</p>
           </div>
         </div>
       </Section>
@@ -219,27 +226,32 @@ export default function GuiaDesafio() {
       >
         <FlowStep
           num="1"
-          label="Ve o anuncio (Meta Ads)"
+          label="Anuncios (Meta Ads)"
           sublabel="Anuncios de video e imagem segmentados por publico"
           color="bg-blue-500/20 text-blue-400"
         />
         <FlowStep
           num="2"
-          label="Acessa a Landing Page"
+          label="Landing Page"
           sublabel="Pagina de vendas com VSL e CTA para compra"
           color="bg-blue-500/20 text-blue-400"
         />
         <FlowStep
           num="3"
           label="Compra o Ingresso"
-          sublabel="Checkout com opcao de Order Bumps"
+          sublabel="Pagina de checkout"
           color="bg-emerald-500/20 text-emerald-400"
+        />
+        <FlowStep
+          num="4"
+          label="Order Bumps (opcoes no checkout)"
+          color="bg-amber-500/20 text-amber-400"
         />
         <div className="ml-11 mb-3 space-y-2">
           <div className="bg-muted/40 border border-border/50 rounded-lg p-3 flex items-center gap-2">
             <ShoppingCart className="w-3.5 h-3.5 text-amber-400" />
             <div>
-              <span className="text-xs font-heading font-medium text-foreground">Order Bump 1: Kit de Estudos</span>
+              <span className="text-xs font-heading font-medium text-foreground">Kit de Estudos</span>
               <span className="text-[10px] text-emerald-400 font-mono ml-2">R$ 37</span>
               <p className="text-[10px] text-muted-foreground">Conteudo introdutorio + mini aulas sobre o desafio</p>
             </div>
@@ -247,41 +259,55 @@ export default function GuiaDesafio() {
           <div className="bg-muted/40 border border-border/50 rounded-lg p-3 flex items-center gap-2">
             <ShoppingCart className="w-3.5 h-3.5 text-amber-400" />
             <div>
-              <span className="text-xs font-heading font-medium text-foreground">Order Bump 2: Passaporte VIP</span>
+              <span className="text-xs font-heading font-medium text-foreground">Passaporte VIP</span>
               <span className="text-[10px] text-emerald-400 font-mono ml-2">R$ 57</span>
               <p className="text-[10px] text-muted-foreground">Acesso as gravacoes (liberadas no sabado apos os 5 dias)</p>
             </div>
           </div>
         </div>
         <FlowStep
-          num="4"
+          num="5"
+          label="Upsell: Desafio de 21 Dias"
+          sublabel="R$ 97 + audios Protocolos Respiratorios nivel 1"
+          color="bg-amber-500/20 text-amber-400"
+        />
+        <FlowStep
+          num="6"
           label="Entra no Grupo de WhatsApp"
           sublabel="Recebe link do grupo apos a compra"
           color="bg-emerald-500/20 text-emerald-400"
         />
         <FlowStep
-          num="5"
-          label="Participa das 5 Sessoes (seg-sex)"
-          sublabel="Cada gravacao fica disponivel por 24h. Link enviado no grupo"
-          color="bg-violet-500/20 text-violet-400"
-        />
-        <FlowStep
-          num="6"
-          label="Recebe oferta de Upsell"
-          sublabel="Desafio de 21 Dias (R$ 97) + Protocolos Respiratorios nivel 1"
-          color="bg-amber-500/20 text-amber-400"
-        />
-        <FlowStep
           num="7"
-          label="Sabado: gravacoes liberadas"
-          sublabel="Todas as 5 gravacoes ficam disponiveis ao mesmo tempo"
+          label="Participa das 5 Sessoes (seg-sex)"
+          sublabel="Sessoes gravadas transmitidas via Zoom e Hotwebinar. Cada gravacao disponivel por 24h"
           color="bg-violet-500/20 text-violet-400"
         />
         <FlowStep
           num="8"
           label="7 dias gratis dos Protocolos Respiratorios"
-          sublabel="Audios de nivel 1 — acesso entregue junto com o ingresso"
+          sublabel="A pessoa e direcionada para a dashboard com o link dos 7 dias gratis (audios nivel 1)"
           color="bg-primary/20 text-primary"
+        />
+        <div className="ml-11 mb-3">
+          <a
+            href="https://lp.felipemarx.com.br/protocolos-respiratorios-7-dias-off-5d"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-muted/40 border border-border/50 rounded-lg px-3 py-2 hover:border-primary/40 transition-colors group"
+          >
+            <Gift className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-xs font-mono text-primary group-hover:underline">
+              7 dias gratis dos audios respiratorios Nivel 1
+            </span>
+            <ExternalLink className="w-3 h-3 text-muted-foreground" />
+          </a>
+        </div>
+        <FlowStep
+          num="9"
+          label="Sabado: gravacoes liberadas"
+          sublabel="Todas as 5 gravacoes ficam disponiveis ao mesmo tempo"
+          color="bg-violet-500/20 text-violet-400"
           isLast
         />
         <div className="mt-3 flex items-center gap-2 text-[10px] text-muted-foreground/70">
@@ -300,7 +326,7 @@ export default function GuiaDesafio() {
           <GlossaryCard
             icon={Ticket}
             term="Ingresso"
-            description="O produto principal. Da acesso as 5 sessoes ao vivo + link dos 7 dias gratis de Protocolos Respiratorios (audios nivel 1)."
+            description="O produto principal. Da acesso as 5 sessoes gravadas (transmitidas via Zoom e Hotwebinar) + link dos 7 dias gratis de Protocolos Respiratorios (audios nivel 1)."
             iconColor="text-primary"
             borderColor="border-primary/20"
           />
