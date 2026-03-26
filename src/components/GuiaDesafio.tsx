@@ -18,6 +18,7 @@ import {
   Video,
   Headphones,
   ExternalLink,
+  Users,
 } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
@@ -164,8 +165,8 @@ export default function GuiaDesafio() {
           </h2>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Tudo que voce precisa saber sobre como o Desafio de 5 Dias funciona.
-          Feito para qualquer pessoa da equipe entender a operacao, os produtos e onde encontrar cada informacao.
+          Tudo que você precisa saber sobre como o Desafio de 5 Dias funciona.
+          Feito para qualquer pessoa da equipe entender a operação, os produtos e onde encontrar cada informação.
         </p>
       </div>
 
@@ -177,8 +178,8 @@ export default function GuiaDesafio() {
             Uso Interno — Confidencial
           </span>
           <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-            No sabado, liberamos o acesso as gravacoes para <strong className="text-foreground">todos os participantes</strong>, inclusive quem nao comprou o Passaporte VIP.
-            Esta informacao <strong className="text-red-400">nao pode ser divulgada ao publico</strong>. Externamente, gravacoes = Passaporte VIP (R$ 57).
+            No sábado, liberamos o acesso às gravações para <strong className="text-foreground">todos os participantes</strong>, inclusive quem não comprou o Passaporte VIP.
+            Esta informação <strong className="text-red-400">não pode ser divulgada ao público</strong>. Externamente, gravações = Passaporte VIP (R$ 57).
           </p>
         </div>
       </div>
@@ -186,33 +187,33 @@ export default function GuiaDesafio() {
       {/* 1. O QUE É O DESAFIO */}
       <Section
         icon={Zap}
-        title="O que e o Desafio"
+        title="O que é o Desafio"
         iconColor="text-violet-400"
         defaultOpen={true}
       >
         <p className="text-sm text-muted-foreground leading-relaxed">
-          O <strong className="text-foreground">Desafio de 5 Dias de Neurociencia da Respiracao</strong> e um evento que fazemos 2 vezes por mes, onde convidamos terapeutas e profissionais da saude para consumirem o conteudo.
-          Sao 5 sessoes gravadas, transmitidas via <strong className="text-foreground">Zoom</strong> e <strong className="text-foreground">Hotwebinar</strong>, uma por dia (segunda a sexta). Cada gravacao fica disponivel por 24 horas.
+          O <strong className="text-foreground">Desafio de 5 Dias de Neurociência da Respiração</strong> é um evento que fazemos 2 vezes por mês, onde convidamos terapeutas e profissionais da saúde para consumirem o conteúdo.
+          São 5 sessões gravadas, transmitidas via <strong className="text-foreground">Zoom</strong> e <strong className="text-foreground">Hotwebinar</strong>, uma por dia (segunda a sexta). Cada gravação fica disponível por 24 horas.
         </p>
         <p className="text-sm text-muted-foreground leading-relaxed mt-2">
-          A partir do <strong className="text-foreground">dia 3</strong> do desafio, liberamos o link de aplicacao para gerar vendas da Formacao.
+          A partir do <strong className="text-foreground">dia 3</strong> do desafio, liberamos o link de aplicação para gerar vendas da Formação.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-4">
           <div className="bg-muted/30 rounded-lg p-3 text-center">
             <span className="text-2xl font-mono font-bold text-primary">2x</span>
-            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Por mes</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Por mês</p>
           </div>
           <div className="bg-muted/30 rounded-lg p-3 text-center">
             <span className="text-2xl font-mono font-bold text-violet-400">5</span>
-            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Sessoes gravadas</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Sessões gravadas</p>
           </div>
           <div className="bg-muted/30 rounded-lg p-3 text-center">
             <span className="text-2xl font-mono font-bold text-emerald-400">24h</span>
-            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Gravacao disponivel por dia</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Gravação disponível por dia</p>
           </div>
           <div className="bg-muted/30 rounded-lg p-3 text-center">
             <span className="text-2xl font-mono font-bold text-amber-400">Dia 3</span>
-            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Link de aplicacao liberado</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-heading">Link de aplicação liberado</p>
           </div>
         </div>
       </Section>
@@ -226,25 +227,34 @@ export default function GuiaDesafio() {
       >
         <FlowStep
           num="1"
-          label="Anuncios (Meta Ads)"
-          sublabel="Anuncios de video e imagem segmentados por publico"
+          label="Anúncios (Meta Ads)"
+          sublabel="Anúncios de vídeo e imagem segmentados por público"
           color="bg-blue-500/20 text-blue-400"
         />
         <FlowStep
           num="2"
           label="Landing Page"
-          sublabel="Pagina de vendas com VSL e CTA para compra"
+          sublabel="Página de vendas com VSL e CTA para compra"
           color="bg-blue-500/20 text-blue-400"
         />
         <FlowStep
           num="3"
-          label="Compra o Ingresso"
-          sublabel="Pagina de checkout"
+          label="Compra o Ingresso (R$ 7)"
+          sublabel="Ingresso duplo — a pessoa paga um valor simbólico e recebe um ingresso cortesia para convidar um amigo da área"
           color="bg-emerald-500/20 text-emerald-400"
         />
+        <div className="ml-11 mb-3">
+          <div className="bg-muted/40 border border-border/50 rounded-lg p-3 flex items-start gap-2">
+            <Users className="w-3.5 h-3.5 text-violet-400 mt-0.5" />
+            <div>
+              <span className="text-xs font-heading font-medium text-foreground">Ingresso Cortesia</span>
+              <p className="text-[10px] text-muted-foreground">Após a compra, a pessoa recebe um e-mail e WhatsApp com o link do ingresso cortesia para convidar um amigo.</p>
+            </div>
+          </div>
+        </div>
         <FlowStep
           num="4"
-          label="Order Bumps (opcoes no checkout)"
+          label="Order Bumps (opções no checkout)"
           color="bg-amber-500/20 text-amber-400"
         />
         <div className="ml-11 mb-3 space-y-2">
@@ -253,7 +263,7 @@ export default function GuiaDesafio() {
             <div>
               <span className="text-xs font-heading font-medium text-foreground">Kit de Estudos</span>
               <span className="text-[10px] text-emerald-400 font-mono ml-2">R$ 37</span>
-              <p className="text-[10px] text-muted-foreground">Conteudo introdutorio + mini aulas sobre o desafio</p>
+              <p className="text-[10px] text-muted-foreground">Conteúdo introdutório + mini aulas sobre o desafio</p>
             </div>
           </div>
           <div className="bg-muted/40 border border-border/50 rounded-lg p-3 flex items-center gap-2">
@@ -261,32 +271,32 @@ export default function GuiaDesafio() {
             <div>
               <span className="text-xs font-heading font-medium text-foreground">Passaporte VIP</span>
               <span className="text-[10px] text-emerald-400 font-mono ml-2">R$ 57</span>
-              <p className="text-[10px] text-muted-foreground">Acesso as gravacoes (liberadas no sabado apos os 5 dias)</p>
+              <p className="text-[10px] text-muted-foreground">Acesso às gravações (liberadas no sábado após os 5 dias)</p>
             </div>
           </div>
         </div>
         <FlowStep
           num="5"
           label="Upsell: Desafio de 21 Dias"
-          sublabel="R$ 97 + audios Protocolos Respiratorios nivel 1"
+          sublabel="R$ 97 + áudios dos Protocolos Respiratórios nível 1"
           color="bg-amber-500/20 text-amber-400"
         />
         <FlowStep
           num="6"
           label="Entra no Grupo de WhatsApp"
-          sublabel="Recebe link do grupo apos a compra"
+          sublabel="Recebe o link do grupo após a compra"
           color="bg-emerald-500/20 text-emerald-400"
         />
         <FlowStep
           num="7"
-          label="Participa das 5 Sessoes (seg-sex)"
-          sublabel="Sessoes gravadas transmitidas via Zoom e Hotwebinar. Cada gravacao disponivel por 24h"
+          label="Participa das 5 Sessões (seg-sex)"
+          sublabel="Sessões gravadas transmitidas via Zoom e Hotwebinar. Cada gravação fica disponível por 24h."
           color="bg-violet-500/20 text-violet-400"
         />
         <FlowStep
           num="8"
-          label="7 dias gratis dos Protocolos Respiratorios"
-          sublabel="A pessoa e direcionada para a dashboard com o link dos 7 dias gratis (audios nivel 1)"
+          label="7 dias grátis dos Protocolos Respiratórios"
+          sublabel="A pessoa é direcionada para a dashboard com o link dos 7 dias grátis (áudios nível 1)."
           color="bg-primary/20 text-primary"
         />
         <div className="ml-11 mb-3">
@@ -298,42 +308,44 @@ export default function GuiaDesafio() {
           >
             <Gift className="w-3.5 h-3.5 text-emerald-400" />
             <span className="text-xs font-mono text-primary group-hover:underline">
-              7 dias gratis dos audios respiratorios Nivel 1
+              🎁 7 dias grátis dos áudios respiratórios Nível 1
             </span>
             <ExternalLink className="w-3 h-3 text-muted-foreground" />
           </a>
         </div>
         <FlowStep
           num="9"
-          label="Sabado: gravacoes liberadas"
-          sublabel="Todas as 5 gravacoes ficam disponiveis ao mesmo tempo"
+          label="Sábado: gravações liberadas"
+          sublabel="Todas as 5 gravações ficam disponíveis ao mesmo tempo."
           color="bg-violet-500/20 text-violet-400"
           isLast
         />
         <div className="mt-3 flex items-center gap-2 text-[10px] text-muted-foreground/70">
           <Mail className="w-3 h-3" />
-          <span>Ao comprar qualquer produto (bump ou upsell), a pessoa recebe email + WhatsApp com acesso.</span>
+          <span>Ao comprar qualquer produto (bump ou upsell), a pessoa recebe e-mail + WhatsApp com acesso.</span>
         </div>
       </Section>
 
       {/* 3. GLOSSÁRIO */}
       <Section
         icon={BookOpen}
-        title="Glossario — Termos Importantes"
+        title="Glossário — Termos Importantes"
         iconColor="text-emerald-400"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <GlossaryCard
             icon={Ticket}
             term="Ingresso"
-            description="O produto principal. Da acesso as 5 sessoes gravadas (transmitidas via Zoom e Hotwebinar) + link dos 7 dias gratis de Protocolos Respiratorios (audios nivel 1)."
+            price="R$ 7"
+            description="Ingresso duplo por um valor simbólico de R$ 7. A pessoa ganha um ingresso cortesia para convidar um amigo da área. Dá acesso às 5 sessões gravadas (transmitidas via Zoom e Hotwebinar)."
+            delivery="Após a compra, recebe e-mail + WhatsApp com o link do ingresso cortesia"
             iconColor="text-primary"
             borderColor="border-primary/20"
           />
           <GlossaryCard
             icon={Gift}
             term="Ingresso Cortesia"
-            description="Ingresso gratuito dado a convidados especiais, parceiros ou indicacoes. Tem o mesmo acesso do ingresso pago, sem custo. Os links de cortesia ficam na Planilha de Links."
+            description="Ingresso gratuito que o comprador recebe para convidar um amigo da área. Também pode ser dado a convidados especiais ou parceiros. Os links de cortesia ficam na Planilha de Links."
             iconColor="text-violet-400"
             borderColor="border-violet-500/20"
           />
@@ -341,8 +353,8 @@ export default function GuiaDesafio() {
             icon={ShoppingCart}
             term="Order Bump"
             price="R$ 37 / R$ 57"
-            description="Oferta adicional que aparece na pagina de checkout, antes de finalizar a compra. O cliente pode adicionar ao pedido com um clique. Temos dois: Kit de Estudos (R$ 37) e Passaporte VIP (R$ 57)."
-            delivery="Ao comprar, recebe email + WhatsApp com acesso"
+            description="Oferta adicional que aparece na página de checkout, antes de finalizar a compra. O cliente pode adicionar ao pedido com um clique. Temos dois: Kit de Estudos (R$ 37) e Passaporte VIP (R$ 57)."
+            delivery="Ao comprar, recebe e-mail + WhatsApp com acesso"
             iconColor="text-amber-400"
             borderColor="border-amber-500/20"
           />
@@ -350,8 +362,8 @@ export default function GuiaDesafio() {
             icon={Crown}
             term="Upsell"
             price="R$ 97"
-            description="Oferta apresentada apos a compra do ingresso. E o Desafio de 21 Dias + acesso aos audios de Protocolos Respiratorios de nivel 1. Aumenta o ticket medio."
-            delivery="Ao comprar, recebe email + WhatsApp com acesso"
+            description="Oferta apresentada após a compra do ingresso. É o Desafio de 21 Dias + acesso aos áudios de Protocolos Respiratórios de nível 1. Aumenta o ticket médio."
+            delivery="Ao comprar, recebe e-mail + WhatsApp com acesso"
             iconColor="text-emerald-400"
             borderColor="border-emerald-500/20"
           />
@@ -359,25 +371,25 @@ export default function GuiaDesafio() {
             icon={Video}
             term="Passaporte VIP"
             price="R$ 57"
-            description="Order Bump que da acesso as gravacoes das sessoes. As gravacoes sao liberadas no sabado, todas as 5 ao mesmo tempo, apos o encerramento do desafio."
+            description="Order Bump que dá acesso às gravações das sessões. As gravações são liberadas no sábado, todas as 5 ao mesmo tempo, após o encerramento do desafio."
             iconColor="text-cyan-400"
             borderColor="border-cyan-500/20"
           />
           <GlossaryCard
             icon={Headphones}
-            term="Protocolos Respiratorios"
-            description="Audios guiados de respiracao (nivel 1). O participante recebe 7 dias gratis junto com o ingresso. Quem compra o Upsell (R$ 97) recebe acesso completo."
+            term="Protocolos Respiratórios"
+            description="Áudios guiados de respiração (nível 1). No final do desafio, a pessoa recebe o link de 7 dias grátis pela dashboard. Quem compra o Upsell (R$ 97) recebe acesso completo."
             iconColor="text-rose-400"
             borderColor="border-rose-500/20"
           />
         </div>
         <div className="mt-4 pt-3 border-t border-border/50">
-          <p className="text-[10px] text-muted-foreground font-heading uppercase tracking-wider mb-2">Metricas da Dashboard</p>
+          <p className="text-[10px] text-muted-foreground font-heading uppercase tracking-wider mb-2">Métricas da Dashboard</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {[
-              { term: 'CPA', desc: 'Custo por Aquisicao — quanto custa cada venda' },
+              { term: 'CPA', desc: 'Custo por Aquisição — quanto custa cada venda' },
               { term: 'CPL', desc: 'Custo por Lead — quanto custa cada ingresso' },
-              { term: 'Ticket Medio', desc: 'Valor medio por venda (faturamento / vendas)' },
+              { term: 'Ticket Médio', desc: 'Valor médio por venda (faturamento / vendas)' },
               { term: 'ROAS', desc: 'Retorno sobre investimento em ads' },
             ].map((m) => (
               <div key={m.term} className="bg-muted/30 rounded-lg p-2.5">
@@ -397,12 +409,12 @@ export default function GuiaDesafio() {
       >
         <div className="space-y-2">
           {[
-            { day: 'Segunda', label: 'Sessao 1', note: 'Gravacao disponivel por 24h', color: 'border-l-blue-500' },
-            { day: 'Terca', label: 'Sessao 2', note: 'Gravacao disponivel por 24h', color: 'border-l-blue-500' },
-            { day: 'Quarta', label: 'Sessao 3', note: 'Gravacao disponivel por 24h', color: 'border-l-blue-500' },
-            { day: 'Quinta', label: 'Sessao 4', note: 'Gravacao disponivel por 24h', color: 'border-l-blue-500' },
-            { day: 'Sexta', label: 'Sessao 5', note: 'Gravacao disponivel por 24h', color: 'border-l-blue-500' },
-            { day: 'Sabado', label: 'Todas as gravacoes liberadas', note: '5 gravacoes disponibilizadas ao mesmo tempo', color: 'border-l-emerald-500' },
+            { day: 'Segunda', label: 'Sessão 1', note: 'Gravação disponível por 24h', color: 'border-l-blue-500' },
+            { day: 'Terça', label: 'Sessão 2', note: 'Gravação disponível por 24h', color: 'border-l-blue-500' },
+            { day: 'Quarta', label: 'Sessão 3', note: 'Gravação disponível por 24h', color: 'border-l-blue-500' },
+            { day: 'Quinta', label: 'Sessão 4', note: 'Gravação disponível por 24h', color: 'border-l-blue-500' },
+            { day: 'Sexta', label: 'Sessão 5', note: 'Gravação disponível por 24h', color: 'border-l-blue-500' },
+            { day: 'Sábado', label: 'Todas as gravações liberadas', note: '5 gravações disponibilizadas ao mesmo tempo', color: 'border-l-emerald-500' },
           ].map((d) => (
             <div
               key={d.day}
@@ -419,11 +431,11 @@ export default function GuiaDesafio() {
         <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Link da gravacao diaria enviado no grupo de WhatsApp</span>
+            <span>Link da gravação diária enviado no grupo de WhatsApp.</span>
           </div>
           <div className="flex items-center gap-2">
             <Headphones className="w-3.5 h-3.5 text-violet-400" />
-            <span>Link dos 7 dias gratis de Protocolos entregue junto com o ingresso</span>
+            <span>Link dos 7 dias grátis dos Protocolos é entregue no final do desafio, pela dashboard.</span>
           </div>
         </div>
       </Section>
@@ -447,7 +459,7 @@ export default function GuiaDesafio() {
                 Planilha de Links
               </span>
               <p className="text-[10px] text-muted-foreground">
-                Links de cortesia, links dos grupos, links dos anuncios e demais recursos
+                Links de cortesia, links dos grupos, links dos anúncios e demais recursos.
               </p>
             </div>
           </a>
@@ -455,33 +467,33 @@ export default function GuiaDesafio() {
             <ExternalLink className="w-4 h-4 text-emerald-400" />
             <div>
               <span className="text-sm font-heading font-medium text-foreground">
-                Dashboard de Metricas
+                Dashboard de Métricas
               </span>
               <p className="text-[10px] text-muted-foreground">
-                Voce ja esta aqui — use as abas Desafio 1-4, Geral, Comparar e Analises
+                Você já está aqui — use as abas Desafio 1-4, Geral, Comparar e Análises.
               </p>
             </div>
           </div>
         </div>
       </Section>
 
-      {/* 6. ONDE ACHAR O QUE */}
+      {/* 6. ONDE ACHAR O QUÊ */}
       <Section
         icon={Map}
-        title="Onde Achar o Que"
+        title="Onde Achar o Quê"
         iconColor="text-amber-400"
       >
         <div className="space-y-1.5">
           {[
-            { need: 'Metricas de um desafio', go: 'Abas Desafio 1, 2, 3 ou 4' },
+            { need: 'Métricas de um desafio', go: 'Abas Desafio 1, 2, 3 ou 4' },
             { need: 'Resultado consolidado', go: 'Aba Geral (Total, Meta 1 ou Meta 2)' },
             { need: 'Comparar desafios', go: 'Aba Comparar' },
-            { need: 'Analises e relatorios', go: 'Aba Analises' },
-            { need: 'Simular cenarios', go: 'Aba Simulador' },
+            { need: 'Análises e relatórios', go: 'Aba Análises' },
+            { need: 'Simular cenários', go: 'Aba Simulador' },
             { need: 'Link de cortesia', go: 'Planilha de Links > aba Cortesias' },
             { need: 'Link do grupo WhatsApp', go: 'Planilha de Links > aba Grupos' },
-            { need: 'Links dos anuncios', go: 'Planilha de Links > aba Anuncios' },
-            { need: 'Config de cada desafio', go: 'Abas Desafio 1-4 > "Configuracao do Desafio"' },
+            { need: 'Links dos anúncios', go: 'Planilha de Links > aba Anúncios' },
+            { need: 'Configuração de cada desafio', go: 'Abas Desafio 1-4 > "Configuração do Desafio"' },
           ].map((item) => (
             <div
               key={item.need}
