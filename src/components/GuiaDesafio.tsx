@@ -263,7 +263,7 @@ export default function GuiaDesafio() {
             <div>
               <span className="text-xs font-heading font-medium text-foreground">Kit de Estudos</span>
               <span className="text-[10px] text-emerald-400 font-mono ml-2">R$ 37</span>
-              <p className="text-[10px] text-muted-foreground">Conteúdo introdutório + mini aulas sobre o desafio</p>
+              <p className="text-[10px] text-muted-foreground">Conteúdo introdutório + mini aulas sobre o desafio. Acesso por 30 dias.</p>
             </div>
           </div>
           <div className="bg-muted/40 border border-border/50 rounded-lg p-3 flex items-center gap-2">
@@ -271,14 +271,14 @@ export default function GuiaDesafio() {
             <div>
               <span className="text-xs font-heading font-medium text-foreground">Passaporte VIP</span>
               <span className="text-[10px] text-emerald-400 font-mono ml-2">R$ 57</span>
-              <p className="text-[10px] text-muted-foreground">Acesso às gravações (liberadas no sábado após os 5 dias)</p>
+              <p className="text-[10px] text-muted-foreground">Acesso às gravações (liberadas no sábado após os 5 dias). Acesso por 30 dias.</p>
             </div>
           </div>
         </div>
         <FlowStep
           num="5"
           label="Upsell: Desafio de 21 Dias"
-          sublabel="R$ 97 + áudios dos Protocolos Respiratórios nível 1"
+          sublabel="R$ 97 + áudios dos Protocolos Respiratórios nível 1. Acesso por 30 dias."
           color="bg-amber-500/20 text-amber-400"
         />
         <FlowStep
@@ -296,7 +296,7 @@ export default function GuiaDesafio() {
         <FlowStep
           num="8"
           label="7 dias grátis dos Protocolos Respiratórios"
-          sublabel="A pessoa é direcionada para a dashboard com o link dos 7 dias grátis (áudios nível 1)."
+          sublabel="A partir da sessão 1, a pessoa recebe o link dos 7 dias grátis dos áudios nível 1 pela dashboard."
           color="bg-primary/20 text-primary"
         />
         <div className="ml-11 mb-3">
@@ -353,7 +353,7 @@ export default function GuiaDesafio() {
             icon={ShoppingCart}
             term="Order Bump"
             price="R$ 37 / R$ 57"
-            description="Oferta adicional que aparece na página de checkout, antes de finalizar a compra. O cliente pode adicionar ao pedido com um clique. Temos dois: Kit de Estudos (R$ 37) e Passaporte VIP (R$ 57)."
+            description="Oferta adicional que aparece na página de checkout, antes de finalizar a compra. O cliente pode adicionar ao pedido com um clique. Temos dois: Kit de Estudos (R$ 37) e Passaporte VIP (R$ 57). Acesso por 30 dias."
             delivery="Ao comprar, recebe e-mail + WhatsApp com acesso"
             iconColor="text-amber-400"
             borderColor="border-amber-500/20"
@@ -362,7 +362,7 @@ export default function GuiaDesafio() {
             icon={Crown}
             term="Upsell"
             price="R$ 97"
-            description="Oferta apresentada após a compra do ingresso. É o Desafio de 21 Dias + acesso aos áudios de Protocolos Respiratórios de nível 1. Aumenta o ticket médio."
+            description="Oferta apresentada após a compra do ingresso. É o Desafio de 21 Dias + acesso aos áudios de Protocolos Respiratórios de nível 1. Acesso por 30 dias. Aumenta o ticket médio."
             delivery="Ao comprar, recebe e-mail + WhatsApp com acesso"
             iconColor="text-emerald-400"
             borderColor="border-emerald-500/20"
@@ -371,14 +371,14 @@ export default function GuiaDesafio() {
             icon={Video}
             term="Passaporte VIP"
             price="R$ 57"
-            description="Order Bump que dá acesso às gravações das sessões. As gravações são liberadas no sábado, todas as 5 ao mesmo tempo, após o encerramento do desafio."
+            description="Order Bump que dá acesso às gravações das sessões. As gravações são liberadas no sábado, todas as 5 ao mesmo tempo, após o encerramento do desafio. Acesso por 30 dias."
             iconColor="text-cyan-400"
             borderColor="border-cyan-500/20"
           />
           <GlossaryCard
             icon={Headphones}
             term="Protocolos Respiratórios"
-            description="Áudios guiados de respiração (nível 1). No final do desafio, a pessoa recebe o link de 7 dias grátis pela dashboard. Quem compra o Upsell (R$ 97) recebe acesso completo."
+            description="Áudios guiados de respiração (nível 1). A partir da sessão 1, a pessoa recebe o link de 7 dias grátis pela dashboard. Quem compra o Upsell (R$ 97) recebe acesso completo."
             iconColor="text-rose-400"
             borderColor="border-rose-500/20"
           />
@@ -435,7 +435,7 @@ export default function GuiaDesafio() {
           </div>
           <div className="flex items-center gap-2">
             <Headphones className="w-3.5 h-3.5 text-violet-400" />
-            <span>Link dos 7 dias grátis dos Protocolos é entregue no final do desafio, pela dashboard.</span>
+            <span>Link dos 7 dias grátis dos Protocolos é entregue a partir da sessão 1, pela dashboard.</span>
           </div>
         </div>
       </Section>
