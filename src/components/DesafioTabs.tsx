@@ -20,6 +20,7 @@ const tabs: { key: TabKey; label: string; num: string }[] = [
   { key: 'analises', label: 'Analises', num: '📊' },
   { key: 'simulador', label: 'Simulador', num: '⚡' },
   { key: 'comparar', label: 'Comparar', num: '⇄' },
+  { key: 'guia', label: 'Guia', num: '📖' },
 ];
 
 export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTabsProps) {
@@ -27,7 +28,7 @@ export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTab
     <div className="flex flex-col sm:flex-row gap-3">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
-        const isDesafio = tab.key !== 'geral' && tab.key !== 'comparar' && tab.key !== 'analises' && tab.key !== 'simulador';
+        const isDesafio = tab.key !== 'geral' && tab.key !== 'comparar' && tab.key !== 'analises' && tab.key !== 'simulador' && tab.key !== 'guia';
         const desafioData = isDesafio ? data[tab.key as DesafioKey] : null;
         const hasData = !isDesafio || (desafioData !== null && (desafioData.investimento > 0 || desafioData.vendas > 0));
         return (
