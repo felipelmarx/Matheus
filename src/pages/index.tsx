@@ -9,6 +9,7 @@ import ListaAnuncios from '@/components/ListaAnuncios';
 import DetalhamentoDia from '@/components/DetalhamentoDia';
 import MetasCard from '@/components/MetasCard';
 import CompararView from '@/components/CompararView';
+import DesafioInfo from '@/components/DesafioInfo';
 import AnalisesDesafios from '@/components/AnalisesDesafios';
 import SimuladorView from '@/components/simulador/SimuladorView';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
@@ -173,6 +174,9 @@ export default function DashboardPage() {
                       </button>
                     ))}
                   </div>
+                )}
+                {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4') && (
+                  <DesafioInfo desafioKey={activeTab} />
                 )}
                 <StatCards data={activeData} />
                 <MetasCard data={activeData} />
