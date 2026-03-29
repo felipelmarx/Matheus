@@ -20,7 +20,7 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
     ? [data.desafio1, data.desafio2]
     : mode === 'meta2'
       ? [data.desafio3, data.desafio4]
-      : [data.desafio1, data.desafio2, data.desafio3, data.desafio4];
+      : [data.desafio1, data.desafio2, data.desafio3, data.desafio4, data.desafio5];
 
   const sum = (fn: (d: DesafioData) => number) => desafios.reduce((acc, d) => acc + fn(d), 0);
 
@@ -160,7 +160,7 @@ export default function DashboardPage() {
                 {activeTab === 'geral' && (
                   <div className="flex items-center justify-center gap-1 bg-card border border-border rounded-xl p-1.5">
                     {([
-                      { key: 'total' as GeralMode, label: 'Total (D1-D4)' },
+                      { key: 'total' as GeralMode, label: 'Total (D1-D5)' },
                       { key: 'meta1' as GeralMode, label: 'Meta 1 (D1+D2)' },
                       { key: 'meta2' as GeralMode, label: 'Meta 2 (D3+D4)' },
                     ]).map((opt) => (
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                     ))}
                   </div>
                 )}
-                {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4') && (
+                {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5') && (
                   <DesafioInfo desafioKey={activeTab} />
                 )}
                 <StatCards data={activeData} />
@@ -192,6 +192,9 @@ export default function DashboardPage() {
                 )}
                 {activeTab === 'desafio4' && data.desafio4Daily.length > 0 && (
                   <DetalhamentoDia daily={data.desafio4Daily} />
+                )}
+                {activeTab === 'desafio5' && data.desafio5Daily.length > 0 && (
+                  <DetalhamentoDia daily={data.desafio5Daily} />
                 )}
               </>
             ) : null}

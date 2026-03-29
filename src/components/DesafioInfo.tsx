@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Users, Tag, ExternalLink, Megaphone, ChevronDown, ChevronUp } from 'lucide-react';
 
-type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4';
+type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5';
 
 interface DesafioConfig {
   publico: string;
@@ -69,6 +69,13 @@ const DESAFIO_DATA: Record<DesafioKey, DesafioConfig> = {
       '1 Daniela AM',
       'EDU REELS 4 AYAHUASCA',
     ],
+  },
+  desafio5: {
+    publico: 'A definir',
+    oferta: 'A definir',
+    hasUpsell: false,
+    pagina: 'https://desafio-5d-lp.vercel.app/',
+    anuncios: [],
   },
 };
 

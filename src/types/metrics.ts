@@ -46,7 +46,7 @@ export interface DesafioData {
   noShow: number;
 }
 
-export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4';
+export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5';
 export type TabKey = 'geral' | DesafioKey | 'comparar' | 'analises' | 'simulador' | 'guia';
 export type GeralMode = 'total' | 'meta1' | 'meta2';
 
@@ -78,6 +78,8 @@ export interface AllDesafiosData {
   desafio3Daily: DailyMetric[];
   desafio4: DesafioData;
   desafio4Daily: DailyMetric[];
+  desafio5: DesafioData;
+  desafio5Daily: DailyMetric[];
   topAds: AdMetric[];
   topAdsDesafio4: AdMetric[];
   visaoEstrategica: string[];

@@ -203,6 +203,8 @@ function getDefaultData(): AllDesafiosData {
     desafio3Daily: [],
     desafio4: getDefaultDesafio(),
     desafio4Daily: [],
+    desafio5: getDefaultDesafio(),
+    desafio5Daily: [],
     topAds: [],
     topAdsDesafio4: [],
     visaoEstrategica: [],
@@ -222,6 +224,7 @@ const DESAFIO_COLS = [
   { key: 'desafio2' as const, labelCol: 6, valueCol: 7 },
   { key: 'desafio3' as const, labelCol: 12, valueCol: 13 },
   { key: 'desafio4' as const, labelCol: 18, valueCol: 19 },
+  { key: 'desafio5' as const, labelCol: 24, valueCol: 25 },
 ];
 
 export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
@@ -235,7 +238,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
   try {
     console.log('[sheets] Fetching from RESUMO - GERAL, MAR/ABR MÉTRICAS GERAIS, and ADS...');
-    const resumoRows = await fetchSheetRows('RESUMO - GERAL!C1:X77');
+    const resumoRows = await fetchSheetRows('RESUMO - GERAL!C1:AD77');
 
     // Daily fetch is independent - don't let it break the main data
     let dailyRows: string[][] = [];
@@ -252,6 +255,15 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log(`[sheets] Desafio 4: ${desafio4Rows.length} rows loaded`);
     } catch (err) {
       console.warn('[sheets] Desafio 4 fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    // Desafio 5 daily fetch is independent
+    let desafio5Rows: string[][] = [];
+    try {
+      desafio5Rows = await fetchSheetRows("'ABR - METRICAS GERAIS'!CU5:DB13");
+      console.log(`[sheets] Desafio 5 daily: ${desafio5Rows.length} rows loaded`);
+    } catch (err) {
+      console.warn('[sheets] Desafio 5 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
     // Ads fetch is independent - don't let it break the main data
@@ -287,6 +299,9 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const desafio4Daily = extractDesafio4Daily(desafio4Rows);
     console.log(`[sheets] desafio4Daily: ${desafio4Daily.length} days loaded`);
 
+    const desafio5Daily = extractDailyMetrics(desafio5Rows);
+    console.log(`[sheets] desafio5Daily: ${desafio5Daily.length} days loaded`);
+
     const topAds = extractAdsData(adsRows);
     console.log(`[sheets] topAds: ${topAds.length} ads ranked`);
 
@@ -301,6 +316,8 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio3Daily,
       desafio4: getDefaultDesafio(),
       desafio4Daily,
+      desafio5: getDefaultDesafio(),
+      desafio5Daily,
       topAds,
       topAdsDesafio4,
       visaoEstrategica: [],
@@ -320,12 +337,13 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     // Columns: B=0, H=6, N=12, T=18 (0-indexed from B)
     // Rows: 0=header, 1="cancelamento", 2=cancel value, 3="no-show", 4=noshow value
     try {
-      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:T39');
-      const cancelCols: { key: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4'; col: number }[] = [
+      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:AD39');
+      const cancelCols: { key: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5'; col: number }[] = [
         { key: 'desafio1', col: 0 },   // B
         { key: 'desafio2', col: 6 },   // H
         { key: 'desafio3', col: 12 },  // N
         { key: 'desafio4', col: 18 },  // T
+        { key: 'desafio5', col: 24 },  // Z/AA
       ];
       for (const cc of cancelCols) {
         data[cc.key].cancelamentos = parseSheetNumber(cancelRows[2]?.[cc.col] ?? '');
