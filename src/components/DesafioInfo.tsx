@@ -136,7 +136,7 @@ export default function DesafioInfo({ desafioKey }: DesafioInfoProps) {
               <span
                 className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-mono font-semibold whitespace-nowrap ${
                   config.hasUpsell
-                    ? 'bg-emerald-500/15 text-emerald-400'
+                    ? 'bg-indigo-500/15 text-indigo-400'
                     : 'bg-amber-500/15 text-amber-400'
                 }`}
               >

@@ -25,7 +25,7 @@ export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
     { label: 'Aplicações', value: outputs.aplicacoes, width: '78%', color: 'bg-violet-500/85' },
     { label: 'Agendamentos', value: outputs.agendamentos, width: '58%', color: 'bg-violet-500/70' },
     { label: 'Entrevistas', value: outputs.entrevistas, width: '42%', color: 'bg-violet-500/55' },
-    { label: 'Vendas Formação', value: outputs.vendasFormacao, width: '28%', color: 'bg-emerald-500' },
+    { label: 'Vendas Formação', value: outputs.vendasFormacao, width: '28%', color: 'bg-indigo-500' },
   ];
 
   return (

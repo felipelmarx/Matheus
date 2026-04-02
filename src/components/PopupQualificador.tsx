@@ -18,10 +18,10 @@ export default function PopupQualificador({ days }: PopupQualificadorProps) {
   const metrics: { key: keyof PopupQualificadorSide; label: string; format: (v: number) => string; icon: typeof DollarSign; color: string; lowerIsBetter?: boolean }[] = [
     { key: 'investimento', label: 'Investimento', format: fmt, icon: DollarSign, color: 'text-blue-400' },
     { key: 'custoEstimado', label: 'Custo Estimado', format: fmt2, icon: Target, color: 'text-orange-400', lowerIsBetter: true },
-    { key: 'checkouts', label: 'Checkouts', format: fmtNum, icon: ShoppingCart, color: 'text-emerald-400' },
+    { key: 'checkouts', label: 'Checkouts', format: fmtNum, icon: ShoppingCart, color: 'text-indigo-400' },
     { key: 'conversaoCheckout', label: 'Conv. Checkout', format: fmtPct, icon: Percent, color: 'text-cyan-400' },
     { key: 'proporcao', label: 'Proporcao', format: fmtPct, icon: Percent, color: 'text-violet-400' },
-    { key: 'vendas', label: 'Vendas', format: fmtNum, icon: Users, color: 'text-emerald-400' },
+    { key: 'vendas', label: 'Vendas', format: fmtNum, icon: Users, color: 'text-indigo-400' },
     { key: 'cpaReal', label: 'CPA Real', format: fmt2, icon: Target, color: 'text-orange-400', lowerIsBetter: true },
     { key: 'faturamento', label: 'Faturamento', format: fmt, icon: TrendingUp, color: 'text-cyan-400' },
     { key: 'ticketMedio', label: 'Ticket Medio', format: fmt2, icon: Tag, color: 'text-amber-400' },
@@ -60,7 +60,7 @@ export default function PopupQualificador({ days }: PopupQualificadorProps) {
             <div className="p-3">
               <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 mb-2 pb-2 border-b border-border/50">
                 <span className="text-[10px] text-muted-foreground font-heading uppercase tracking-wider">Metrica</span>
-                <span className="text-[10px] text-emerald-400 font-heading font-semibold text-right w-[5.5rem]">Qualif.</span>
+                <span className="text-[10px] text-indigo-400 font-heading font-semibold text-right w-[5.5rem]">Qualif.</span>
                 <span className="text-[10px] text-orange-400 font-heading font-semibold text-right w-[5.5rem]">Desqualif.</span>
               </div>
 
@@ -88,10 +88,10 @@ export default function PopupQualificador({ days }: PopupQualificadorProps) {
                       <Icon className={`w-3 h-3 shrink-0 ${m.color}`} />
                       <span className="text-[11px] text-muted-foreground font-heading truncate">{m.label}</span>
                     </div>
-                    <span className={`text-[11px] font-mono font-medium text-right w-[5.5rem] ${qBetter ? 'text-emerald-400 font-bold' : 'text-foreground'}`}>
+                    <span className={`text-[11px] font-mono font-medium text-right w-[5.5rem] ${qBetter ? 'text-indigo-400 font-bold' : 'text-foreground'}`}>
                       {m.format(qVal)}
                     </span>
-                    <span className={`text-[11px] font-mono font-medium text-right w-[5.5rem] ${dBetter ? 'text-emerald-400 font-bold' : 'text-foreground'}`}>
+                    <span className={`text-[11px] font-mono font-medium text-right w-[5.5rem] ${dBetter ? 'text-indigo-400 font-bold' : 'text-foreground'}`}>
                       {m.format(dVal)}
                     </span>
                   </div>

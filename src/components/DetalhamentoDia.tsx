@@ -14,7 +14,7 @@ export default function DetalhamentoDia({ daily }: DetalhamentoDiaProps) {
 
   const metrics = [
     { key: 'investimento' as const, label: 'Investimento', icon: DollarSign, iconColor: 'text-blue-400', format: fmt },
-    { key: 'vendas' as const, label: 'Vendas', icon: ShoppingCart, iconColor: 'text-emerald-400', format: fmtNum },
+    { key: 'vendas' as const, label: 'Vendas', icon: ShoppingCart, iconColor: 'text-indigo-400', format: fmtNum },
     { key: 'cpa' as const, label: 'CPA', icon: Target, iconColor: 'text-orange-400', format: fmt },
     { key: 'ticketMedio' as const, label: 'Ticket Médio', icon: Tag, iconColor: 'text-amber-400', format: fmt },
     { key: 'faturamento' as const, label: 'Faturamento', icon: TrendingUp, iconColor: 'text-cyan-400', format: fmt },

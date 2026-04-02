@@ -52,7 +52,7 @@ const sections: { title: string; color: string; fields: FieldConfig[] }[] = [
   },
   {
     title: 'Upsell',
-    color: 'text-emerald-400',
+    color: 'text-indigo-400',
     fields: [
       { key: 'precoUpsell', label: 'Preco', min: 0, max: 10000, step: 1, unit: 'R$' },
       { key: 'taxaUpsell', label: 'Taxa de Aceitacao', min: 0, max: 100, step: 1, unit: '%' },

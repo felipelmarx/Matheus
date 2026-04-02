@@ -85,9 +85,9 @@ const METRIC_GROUPS: MetricGroup[] = [
     id: 'sessoes',
     label: 'Sessoes ao Vivo',
     icon: Monitor,
-    color: 'from-emerald-500/10 to-emerald-600/5',
-    iconColor: 'text-emerald-400',
-    borderColor: 'border-emerald-500/20',
+    color: 'from-indigo-500/10 to-indigo-600/5',
+    iconColor: 'text-indigo-400',
+    borderColor: 'border-indigo-500/20',
     pattern: /sess[aã]o|assistiu|participou/i,
   },
   {
@@ -112,9 +112,9 @@ const METRIC_GROUPS: MetricGroup[] = [
     id: 'comercial',
     label: 'Comercial & Faturamento',
     icon: Trophy,
-    color: 'from-emerald-500/10 to-emerald-600/5',
-    iconColor: 'text-emerald-400',
-    borderColor: 'border-emerald-500/20',
+    color: 'from-indigo-500/10 to-indigo-600/5',
+    iconColor: 'text-indigo-400',
+    borderColor: 'border-indigo-500/20',
     pattern: /^agendamento|^entrevista|vendas da forma|^cac$|ticket m[eé]dio forma|convers[aã]o|faturamento total|tm\/cac/i,
   },
 ];
@@ -135,7 +135,7 @@ const KPI_DEFS: KPIDef[] = [
   { label: 'Investimento Bruto', pattern: /investimento bruto/i, color: 'from-blue-500/10 to-blue-600/5', iconColor: 'text-blue-400', borderColor: 'border-blue-500/20' },
   { label: 'Vendas Ingressos', pattern: /^vendas ingressos$/i, color: 'from-violet-500/10 to-violet-600/5', iconColor: 'text-violet-400', borderColor: 'border-violet-500/20' },
   { label: 'CPA', pattern: /^cpa \(custo/i, color: 'from-red-500/10 to-red-600/5', iconColor: 'text-red-400', borderColor: 'border-red-500/20' },
-  { label: 'Faturamento Total', pattern: /^faturamento total$/i, color: 'from-emerald-500/10 to-emerald-600/5', iconColor: 'text-emerald-400', borderColor: 'border-emerald-500/20' },
+  { label: 'Faturamento Total', pattern: /^faturamento total$/i, color: 'from-indigo-500/10 to-indigo-600/5', iconColor: 'text-indigo-400', borderColor: 'border-indigo-500/20' },
   { label: 'Vendas Formacao', pattern: /^vendas da forma/i, color: 'from-amber-500/10 to-amber-600/5', iconColor: 'text-amber-400', borderColor: 'border-amber-500/20' },
   { label: 'Inv. Liquido', pattern: /investimento l[ií]quido/i, color: 'from-red-500/10 to-red-600/5', iconColor: 'text-red-400', borderColor: 'border-red-500/20' },
 ];
@@ -214,7 +214,7 @@ function isSectionHeader(m: ResumoTecnicoMetric): boolean {
 
 function comparisonColor(text: string): string {
   const lower = text.toLowerCase();
-  if (/melhor|cresci|aument|reduziu.*custo|eficien|positiv/i.test(lower)) return 'text-emerald-400';
+  if (/melhor|cresci|aument|reduziu.*custo|eficien|positiv/i.test(lower)) return 'text-indigo-400';
   if (/pior|ca[ií]u|aument.*custo|negativ|queda/i.test(lower)) return 'text-red-400';
   return 'text-muted-foreground';
 }

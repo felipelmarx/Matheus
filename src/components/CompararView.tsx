@@ -120,7 +120,7 @@ function getValueColor(
   const best = invertColor ? Math.min(...nonZero) : Math.max(...nonZero);
   const worst = invertColor ? Math.max(...nonZero) : Math.min(...nonZero);
 
-  if (value === best) return 'text-emerald-400';
+  if (value === best) return 'text-indigo-400';
   if (value === worst && nonZero.length > 1) return 'text-red-400';
   return 'text-foreground';
 }

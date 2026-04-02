@@ -10,7 +10,7 @@ const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL',
 const styles = [
   { bg: 'from-red-500/5', header: 'bg-red-500/10', text: 'text-red-400', icon: TrendingDown },
   { bg: 'from-primary/5', header: 'bg-primary/10', text: 'text-primary', icon: Minus },
-  { bg: 'from-emerald-500/5', header: 'bg-emerald-500/10', text: 'text-emerald-400', icon: TrendingUp },
+  { bg: 'from-indigo-500/5', header: 'bg-indigo-500/10', text: 'text-indigo-400', icon: TrendingUp },
 ];
 
 interface Row {
@@ -25,9 +25,9 @@ const rows: Row[] = [
   { label: 'Receita', get: (c) => BRL.format(c.outputs.faturamentoTotal) },
   { label: 'CPA', get: (c) => BRL.format(c.outputs.cpa) },
   { label: 'EPC', get: (c) => `R$ ${c.outputs.epc.toFixed(2)}` },
-  { label: 'Lucro', get: (c) => BRL.format(c.outputs.lucro), color: (c) => c.outputs.lucro >= 0 ? 'text-emerald-400' : 'text-red-400' },
-  { label: 'ROI', get: (c) => `${c.outputs.roi.toFixed(1)}%`, color: (c) => c.outputs.roi >= 0 ? 'text-emerald-400' : 'text-red-400' },
-  { label: 'ROAS', get: (c) => `${c.outputs.roas.toFixed(2)}x`, color: (c) => c.outputs.roas >= 1 ? 'text-emerald-400' : 'text-red-400' },
+  { label: 'Lucro', get: (c) => BRL.format(c.outputs.lucro), color: (c) => c.outputs.lucro >= 0 ? 'text-indigo-400' : 'text-red-400' },
+  { label: 'ROI', get: (c) => `${c.outputs.roi.toFixed(1)}%`, color: (c) => c.outputs.roi >= 0 ? 'text-indigo-400' : 'text-red-400' },
+  { label: 'ROAS', get: (c) => `${c.outputs.roas.toFixed(2)}x`, color: (c) => c.outputs.roas >= 1 ? 'text-indigo-400' : 'text-red-400' },
 ];
 
 export default function SimuladorCenarios({ cenarios }: SimuladorCenariosProps) {

@@ -4,38 +4,38 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 220 15% 15%;
+    --background: 0 0% 99%;
+    --foreground: 225 15% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 15%;
-    --primary: 145 60% 45%;
+    --card-foreground: 225 15% 15%;
+    --primary: 230 70% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 90%;
-    --secondary-foreground: 220 15% 15%;
-    --muted: 215 15% 85%;
-    --muted-foreground: 215 15% 40%;
-    --border: 220 14% 85%;
+    --secondary: 225 14% 92%;
+    --secondary-foreground: 225 15% 15%;
+    --muted: 220 14% 90%;
+    --muted-foreground: 220 12% 45%;
+    --border: 225 14% 88%;
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
-    --accent: 145 60% 45%;
+    --accent: 230 70% 55%;
     --accent-foreground: 0 0% 100%;
   }
 
   .dark {
-    --background: 220 20% 7%;
+    --background: 225 20% 7%;
     --foreground: 0 0% 98%;
-    --card: 220 18% 10%;
+    --card: 225 18% 10%;
     --card-foreground: 0 0% 98%;
-    --primary: 145 60% 45%;
+    --primary: 230 70% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 16%;
+    --secondary: 225 14% 16%;
     --secondary-foreground: 0 0% 95%;
-    --muted: 220 14% 16%;
-    --muted-foreground: 215 15% 70%;
-    --border: 220 14% 20%;
+    --muted: 225 14% 16%;
+    --muted-foreground: 220 12% 70%;
+    --border: 225 14% 20%;
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
-    --accent: 145 60% 45%;
+    --accent: 230 70% 60%;
     --accent-foreground: 0 0% 100%;
   }
 
@@ -51,6 +51,44 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* ── 3D Card System ──────────────────────────────────── */
+
+.card-3d {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.03);
+  transition: transform 0.25s cubic-bezier(0.33, 1, 0.68, 1),
+              box-shadow 0.25s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.card-3d:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    0 16px 40px rgba(0, 0, 0, 0.06);
+}
+
+.dark .card-3d {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.dark .card-3d:hover {
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.25),
+    0 8px 16px rgba(0, 0, 0, 0.2),
+    0 16px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Scrollbar ───────────────────────────────────────── */
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -69,6 +107,8 @@
   background: hsl(var(--muted-foreground));
 }
 
+/* ── Animations ──────────────────────────────────────── */
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -78,7 +118,8 @@
   animation: fadeIn 0.3s ease-in-out;
 }
 
-/* Simulator slider */
+/* ── Simulator slider ────────────────────────────────── */
+
 .sim-slider {
   -webkit-appearance: none;
   appearance: none;

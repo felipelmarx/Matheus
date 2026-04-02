@@ -20,7 +20,7 @@ export default function MetasCard({ data }: MetasCardProps) {
       label: 'Vendas da Formação',
       value: fmtNum(data.vendasFormacao),
       icon: Trophy,
-      iconColor: 'text-emerald-400',
+      iconColor: 'text-indigo-400',
     },
     {
       label: 'CAC da Formação',

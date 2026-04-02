@@ -132,7 +132,7 @@ function GlossaryCard({
           {term}
         </span>
         {price && (
-          <span className="ml-auto text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+          <span className="ml-auto text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md">
             {price}
           </span>
         )}
@@ -208,7 +208,7 @@ export default function GuiaDesafio() {
             <p className="text-[10px] text-muted-foreground mt-1 font-heading">Sessões gravadas</p>
           </div>
           <div className="bg-muted/30 rounded-lg p-3 text-center">
-            <span className="text-2xl font-mono font-bold text-emerald-400">24h</span>
+            <span className="text-2xl font-mono font-bold text-indigo-400">24h</span>
             <p className="text-[10px] text-muted-foreground mt-1 font-heading">Gravação disponível por dia</p>
           </div>
           <div className="bg-muted/30 rounded-lg p-3 text-center">
@@ -241,7 +241,7 @@ export default function GuiaDesafio() {
           num="3"
           label="Compra o Ingresso (R$ 7)"
           sublabel="Ingresso duplo — a pessoa paga um valor simbólico e recebe um ingresso cortesia para convidar um amigo da área"
-          color="bg-emerald-500/20 text-emerald-400"
+          color="bg-indigo-500/20 text-indigo-400"
         />
         <div className="ml-11 mb-3">
           <div className="bg-muted/40 border border-border/50 rounded-lg p-3 flex items-start gap-2">
@@ -262,7 +262,7 @@ export default function GuiaDesafio() {
             <ShoppingCart className="w-3.5 h-3.5 text-amber-400" />
             <div>
               <span className="text-xs font-heading font-medium text-foreground">Kit de Estudos</span>
-              <span className="text-[10px] text-emerald-400 font-mono ml-2">R$ 37</span>
+              <span className="text-[10px] text-indigo-400 font-mono ml-2">R$ 37</span>
               <p className="text-[10px] text-muted-foreground">Conteúdo introdutório + mini aulas sobre o desafio. Acesso por 30 dias.</p>
             </div>
           </div>
@@ -270,7 +270,7 @@ export default function GuiaDesafio() {
             <ShoppingCart className="w-3.5 h-3.5 text-amber-400" />
             <div>
               <span className="text-xs font-heading font-medium text-foreground">Passaporte VIP</span>
-              <span className="text-[10px] text-emerald-400 font-mono ml-2">R$ 57</span>
+              <span className="text-[10px] text-indigo-400 font-mono ml-2">R$ 57</span>
               <p className="text-[10px] text-muted-foreground">Acesso às gravações (liberadas no sábado após os 5 dias). Acesso por 30 dias.</p>
             </div>
           </div>
@@ -285,7 +285,7 @@ export default function GuiaDesafio() {
           num="6"
           label="Entra no Grupo de WhatsApp"
           sublabel="Recebe o link do grupo após a compra"
-          color="bg-emerald-500/20 text-emerald-400"
+          color="bg-indigo-500/20 text-indigo-400"
         />
         <FlowStep
           num="7"
@@ -306,7 +306,7 @@ export default function GuiaDesafio() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-muted/40 border border-border/50 rounded-lg px-3 py-2 hover:border-primary/40 transition-colors group"
           >
-            <Gift className="w-3.5 h-3.5 text-emerald-400" />
+            <Gift className="w-3.5 h-3.5 text-indigo-400" />
             <span className="text-xs font-mono text-primary group-hover:underline">
               🎁 7 dias grátis dos áudios respiratórios Nível 1
             </span>
@@ -330,7 +330,7 @@ export default function GuiaDesafio() {
       <Section
         icon={BookOpen}
         title="Glossário — Termos Importantes"
-        iconColor="text-emerald-400"
+        iconColor="text-indigo-400"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <GlossaryCard
@@ -364,8 +364,8 @@ export default function GuiaDesafio() {
             price="R$ 97"
             description="Oferta apresentada após a compra do ingresso. É o Desafio de 21 Dias + acesso aos áudios de Protocolos Respiratórios de nível 1. Acesso por 30 dias. Aumenta o ticket médio."
             delivery="Ao comprar, recebe e-mail + WhatsApp com acesso"
-            iconColor="text-emerald-400"
-            borderColor="border-emerald-500/20"
+            iconColor="text-indigo-400"
+            borderColor="border-indigo-500/20"
           />
           <GlossaryCard
             icon={Video}
@@ -414,7 +414,7 @@ export default function GuiaDesafio() {
             { day: 'Quarta', label: 'Sessão 3', note: 'Gravação disponível por 24h', color: 'border-l-blue-500' },
             { day: 'Quinta', label: 'Sessão 4', note: 'Gravação disponível por 24h', color: 'border-l-blue-500' },
             { day: 'Sexta', label: 'Sessão 5', note: 'Gravação disponível por 24h', color: 'border-l-blue-500' },
-            { day: 'Sábado', label: 'Todas as gravações liberadas', note: '5 gravações disponibilizadas ao mesmo tempo', color: 'border-l-emerald-500' },
+            { day: 'Sábado', label: 'Todas as gravações liberadas', note: '5 gravações disponibilizadas ao mesmo tempo', color: 'border-l-indigo-500' },
           ].map((d) => (
             <div
               key={d.day}
@@ -430,7 +430,7 @@ export default function GuiaDesafio() {
         </div>
         <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+            <MessageCircle className="w-3.5 h-3.5 text-indigo-400" />
             <span>Link da gravação diária enviado no grupo de WhatsApp.</span>
           </div>
           <div className="flex items-center gap-2">
@@ -464,7 +464,7 @@ export default function GuiaDesafio() {
             </div>
           </a>
           <div className="flex items-center gap-3 bg-muted/30 border border-border/50 rounded-lg p-3.5">
-            <ExternalLink className="w-4 h-4 text-emerald-400" />
+            <ExternalLink className="w-4 h-4 text-indigo-400" />
             <div>
               <span className="text-sm font-heading font-medium text-foreground">
                 Dashboard de Métricas

@@ -52,7 +52,7 @@ export default function SimuladorBreakeven({ data }: SimuladorBreakevenProps) {
           </span>
         )}
         {allPositive && (
-          <span className="text-xs font-mono font-bold text-emerald-400">
+          <span className="text-xs font-mono font-bold text-indigo-400">
             Sempre lucrativo
           </span>
         )}

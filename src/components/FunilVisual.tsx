@@ -20,7 +20,7 @@ export default function FunilVisual({ data }: FunilVisualProps) {
     { label: 'Aplicações', value: data.aplicacoes, width: '78%', color: 'bg-violet-500/85' },
     { label: 'Agendamentos', value: data.agendamentos, width: '58%', color: 'bg-violet-500/70' },
     { label: 'Entrevistas', value: data.entrevistas, width: '42%', color: 'bg-violet-500/55' },
-    { label: 'Vendas Formação', value: data.vendasFormacao, width: '28%', color: 'bg-emerald-500' },
+    { label: 'Vendas Formação', value: data.vendasFormacao, width: '28%', color: 'bg-indigo-500' },
   ];
 
   const conversionRate = (from: number, to: number) => {
