@@ -70,6 +70,25 @@ export interface AdMetric {
   dailyBreakdown: { day: string; spent: number; purchases: number }[];
 }
 
+export interface PopupQualificadorSide {
+  investimento: number;
+  custoEstimado: number;
+  checkouts: number;
+  conversaoCheckout: number;
+  proporcao: number;
+  vendas: number;
+  cpaReal: number;
+  faturamento: number;
+  ticketMedio: number;
+}
+
+export interface PopupQualificadorDay {
+  data: string;
+  qualificador: PopupQualificadorSide;
+  desqualificado: PopupQualificadorSide;
+  checkoutTotais: number;
+}
+
 export interface AllDesafiosData {
   geral: DesafioData;
   desafio1: DesafioData;
@@ -80,6 +99,7 @@ export interface AllDesafiosData {
   desafio4Daily: DailyMetric[];
   desafio5: DesafioData;
   desafio5Daily: DailyMetric[];
+  popupQualificador: PopupQualificadorDay[];
   topAds: AdMetric[];
   topAdsDesafio4: AdMetric[];
   visaoEstrategica: string[];

@@ -7,6 +7,7 @@ import ResumoGeral from '@/components/ResumoGeral';
 import FunilVisual from '@/components/FunilVisual';
 import ListaAnuncios from '@/components/ListaAnuncios';
 import DetalhamentoDia from '@/components/DetalhamentoDia';
+import PopupQualificador from '@/components/PopupQualificador';
 import MetasCard from '@/components/MetasCard';
 import CompararView from '@/components/CompararView';
 import DesafioInfo from '@/components/DesafioInfo';
@@ -195,6 +196,9 @@ export default function DashboardPage() {
                 )}
                 {activeTab === 'desafio5' && data.desafio5Daily.length > 0 && (
                   <DetalhamentoDia daily={data.desafio5Daily} />
+                )}
+                {activeTab === 'desafio5' && data.popupQualificador.length > 0 && (
+                  <PopupQualificador days={data.popupQualificador} />
                 )}
               </>
             ) : null}

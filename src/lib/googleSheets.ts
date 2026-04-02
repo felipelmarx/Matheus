@@ -1,4 +1,4 @@
-import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric } from '@/types/metrics';
+import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
 
@@ -194,6 +194,57 @@ function extractDesafio4Daily(rows: string[][]): DailyMetric[] {
   return daily;
 }
 
+// Extract Pop-up Qualificador data from ABR - METRICAS GERAIS (AT5:BL19)
+// Row 0-1 = headers, row 2 = empty, data starts row 3 (= 30/03/2026)
+// Cols 0-8 = QUALIFICADOR, cols 9-17 = DESQUALIFICADO, col 18 = checkout totais
+function extractPopupQualificador(rows: string[][]): PopupQualificadorDay[] {
+  const p = parseSheetNumber;
+  const days: PopupQualificadorDay[] = [];
+  const startDate = new Date(2026, 2, 30); // 30/03/2026
+
+  for (let i = 3; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row || row.length === 0) continue;
+
+    // Skip rows where all values are zero/empty
+    const hasData = row.some((val, idx) => idx !== 0 && p(val) !== 0) || p(row[0]) !== 0;
+    if (!hasData) continue;
+
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + (i - 3));
+    const dateStr = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+
+    days.push({
+      data: dateStr,
+      qualificador: {
+        investimento: p(row[0]),
+        custoEstimado: p(row[1]),
+        checkouts: p(row[2]),
+        conversaoCheckout: p(row[3]),
+        proporcao: p(row[4]),
+        vendas: p(row[5]),
+        cpaReal: p(row[6]),
+        faturamento: p(row[7]),
+        ticketMedio: p(row[8]),
+      },
+      desqualificado: {
+        investimento: p(row[9]),
+        custoEstimado: p(row[10]),
+        checkouts: p(row[11]),
+        conversaoCheckout: p(row[12]),
+        proporcao: p(row[13]),
+        vendas: p(row[14]),
+        cpaReal: p(row[15]),
+        faturamento: p(row[16]),
+        ticketMedio: p(row[17]),
+      },
+      checkoutTotais: p(row[18]),
+    });
+  }
+
+  return days;
+}
+
 function getDefaultData(): AllDesafiosData {
   return {
     geral: getDefaultDesafio(),
@@ -205,6 +256,7 @@ function getDefaultData(): AllDesafiosData {
     desafio4Daily: [],
     desafio5: getDefaultDesafio(),
     desafio5Daily: [],
+    popupQualificador: [],
     topAds: [],
     topAdsDesafio4: [],
     visaoEstrategica: [],
@@ -266,6 +318,15 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Desafio 5 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
+    // Pop-up Qualificador fetch is independent
+    let popupRows: string[][] = [];
+    try {
+      popupRows = await fetchSheetRows("'ABR - METRICAS GERAIS'!AT5:BL19");
+      console.log(`[sheets] Popup Qualificador: ${popupRows.length} rows loaded`);
+    } catch (err) {
+      console.warn('[sheets] Popup Qualificador fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
     // Ads fetch is independent - don't let it break the main data
     let adsRows: string[][] = [];
     try {
@@ -302,6 +363,9 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const desafio5Daily = extractDailyMetrics(desafio5Rows);
     console.log(`[sheets] desafio5Daily: ${desafio5Daily.length} days loaded`);
 
+    const popupQualificador = extractPopupQualificador(popupRows);
+    console.log(`[sheets] popupQualificador: ${popupQualificador.length} days loaded`);
+
     const topAds = extractAdsData(adsRows);
     console.log(`[sheets] topAds: ${topAds.length} ads ranked`);
 
@@ -318,6 +382,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio4Daily,
       desafio5: getDefaultDesafio(),
       desafio5Daily,
+      popupQualificador,
       topAds,
       topAdsDesafio4,
       visaoEstrategica: [],
