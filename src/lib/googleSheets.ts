@@ -260,7 +260,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     // Desafio 5 daily fetch is independent
     let desafio5Rows: string[][] = [];
     try {
-      desafio5Rows = await fetchSheetRows("'ABR - METRICAS GERAIS'!CU5:DB13");
+      desafio5Rows = await fetchSheetRows("'ABR - METRICAS GERAIS'!DQ5:DX13");
       console.log(`[sheets] Desafio 5 daily: ${desafio5Rows.length} rows loaded`);
     } catch (err) {
       console.warn('[sheets] Desafio 5 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
