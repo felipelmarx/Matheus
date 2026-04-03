@@ -59,6 +59,9 @@ export interface DailyMetric {
   faturamento: number;
   lucroPrejuizo: number;
   cortesia: number;
+  ingressosTotais: number;
+  qualificados: number;
+  desqualificados: number;
 }
 
 export interface AdMetric {
@@ -72,7 +75,6 @@ export interface AdMetric {
 
 export interface PopupQualificadorSide {
   investimento: number;
-  custoEstimado: number;
   checkouts: number;
   conversaoCheckout: number;
   proporcao: number;
@@ -86,7 +88,7 @@ export interface PopupQualificadorDay {
   data: string;
   qualificador: PopupQualificadorSide;
   desqualificado: PopupQualificadorSide;
-  checkoutTotais: number;
+  investimentoTotal: number;
 }
 
 export interface AllDesafiosData {

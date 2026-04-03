@@ -17,7 +17,6 @@ export default function PopupQualificador({ days }: PopupQualificadorProps) {
 
   const metrics: { key: keyof PopupQualificadorSide; label: string; format: (v: number) => string; icon: typeof DollarSign; color: string; lowerIsBetter?: boolean }[] = [
     { key: 'investimento', label: 'Investimento', format: fmt, icon: DollarSign, color: 'text-blue-400' },
-    { key: 'custoEstimado', label: 'Custo Estimado', format: fmt2, icon: Target, color: 'text-orange-400', lowerIsBetter: true },
     { key: 'checkouts', label: 'Checkouts', format: fmtNum, icon: ShoppingCart, color: 'text-indigo-400' },
     { key: 'conversaoCheckout', label: 'Conv. Checkout', format: fmtPct, icon: Percent, color: 'text-cyan-400' },
     { key: 'proporcao', label: 'Proporcao', format: fmtPct, icon: Percent, color: 'text-violet-400' },
@@ -52,7 +51,7 @@ export default function PopupQualificador({ days }: PopupQualificadorProps) {
                   <span className="text-sm font-heading font-semibold text-foreground">{day.data}</span>
                 </div>
                 <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-2 py-0.5 rounded">
-                  Checkouts totais: {day.checkoutTotais}
+                  Invest. total: {BRL.format(day.investimentoTotal)}
                 </span>
               </div>
             </div>

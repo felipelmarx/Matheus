@@ -1,4 +1,4 @@
-import { CalendarDays, DollarSign, ShoppingCart, Target, Tag, TrendingUp, TrendingDown, Gift } from 'lucide-react';
+import { CalendarDays, DollarSign, ShoppingCart, Target, Tag, TrendingUp, TrendingDown, Gift, Ticket, UserCheck, UserX } from 'lucide-react';
 import type { DailyMetric } from '@/types/metrics';
 
 interface DetalhamentoDiaProps {
@@ -20,6 +20,9 @@ export default function DetalhamentoDia({ daily }: DetalhamentoDiaProps) {
     { key: 'faturamento' as const, label: 'Faturamento', icon: TrendingUp, iconColor: 'text-cyan-400', format: fmt },
     { key: 'lucroPrejuizo' as const, label: 'Lucro / Prejuízo', icon: TrendingDown, iconColor: 'text-violet-400', format: fmt, isProfit: true },
     { key: 'cortesia' as const, label: 'Cortesia', icon: Gift, iconColor: 'text-pink-400', format: fmtNum },
+    { key: 'ingressosTotais' as const, label: 'Ingressos Totais', icon: Ticket, iconColor: 'text-emerald-400', format: fmtNum },
+    { key: 'qualificados' as const, label: 'Qualificados', icon: UserCheck, iconColor: 'text-green-400', format: fmtNum },
+    { key: 'desqualificados' as const, label: 'Desqualificados', icon: UserX, iconColor: 'text-red-400', format: fmtNum },
   ];
 
   return (

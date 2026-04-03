@@ -118,6 +118,9 @@ function extractDailyMetrics(rows: string[][]): DailyMetric[] {
       faturamento: p(row[5]),
       lucroPrejuizo: p(row[6]),
       cortesia: p(row[7]),
+      ingressosTotais: p(row[8]),
+      qualificados: p(row[9]),
+      desqualificados: p(row[10]),
     });
   }
 
@@ -188,15 +191,18 @@ function extractDesafio4Daily(rows: string[][]): DailyMetric[] {
       faturamento: p(row[85]),
       lucroPrejuizo: p(row[87]),
       cortesia: p(row[77]),
+      ingressosTotais: 0,
+      qualificados: 0,
+      desqualificados: 0,
     });
   }
 
   return daily;
 }
 
-// Extract Pop-up Qualificador data from ABR - METRICAS GERAIS (AT5:BL19)
+// Extract Pop-up Qualificador data from ABR - METRICAS GERAIS (AW5:BM19)
 // Row 0-1 = headers, row 2 = empty, data starts row 3 (= 30/03/2026)
-// Cols 0-8 = QUALIFICADOR, cols 9-17 = DESQUALIFICADO, col 18 = checkout totais
+// Cols 0-7 = QUALIFICADOR, col 8 = investimento total, cols 9-16 = DESQUALIFICADO
 function extractPopupQualificador(rows: string[][]): PopupQualificadorDay[] {
   const p = parseSheetNumber;
   const days: PopupQualificadorDay[] = [];
@@ -218,27 +224,25 @@ function extractPopupQualificador(rows: string[][]): PopupQualificadorDay[] {
       data: dateStr,
       qualificador: {
         investimento: p(row[0]),
-        custoEstimado: p(row[1]),
-        checkouts: p(row[2]),
-        conversaoCheckout: p(row[3]),
-        proporcao: p(row[4]),
-        vendas: p(row[5]),
-        cpaReal: p(row[6]),
-        faturamento: p(row[7]),
-        ticketMedio: p(row[8]),
+        checkouts: p(row[1]),
+        conversaoCheckout: p(row[2]),
+        proporcao: p(row[3]),
+        vendas: p(row[4]),
+        cpaReal: p(row[5]),
+        faturamento: p(row[6]),
+        ticketMedio: p(row[7]),
       },
       desqualificado: {
         investimento: p(row[9]),
-        custoEstimado: p(row[10]),
-        checkouts: p(row[11]),
-        conversaoCheckout: p(row[12]),
-        proporcao: p(row[13]),
-        vendas: p(row[14]),
-        cpaReal: p(row[15]),
-        faturamento: p(row[16]),
-        ticketMedio: p(row[17]),
+        checkouts: p(row[10]),
+        conversaoCheckout: p(row[11]),
+        proporcao: p(row[12]),
+        vendas: p(row[13]),
+        cpaReal: p(row[14]),
+        faturamento: p(row[15]),
+        ticketMedio: p(row[16]),
       },
-      checkoutTotais: p(row[18]),
+      investimentoTotal: p(row[8]),
     });
   }
 
@@ -312,7 +316,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     // Desafio 5 daily fetch is independent
     let desafio5Rows: string[][] = [];
     try {
-      desafio5Rows = await fetchSheetRows("'ABR - METRICAS GERAIS'!DQ5:DX13");
+      desafio5Rows = await fetchSheetRows("'ABR - METRICAS GERAIS'!DS5:EC13");
       console.log(`[sheets] Desafio 5 daily: ${desafio5Rows.length} rows loaded`);
     } catch (err) {
       console.warn('[sheets] Desafio 5 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
@@ -321,7 +325,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     // Pop-up Qualificador fetch is independent
     let popupRows: string[][] = [];
     try {
-      popupRows = await fetchSheetRows("'ABR - METRICAS GERAIS'!AT5:BL19");
+      popupRows = await fetchSheetRows("'ABR - METRICAS GERAIS'!AW5:BM19");
       console.log(`[sheets] Popup Qualificador: ${popupRows.length} rows loaded`);
     } catch (err) {
       console.warn('[sheets] Popup Qualificador fetch failed (non-blocking):', err instanceof Error ? err.message : err);
