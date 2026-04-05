@@ -27,6 +27,7 @@ const WINNER_ADS = [
   'edu- ayhuasca 2',
   'ayahuasca edu',
   'desafio certo',
+  'edu reels 4 ayahuasca',
 ];
 
 function isWinnerAd(adName: string) {
