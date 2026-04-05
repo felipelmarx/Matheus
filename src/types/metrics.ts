@@ -70,6 +70,7 @@ export interface AdMetric {
   totalSpent: number;
   totalPurchases: number;
   cpa: number;
+  formationSales: number;
   dailyBreakdown: { day: string; spent: number; purchases: number }[];
 }
 

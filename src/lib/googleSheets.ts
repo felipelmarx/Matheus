@@ -128,7 +128,8 @@ function extractDailyMetrics(rows: string[][]): DailyMetric[] {
 }
 
 // Aggregate ads data: group by ad name, sum spent/purchases, rank by purchases
-function extractAdsData(rows: string[][]): AdMetric[] {
+// formationSalesMap maps normalized ad name → formation sales count
+function extractAdsData(rows: string[][], formationSalesMap?: Map<string, number>): AdMetric[] {
   const p = parseSheetNumber;
   const adsMap = new Map<string, { spent: number; purchases: number; daily: Map<string, { spent: number; purchases: number }> }>();
 
@@ -162,10 +163,63 @@ function extractAdsData(rows: string[][]): AdMetric[] {
       totalSpent: d.spent,
       totalPurchases: d.purchases,
       cpa: d.purchases > 0 ? d.spent / d.purchases : 0,
+      formationSales: matchFormationSales(name, formationSalesMap),
       dailyBreakdown: [...d.daily.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([day, v]) => ({ day, spent: v.spent, purchases: v.purchases })),
     }));
+}
+
+// Match an ad name from the ADD/AT tab to formation sales from COMP-FORM
+// COMP-FORM ad names may have "|adId" suffix and slight variations (- Copy, etc.)
+function matchFormationSales(adName: string, salesMap?: Map<string, number>): number {
+  if (!salesMap || salesMap.size === 0) return 0;
+  const lower = adName.toLowerCase().trim();
+
+  // Direct match
+  if (salesMap.has(lower)) return salesMap.get(lower)!;
+
+  // Try substring matching: if COMP-FORM name contains the ADD ad name or vice versa
+  for (const [key, count] of salesMap) {
+    if (key.includes(lower) || lower.includes(key)) return count;
+  }
+
+  return 0;
+}
+
+// Fetch formation sales data from COMP-FORM tab
+// Returns maps for each desafio: normalized ad name → sales count
+async function fetchFormationSalesData(): Promise<{ d3: Map<string, number>; all: Map<string, number> }> {
+  const d3Map = new Map<string, number>();
+  const allMap = new Map<string, number>();
+
+  try {
+    const rows = await fetchSheetRows("'COMP-FORM'!A2:U200");
+    for (const row of rows) {
+      const pagante = (row[9] ?? '').toUpperCase().trim();
+      const anuncioRaw = (row[15] ?? '').trim();
+      if (pagante !== 'SIM' || !anuncioRaw) continue;
+
+      // Strip "|adId" suffix and normalize
+      const adName = anuncioRaw.split('|')[0].trim().toLowerCase();
+      if (!adName || adName === '{{ad.name}}') continue;
+
+      const d3 = (row[20] ?? '').toUpperCase().trim();
+
+      // All desafios combined (for topAds which uses all ADD data)
+      allMap.set(adName, (allMap.get(adName) ?? 0) + 1);
+
+      // Desafio 3 specific
+      if (d3 === 'SIM') {
+        d3Map.set(adName, (d3Map.get(adName) ?? 0) + 1);
+      }
+    }
+    console.log(`[sheets] Formation sales: ${allMap.size} ads total, ${d3Map.size} ads in D3`);
+  } catch (err) {
+    console.warn('[sheets] COMP-FORM fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+  }
+
+  return { d3: d3Map, all: allMap };
 }
 
 // Extract daily metrics for Desafio 4 from FN4:JF16
@@ -370,10 +424,18 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const popupQualificador = extractPopupQualificador(popupRows);
     console.log(`[sheets] popupQualificador: ${popupQualificador.length} days loaded`);
 
-    const topAds = extractAdsData(adsRows);
+    // Fetch formation sales from COMP-FORM
+    let formationSales = { d3: new Map<string, number>(), all: new Map<string, number>() };
+    try {
+      formationSales = await fetchFormationSalesData();
+    } catch (err) {
+      console.warn('[sheets] Formation sales fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    const topAds = extractAdsData(adsRows, formationSales.d3);
     console.log(`[sheets] topAds: ${topAds.length} ads ranked`);
 
-    const topAdsDesafio4 = extractAdsData(adsD4Rows);
+    const topAdsDesafio4 = extractAdsData(adsD4Rows, formationSales.all);
     console.log(`[sheets] topAdsDesafio4: ${topAdsDesafio4.length} ads ranked`);
 
     const data: AllDesafiosData = {

@@ -1,4 +1,4 @@
-import { Megaphone, ExternalLink, Film, ImageIcon } from 'lucide-react';
+import { Megaphone, ExternalLink, Film, ImageIcon, ShoppingCart } from 'lucide-react';
 import type { AdMetric } from '@/types/metrics';
 
 interface ListaAnunciosProps {
@@ -129,6 +129,12 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
                     {ad.cpa > 0 ? BRL.format(ad.cpa) : '--'}
                   </span>
                 </span>
+                {ad.formationSales > 0 && (
+                  <span className="flex items-center gap-1 text-xs font-heading text-emerald-500 bg-emerald-500/10 rounded-md px-2 py-1">
+                    <ShoppingCart className="w-3 h-3" />
+                    <span className="font-mono font-bold">{ad.formationSales}</span> venda{ad.formationSales > 1 ? 's' : ''} formação
+                  </span>
+                )}
                 {winner && (
                   <span className="flex items-center gap-1 text-xs font-heading text-yellow-500 bg-yellow-500/10 rounded-md px-2 py-1">
                     🏆 Venda da Formação
