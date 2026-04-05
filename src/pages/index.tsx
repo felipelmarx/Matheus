@@ -13,7 +13,10 @@ import CompararView from '@/components/CompararView';
 import DesafioInfo from '@/components/DesafioInfo';
 import GuiaDesafio from '@/components/GuiaDesafio';
 import AnalisesDesafios from '@/components/AnalisesDesafios';
+import AnaliseCompradores from '@/components/AnaliseCompradores';
+import AnaliseGeneric from '@/components/AnaliseGeneric';
 import SimuladorView from '@/components/simulador/SimuladorView';
+import { ClipboardList, Shuffle } from 'lucide-react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
@@ -100,7 +103,7 @@ export default function DashboardPage() {
 
   const activeData = useMemo(() => {
     if (!data) return null;
-    if (activeTab === 'comparar' || activeTab === 'analises' || activeTab === 'simulador' || activeTab === 'guia') return null;
+    if (activeTab === 'comparar' || activeTab === 'analises' || activeTab === 'simulador' || activeTab === 'guia' || activeTab === 'analiseAplicacoes' || activeTab === 'analiseCruzada') return null;
     if (activeTab === 'geral') return buildGeralData(data, geralMode);
     return data[activeTab];
   }, [data, activeTab, geralMode]);
@@ -154,6 +157,20 @@ export default function DashboardPage() {
                 visaoEstrategica={data.visaoEstrategica}
                 resumoTecnico={data.resumoTecnico}
               />
+            ) : activeTab === 'analiseAplicacoes' ? (
+              <AnaliseGeneric
+                sections={data.analiseAplicacoes}
+                title="Analise de Aplicacoes por Desafio"
+                headerIcon={ClipboardList}
+                headerGradient="from-sky-500/10 to-teal-500/10"
+              />
+            ) : activeTab === 'analiseCruzada' ? (
+              <AnaliseGeneric
+                sections={data.analiseCruzada}
+                title="Analise Cruzada — Compradores x Aplicacoes"
+                headerIcon={Shuffle}
+                headerGradient="from-fuchsia-500/10 to-indigo-500/10"
+              />
             ) : activeTab === 'comparar' ? (
               <CompararView data={data} />
             ) : activeData ? (
@@ -188,6 +205,13 @@ export default function DashboardPage() {
                 <FunilVisual data={activeData} />
                 {activeTab === 'desafio3' && <ListaAnuncios ads={data.topAds} />}
                 {activeTab === 'desafio4' && <ListaAnuncios ads={data.topAdsDesafio4} />}
+                {(activeTab === 'desafio3' || activeTab === 'desafio4') && data.analiseCompradores.length > 0 && (
+                  <AnaliseCompradores
+                    sections={data.analiseCompradores}
+                    topAds={data.topAds}
+                    topAdsDesafio4={data.topAdsDesafio4}
+                  />
+                )}
                 {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
                   <DetalhamentoDia daily={data.desafio3Daily} />
                 )}

@@ -1,4 +1,4 @@
-import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay } from '@/types/metrics';
+import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay, AnaliseCompradorSection } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
 
@@ -303,6 +303,47 @@ function extractPopupQualificador(rows: string[][]): PopupQualificadorDay[] {
   return days;
 }
 
+// Parse ANALISE-COMPRADORES tab: sections with header row + content row, separated by blank rows
+function parseAnaliseCompradores(rows: string[][]): AnaliseCompradorSection[] {
+  const sections: AnaliseCompradorSection[] = [];
+  let i = 0;
+
+  while (i < rows.length) {
+    const cell = (rows[i]?.[0] ?? '').trim();
+
+    // Skip empty rows, the main title row, and the date row
+    if (!cell || i <= 2) {
+      i++;
+      continue;
+    }
+
+    // Check if this looks like a section header (starts with a number followed by period)
+    if (/^\d+\.\s+/.test(cell)) {
+      const title = cell;
+      // Content is on the next non-empty row
+      let content = '';
+      for (let j = i + 1; j < rows.length; j++) {
+        const nextCell = (rows[j]?.[0] ?? '').trim();
+        if (nextCell && !/^\d+\.\s+/.test(nextCell)) {
+          content = nextCell;
+          i = j + 1;
+          break;
+        }
+        if (/^\d+\.\s+/.test(nextCell)) {
+          i = j;
+          break;
+        }
+        i = j + 1;
+      }
+      sections.push({ title, content });
+    } else {
+      i++;
+    }
+  }
+
+  return sections;
+}
+
 function getDefaultData(): AllDesafiosData {
   return {
     geral: getDefaultDesafio(),
@@ -319,6 +360,9 @@ function getDefaultData(): AllDesafiosData {
     topAdsDesafio4: [],
     visaoEstrategica: [],
     resumoTecnico: { metrics: [], analysis: [] },
+    analiseCompradores: [],
+    analiseAplicacoes: [],
+    analiseCruzada: [],
     lastUpdated: new Date().toISOString(),
     fromCache: false,
   };
@@ -453,6 +497,9 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       topAdsDesafio4,
       visaoEstrategica: [],
       resumoTecnico: { metrics: [], analysis: [] },
+      analiseCompradores: [],
+      analiseAplicacoes: [],
+      analiseCruzada: [],
       lastUpdated: new Date().toISOString(),
       fromCache: false,
     };
@@ -520,6 +567,33 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log(`[sheets] Resumo Tecnico: ${metrics.length} metrics, ${analysis.length} analysis lines`);
     } catch (err) {
       console.warn('[sheets] Resumo Tecnico fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    // ANALISE-COMPRADORES: deep buyer analysis (12 sections)
+    try {
+      const acRows = await fetchSheetRows('ANALISE-COMPRADORES!A1:A50');
+      data.analiseCompradores = parseAnaliseCompradores(acRows);
+      console.log(`[sheets] Analise Compradores: ${data.analiseCompradores.length} sections loaded`);
+    } catch (err) {
+      console.warn('[sheets] Analise Compradores fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    // ANALISE-APLICACOES: application analysis (10 sections)
+    try {
+      const aaRows = await fetchSheetRows('ANALISE-APLICACOES!A1:A50');
+      data.analiseAplicacoes = parseAnaliseCompradores(aaRows);
+      console.log(`[sheets] Analise Aplicacoes: ${data.analiseAplicacoes.length} sections loaded`);
+    } catch (err) {
+      console.warn('[sheets] Analise Aplicacoes fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    // ANALISE-CRUZADA: cross-analysis buyers x applications (10 sections)
+    try {
+      const acxRows = await fetchSheetRows('ANALISE-CRUZADA!A1:A50');
+      data.analiseCruzada = parseAnaliseCompradores(acxRows);
+      console.log(`[sheets] Analise Cruzada: ${data.analiseCruzada.length} sections loaded`);
+    } catch (err) {
+      console.warn('[sheets] Analise Cruzada fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
     // Sum ingressosTotais for geral from desafio1 + desafio2

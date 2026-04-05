@@ -47,7 +47,7 @@ export interface DesafioData {
 }
 
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5';
-export type TabKey = 'geral' | DesafioKey | 'comparar' | 'analises' | 'simulador' | 'guia';
+export type TabKey = 'geral' | DesafioKey | 'comparar' | 'analises' | 'analiseAplicacoes' | 'analiseCruzada' | 'simulador' | 'guia';
 export type GeralMode = 'total' | 'meta1' | 'meta2';
 
 export interface DailyMetric {
@@ -92,6 +92,11 @@ export interface PopupQualificadorDay {
   investimentoTotal: number;
 }
 
+export interface AnaliseCompradorSection {
+  title: string;
+  content: string;
+}
+
 export interface AllDesafiosData {
   geral: DesafioData;
   desafio1: DesafioData;
@@ -107,6 +112,9 @@ export interface AllDesafiosData {
   topAdsDesafio4: AdMetric[];
   visaoEstrategica: string[];
   resumoTecnico: { metrics: ResumoTecnicoMetric[]; analysis: string[] };
+  analiseCompradores: AnaliseCompradorSection[];
+  analiseAplicacoes: AnaliseCompradorSection[];
+  analiseCruzada: AnaliseCompradorSection[];
   lastUpdated: string;
   fromCache: boolean;
 }

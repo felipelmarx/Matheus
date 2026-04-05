@@ -20,6 +20,8 @@ const tabs: { key: TabKey; label: string; num: string }[] = [
   { key: 'desafio4', label: 'Desafio 4', num: '04' },
   { key: 'desafio5', label: 'Desafio 5', num: '05' },
   { key: 'analises', label: 'Analises', num: '📊' },
+  { key: 'analiseAplicacoes', label: 'Aplicacoes', num: '📋' },
+  { key: 'analiseCruzada', label: 'Cruzada', num: '🔀' },
   { key: 'simulador', label: 'Simulador', num: '⚡' },
   { key: 'comparar', label: 'Comparar', num: '⇄' },
   { key: 'guia', label: 'Guia', num: '📖' },
