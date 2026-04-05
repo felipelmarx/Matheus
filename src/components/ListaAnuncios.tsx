@@ -22,6 +22,18 @@ const AD_LINKS: { pattern: string; link: string; type: 'video' | 'image' }[] = [
   { pattern: 'AD 12 LOTE 8', link: 'https://drive.google.com/file/d/186szavOZqJNyArttPkpy9j4eTi_9tdLS/view', type: 'video' },
 ];
 
+const WINNER_ADS = [
+  'felipe marx ad4 lote 1',
+  'edu- ayhuasca 2',
+  'ayahuasca edu',
+  'desafio certo',
+];
+
+function isWinnerAd(adName: string) {
+  const lower = adName.toLowerCase();
+  return WINNER_ADS.some((w) => lower.includes(w));
+}
+
 function findAdLink(adName: string) {
   const lower = adName.toLowerCase();
   return AD_LINKS.find((entry) => lower.includes(entry.pattern.toLowerCase())) ?? null;
@@ -65,9 +77,10 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
       <div className="divide-y divide-border">
         {ads.map((ad) => {
           const adLink = findAdLink(ad.name);
+          const winner = isWinnerAd(ad.name);
           return (
-            <div key={ad.rank} className="px-5 py-4 hover:bg-muted/30 transition-colors">
-              {/* Rank + Type icon + Name + Link button */}
+            <div key={ad.rank} className={`px-5 py-4 hover:bg-muted/30 transition-colors ${winner ? 'bg-yellow-500/5' : ''}`}>
+              {/* Rank + Type icon + Name + Trophy + Link button */}
               <div className="flex items-center gap-3">
                 <span
                   className={`w-7 h-7 rounded-md flex items-center justify-center text-sm font-mono font-bold shrink-0 ${
@@ -86,6 +99,11 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
                 <span className="text-sm font-heading font-medium text-foreground truncate flex-1">
                   {ad.name}
                 </span>
+                {winner && (
+                  <span className="shrink-0 flex items-center gap-1 text-xs font-heading text-yellow-500 bg-yellow-500/10 rounded-md px-2 py-1">
+                    🏆 Venda da Formação
+                  </span>
+                )}
                 {adLink && (
                   <a
                     href={adLink.link}
