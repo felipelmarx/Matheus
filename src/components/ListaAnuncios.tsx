@@ -22,18 +22,6 @@ const AD_LINKS: { pattern: string; link: string; type: 'video' | 'image' }[] = [
   { pattern: 'AD 12 LOTE 8', link: 'https://drive.google.com/file/d/186szavOZqJNyArttPkpy9j4eTi_9tdLS/view', type: 'video' },
 ];
 
-const WINNER_ADS = [
-  'felipe marx ad4 lote 1',
-  'edu- ayhuasca 2',
-  'ayahuasca edu',
-  'desafio certo',
-  'edu reels 4 ayahuasca',
-];
-
-function isWinnerAd(adName: string) {
-  const lower = adName.toLowerCase();
-  return WINNER_ADS.some((w) => lower.includes(w));
-}
 
 function findAdLink(adName: string) {
   const lower = adName.toLowerCase();
@@ -78,9 +66,8 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
       <div className="divide-y divide-border">
         {ads.map((ad) => {
           const adLink = findAdLink(ad.name);
-          const winner = isWinnerAd(ad.name);
           return (
-            <div key={ad.rank} className={`px-5 py-4 hover:bg-muted/30 transition-colors ${winner ? 'bg-yellow-500/5' : ''}`}>
+            <div key={ad.rank} className="px-5 py-4 hover:bg-muted/30 transition-colors">
               {/* Rank + Type icon + Name + Link button */}
               <div className="flex items-center gap-3">
                 <span
@@ -133,11 +120,6 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
                   <span className="flex items-center gap-1 text-xs font-heading text-emerald-500 bg-emerald-500/10 rounded-md px-2 py-1">
                     <ShoppingCart className="w-3 h-3" />
                     <span className="font-mono font-bold">{ad.formationSales}</span> venda{ad.formationSales > 1 ? 's' : ''} formação
-                  </span>
-                )}
-                {winner && (
-                  <span className="flex items-center gap-1 text-xs font-heading text-yellow-500 bg-yellow-500/10 rounded-md px-2 py-1">
-                    🏆 Venda da Formação
                   </span>
                 )}
               </div>
