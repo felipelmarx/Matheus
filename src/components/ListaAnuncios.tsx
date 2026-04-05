@@ -81,7 +81,7 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
           const winner = isWinnerAd(ad.name);
           return (
             <div key={ad.rank} className={`px-5 py-4 hover:bg-muted/30 transition-colors ${winner ? 'bg-yellow-500/5' : ''}`}>
-              {/* Rank + Type icon + Name + Trophy + Link button */}
+              {/* Rank + Type icon + Name + Link button */}
               <div className="flex items-center gap-3">
                 <span
                   className={`w-7 h-7 rounded-md flex items-center justify-center text-sm font-mono font-bold shrink-0 ${
@@ -100,11 +100,6 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
                 <span className="text-sm font-heading font-medium text-foreground truncate flex-1">
                   {ad.name}
                 </span>
-                {winner && (
-                  <span className="shrink-0 flex items-center gap-1 text-xs font-heading text-yellow-500 bg-yellow-500/10 rounded-md px-2 py-1">
-                    🏆 Venda da Formação
-                  </span>
-                )}
                 {adLink && (
                   <a
                     href={adLink.link}
@@ -118,7 +113,7 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
                 )}
               </div>
 
-              {/* Metrics */}
+              {/* Metrics + Winner badge */}
               <div className="flex items-center gap-5 pl-10 mt-2 flex-wrap">
                 <span className="text-sm">
                   <span className="font-mono font-bold text-primary">{ad.totalPurchases}</span>
@@ -134,6 +129,11 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
                     {ad.cpa > 0 ? BRL.format(ad.cpa) : '--'}
                   </span>
                 </span>
+                {winner && (
+                  <span className="flex items-center gap-1 text-xs font-heading text-yellow-500 bg-yellow-500/10 rounded-md px-2 py-1">
+                    🏆 Venda da Formação
+                  </span>
+                )}
               </div>
             </div>
           );
