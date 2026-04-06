@@ -170,10 +170,9 @@ export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
   const custoAplicacao = aplicacoes > 0 ? investimento / aplicacoes : 0;
   const custoAgendamento = agendamentos > 0 ? investimento / agendamentos : 0;
   const custoEntrevista = entrevistas > 0 ? investimento / entrevistas : 0;
-  const custoVendaFormacao = vendasFormacao > 0 ? investimento / vendasFormacao : 0;
+  const custoVendaFormacao = (saldoFrontEnd < 0 && vendasFormacao > 0) ? Math.abs(saldoFrontEnd) / vendasFormacao : 0;
   const ticketMedioFormacao = vendasFormacao > 0 ? faturamentoBackEnd / vendasFormacao : 0;
-  const cacReal = (saldoFrontEnd < 0 && vendasFormacao > 0) ? Math.abs(saldoFrontEnd) / vendasFormacao : 0;
-  const tmCac = cacReal > 0 ? ticketMedioFormacao / cacReal : 0;
+  const tmCac = custoVendaFormacao > 0 ? ticketMedioFormacao / custoVendaFormacao : 0;
   const lucro = faturamentoTotal - investimento;
   const roi = investimento > 0 ? (lucro / investimento) * 100 : 0;
   const roas = investimento > 0 ? faturamentoTotal / investimento : 0;
