@@ -1,4 +1,5 @@
 import type { AllDesafiosData } from '@/types/metrics';
+import type { SimuladorInputs as InputsType } from '@/hooks/useSimulador';
 import { useSimulador } from '@/hooks/useSimulador';
 import SimuladorInputs from './SimuladorInputs';
 import SimuladorKPIs from './SimuladorKPIs';
@@ -19,18 +20,18 @@ export default function SimuladorView({ data }: SimuladorViewProps) {
     { key: 'desafio4', label: 'Desafio 4', data: data.desafio4 },
   ] : [];
 
-  const handleApplyRates = (rates: { taxaAplicacao: number; taxaAgendamento: number; taxaEntrevista: number; taxaVendaFormacao: number }) => {
-    updateInput('taxaAplicacao', rates.taxaAplicacao);
-    updateInput('taxaAgendamento', rates.taxaAgendamento);
-    updateInput('taxaEntrevista', rates.taxaEntrevista);
-    updateInput('taxaVendaFormacao', rates.taxaVendaFormacao);
+  const handleApplyMetrics = (metrics: Partial<InputsType>) => {
+    (Object.keys(metrics) as (keyof InputsType)[]).forEach((key) => {
+      const value = metrics[key];
+      if (value !== undefined) updateInput(key, value);
+    });
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Referência: Melhor Desafio + Último Desafio */}
       {desafios.length > 0 && (
-        <SimuladorReferencia desafios={desafios} onApply={handleApplyRates} />
+        <SimuladorReferencia desafios={desafios} onApply={handleApplyMetrics} />
       )}
 
       {/* KPIs - Full width */}
