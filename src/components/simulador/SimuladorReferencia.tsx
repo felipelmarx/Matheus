@@ -33,7 +33,7 @@ function extractMetrics(d: DesafioData, label: string): ExtractedMetrics | null 
     // Produto Principal
     precoProduto: d.ticketMedio > 0 ? d.ticketMedio : 0,
     // Qualificacao
-    taxaAplicacao: d.ingressosTotais > 0 ? (d.aplicacoes / d.ingressosTotais) * 100 : 0,
+    taxaAplicacao: d.vendas > 0 ? (d.aplicacoes / d.vendas) * 100 : 0,
     taxaAgendamento: d.aplicacoes > 0 ? (d.agendamentos / d.aplicacoes) * 100 : 0,
     taxaEntrevista: d.agendamentos > 0 ? (d.entrevistas / d.agendamentos) * 100 : 0,
     // Formacao
