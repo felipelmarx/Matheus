@@ -1,14 +1,76 @@
-import { DollarSign, ShoppingCart, TrendingUp, Target } from 'lucide-react';
+import { DollarSign, ShoppingCart, TrendingUp, Target, Ticket, Receipt } from 'lucide-react';
 import type { DesafioData } from '@/types/metrics';
 
 interface StatCardsProps {
   data: DesafioData;
 }
 
+interface CardData {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+  accentColor: string;
+  accentBg: string;
+}
+
+function CardGrid({ cards }: { cards: CardData[] }) {
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {cards.map((card) => {
+        const Icon = card.icon;
+        return (
+          <div key={card.label} className="card-3d p-5">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-heading">
+                {card.label}
+              </p>
+              <div className={`p-1.5 rounded-lg ${card.accentBg} ${card.accentColor}`}>
+                <Icon className="w-4 h-4" />
+              </div>
+            </div>
+            <p className="text-sm font-bold font-mono text-foreground">{card.value}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function StatCards({ data }: StatCardsProps) {
   const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-  const cards = [
+  const captacaoCards: CardData[] = [
+    {
+      label: 'INVESTIMENTO LIQUIDO',
+      value: BRL.format(data.lucroPrejuizo),
+      icon: Receipt,
+      accentColor: 'text-red-500',
+      accentBg: 'bg-red-500/8',
+    },
+    {
+      label: 'INGRESSOS',
+      value: data.ingressosTotais.toLocaleString('pt-BR'),
+      icon: Ticket,
+      accentColor: 'text-emerald-500',
+      accentBg: 'bg-emerald-500/8',
+    },
+    {
+      label: 'TICKET MEDIO INGRESSOS',
+      value: BRL.format(data.ticketMedio),
+      icon: Target,
+      accentColor: 'text-cyan-500',
+      accentBg: 'bg-cyan-500/8',
+    },
+    {
+      label: 'FATURAMENTO CAPTACAO',
+      value: BRL.format(data.faturamento),
+      icon: TrendingUp,
+      accentColor: 'text-teal-500',
+      accentBg: 'bg-teal-500/8',
+    },
+  ];
+
+  const formacaoCards: CardData[] = [
     {
       label: 'INVESTIMENTO',
       value: BRL.format(data.investimento),
@@ -40,26 +102,9 @@ export default function StatCards({ data }: StatCardsProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {cards.map((card) => {
-        const Icon = card.icon;
-        return (
-          <div
-            key={card.label}
-            className="card-3d p-5"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground font-heading">
-                {card.label}
-              </p>
-              <div className={`p-1.5 rounded-lg ${card.accentBg} ${card.accentColor}`}>
-                <Icon className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-sm font-bold font-mono text-foreground">{card.value}</p>
-          </div>
-        );
-      })}
+    <div className="space-y-4">
+      <CardGrid cards={captacaoCards} />
+      <CardGrid cards={formacaoCards} />
     </div>
   );
 }
