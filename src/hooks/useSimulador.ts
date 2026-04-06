@@ -116,11 +116,11 @@ const DEFAULTS: SimuladorInputs = {
   taxaUpsell: 15,
   precoDownsell: 17,
   taxaDownsell: 30,
-  taxaAplicacao: 30,
-  taxaAgendamento: 60,
-  taxaEntrevista: 80,
-  taxaVendaFormacao: 20,
-  ticketFormacao: 5000,
+  taxaAplicacao: 12,
+  taxaAgendamento: 79,
+  taxaEntrevista: 58,
+  taxaVendaFormacao: 28,
+  ticketFormacao: 7275,
 };
 
 // ─── Compute ────────────────────────────────────────────
