@@ -182,6 +182,8 @@ function normalizeAdName(name: string): string {
     .replace(/\s*-\s*c[oó]p[iy]a?\b.*$/i, '')
     // strip version markers like "v2", "v10"
     .replace(/\s*\bv\d+\b/gi, '')
+    // normalize punctuation (hyphens, parens, brackets, underscores) to spaces
+    .replace(/[\(\)\[\]\-_]+/g, ' ')
     // collapse whitespace
     .replace(/\s+/g, ' ')
     .trim();
