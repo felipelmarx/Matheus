@@ -232,7 +232,59 @@ function matchFormationSales(adName: string, salesMap?: Map<string, number>): nu
   return total;
 }
 
-// Fetch formation sales data from COMP-FORM tab
+// Extract formation sales per ad from ANALISE-COMPRADORES section 6 narrative.
+// The AI-generated text contains lines like:
+//   'edu-ayhuasca 2' — ~10 compradores
+//   'AD 1 LOTE 1' e variações — presente em ~12 compradores
+// We pull (adName, count) pairs by scanning quoted ad names followed by a
+// "~N comprador(es)" mention within the same fragment (split by '. ' / ';').
+function extractFormationSalesFromAnaliseCompradores(
+  sections: AnaliseCompradorSection[],
+): Map<string, number> {
+  const map = new Map<string, number>();
+  const section6 = sections.find((s) => /an[uú]ncios/i.test(s.title));
+  if (!section6 || !section6.content) return map;
+
+  // Split into clauses on sentence boundaries to keep ad name + count colocated
+  const clauses = section6.content.split(/(?<=[.;])\s+/);
+
+  // Quoted ad name: ' " ' or ' ' ' (also smart quotes)
+  const QUOTED = /['"\u2018\u2019\u201C\u201D]([^'"\u2018\u2019\u201C\u201D]{2,80})['"\u2018\u2019\u201C\u201D]/g;
+  const COUNT = /~?\s*(\d{1,4})\s*comprador/i;
+
+  for (const clause of clauses) {
+    const countMatch = COUNT.exec(clause);
+    if (!countMatch) continue;
+    const count = parseInt(countMatch[1], 10);
+    if (!Number.isFinite(count) || count <= 0) continue;
+
+    QUOTED.lastIndex = 0;
+    const names: string[] = [];
+    let m;
+    while ((m = QUOTED.exec(clause)) !== null) {
+      names.push(m[1]);
+    }
+    if (names.length === 0) continue;
+
+    // If multiple ad names share one count clause (rare), give each the count.
+    for (const raw of names) {
+      const norm = normalizeAdName(raw);
+      if (!norm) continue;
+      // Don't overwrite a higher value already discovered
+      const prev = map.get(norm) ?? 0;
+      if (count > prev) map.set(norm, count);
+    }
+  }
+
+  console.log(
+    `[sheets][analise-compradores] extracted ${map.size} ad→buyer pairs: ` +
+      [...map.entries()].slice(0, 8).map(([k, v]) => `"${k}"(${v})`).join(', '),
+  );
+
+  return map;
+}
+
+// Fetch formation sales data from COMP-FORM tab (LEGACY fallback)
 // Returns maps for each desafio: normalized ad name → sales count
 async function fetchFormationSalesData(): Promise<{ d3: Map<string, number>; all: Map<string, number> }> {
   const d3Map = new Map<string, number>();
@@ -517,18 +569,37 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const popupQualificador = extractPopupQualificador(popupRows);
     console.log(`[sheets] popupQualificador: ${popupQualificador.length} days loaded`);
 
-    // Fetch formation sales from COMP-FORM
-    let formationSales = { d3: new Map<string, number>(), all: new Map<string, number>() };
+    // NEW STRATEGY: Fetch ANALISE-COMPRADORES early and derive formation sales
+    // map from section 6 narrative (source of truth per Sr. Matheus).
+    let analiseCompradoresSections: AnaliseCompradorSection[] = [];
     try {
-      formationSales = await fetchFormationSalesData();
+      const acRows = await fetchSheetRows('ANALISE-COMPRADORES!A1:A50');
+      analiseCompradoresSections = parseAnaliseCompradores(acRows);
+      console.log(`[sheets] Analise Compradores: ${analiseCompradoresSections.length} sections loaded`);
     } catch (err) {
-      console.warn('[sheets] Formation sales fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+      console.warn('[sheets] Analise Compradores fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
-    const topAds = extractAdsData(adsRows, formationSales.d3);
+    const formationSalesMap = extractFormationSalesFromAnaliseCompradores(analiseCompradoresSections);
+
+    // Fallback to legacy COMP-FORM matcher only if AC produced nothing
+    let legacyFormation = { d3: new Map<string, number>(), all: new Map<string, number>() };
+    if (formationSalesMap.size === 0) {
+      try {
+        legacyFormation = await fetchFormationSalesData();
+        console.log('[sheets] Falling back to COMP-FORM (ANALISE-COMPRADORES section 6 yielded 0 pairs)');
+      } catch (err) {
+        console.warn('[sheets] Formation sales fallback failed (non-blocking):', err instanceof Error ? err.message : err);
+      }
+    }
+
+    const adsMapAll = formationSalesMap.size > 0 ? formationSalesMap : legacyFormation.all;
+    const adsMapD3 = formationSalesMap.size > 0 ? formationSalesMap : legacyFormation.d3;
+
+    const topAds = extractAdsData(adsRows, adsMapD3);
     console.log(`[sheets] topAds: ${topAds.length} ads ranked`);
 
-    const topAdsDesafio4 = extractAdsData(adsD4Rows, formationSales.all);
+    const topAdsDesafio4 = extractAdsData(adsD4Rows, adsMapAll);
     console.log(`[sheets] topAdsDesafio4: ${topAdsDesafio4.length} ads ranked`);
 
     const data: AllDesafiosData = {
@@ -618,14 +689,8 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Resumo Tecnico fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
-    // ANALISE-COMPRADORES: deep buyer analysis (12 sections)
-    try {
-      const acRows = await fetchSheetRows('ANALISE-COMPRADORES!A1:A50');
-      data.analiseCompradores = parseAnaliseCompradores(acRows);
-      console.log(`[sheets] Analise Compradores: ${data.analiseCompradores.length} sections loaded`);
-    } catch (err) {
-      console.warn('[sheets] Analise Compradores fetch failed (non-blocking):', err instanceof Error ? err.message : err);
-    }
+    // ANALISE-COMPRADORES already fetched above for formation sales matching
+    data.analiseCompradores = analiseCompradoresSections;
 
     // ANALISE-APLICACOES: application analysis (10 sections)
     try {
