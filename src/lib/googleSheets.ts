@@ -170,21 +170,66 @@ function extractAdsData(rows: string[][], formationSalesMap?: Map<string, number
     }));
 }
 
+// Normalize an ad name for matching: lowercase, strip emoji, suffixes, extra spaces
+function normalizeAdName(name: string): string {
+  return name
+    .toLowerCase()
+    // strip emoji and most non-text symbols
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F000}-\u{1F2FF}]/gu, '')
+    // strip "|adId" suffix
+    .split('|')[0]
+    // strip "- copy", "- copia", "- cópia"
+    .replace(/\s*-\s*c[oó]p[iy]a?\b.*$/i, '')
+    // strip version markers like "v2", "v10"
+    .replace(/\s*\bv\d+\b/gi, '')
+    // collapse whitespace
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // Match an ad name from the ADD/AT tab to formation sales from COMP-FORM
-// COMP-FORM ad names may have "|adId" suffix and slight variations (- Copy, etc.)
+// 3-layer matching with aggregation: exact → prefix (>=8) → substring (>8)
 function matchFormationSales(adName: string, salesMap?: Map<string, number>): number {
   if (!salesMap || salesMap.size === 0) return 0;
-  const lower = adName.toLowerCase().trim();
+  const norm = normalizeAdName(adName);
+  if (!norm) return 0;
 
-  // Direct match
-  if (salesMap.has(lower)) return salesMap.get(lower)!;
+  let total = 0;
+  let matched = false;
 
-  // Try substring matching: if COMP-FORM name contains the ADD ad name or vice versa
+  // Layer 1: exact normalized match — sum ALL
   for (const [key, count] of salesMap) {
-    if (key.includes(lower) || lower.includes(key)) return count;
+    if (key === norm) {
+      total += count;
+      matched = true;
+    }
+  }
+  if (matched) return total;
+
+  // Layer 2: prefix match (min 8 chars) — sum ALL
+  if (norm.length >= 8) {
+    for (const [key, count] of salesMap) {
+      if (key.length >= 8 && (key.startsWith(norm) || norm.startsWith(key))) {
+        total += count;
+        matched = true;
+      }
+    }
+    if (matched) return total;
   }
 
-  return 0;
+  // Layer 3: substring (only if key length > 8) — sum ALL
+  for (const [key, count] of salesMap) {
+    if (key.length > 8 && norm.length > 8 && (key.includes(norm) || norm.includes(key))) {
+      total += count;
+      matched = true;
+    }
+  }
+
+  if (!matched) {
+    console.log(`[sheets][formation-miss] ad="${adName}" norm="${norm}"`);
+  }
+
+  return total;
 }
 
 // Fetch formation sales data from COMP-FORM tab
@@ -200,8 +245,8 @@ async function fetchFormationSalesData(): Promise<{ d3: Map<string, number>; all
       const anuncioRaw = (row[15] ?? '').trim();
       if (pagante !== 'SIM' || !anuncioRaw) continue;
 
-      // Strip "|adId" suffix and normalize
-      const adName = anuncioRaw.split('|')[0].trim().toLowerCase();
+      // Normalize using the same function as the matcher
+      const adName = normalizeAdName(anuncioRaw);
       if (!adName || adName === '{{ad.name}}') continue;
 
       const d3 = (row[20] ?? '').toUpperCase().trim();
@@ -215,6 +260,10 @@ async function fetchFormationSalesData(): Promise<{ d3: Map<string, number>; all
       }
     }
     console.log(`[sheets] Formation sales: ${allMap.size} ads total, ${d3Map.size} ads in D3`);
+    const sampleAll = [...allMap.entries()].slice(0, 5).map(([k, v]) => `"${k}"(${v})`).join(', ');
+    console.log(`[sheets][formation-sample] all keys: ${sampleAll}`);
+    const sampleD3 = [...d3Map.entries()].slice(0, 5).map(([k, v]) => `"${k}"(${v})`).join(', ');
+    console.log(`[sheets][formation-sample] d3 keys: ${sampleD3}`);
   } catch (err) {
     console.warn('[sheets] COMP-FORM fetch failed (non-blocking):', err instanceof Error ? err.message : err);
   }
