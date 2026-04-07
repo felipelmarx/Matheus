@@ -170,6 +170,14 @@ function extractAdsData(rows: string[][], formationSalesMap?: Map<string, number
     }));
 }
 
+// Manual overrides for ads not captured in ANALISE-COMPRADORES section 6
+// These are merged into the formation sales map and take precedence over extracted values
+const MANUAL_FORMATION_SALES_RAW: Array<[string, number]> = [
+  ['EDU REELS 4 AYAHUASCA', 3],
+  ['[EDU] hook 3 cta 1', 1],
+  ['AD 1 LOTE 6 COLOMBIA', 3],
+];
+
 // Normalize an ad name for matching: lowercase, strip emoji, suffixes, extra spaces
 function normalizeAdName(name: string): string {
   return name
@@ -281,6 +289,16 @@ function extractFormationSalesFromAnaliseCompradores(
   console.log(
     `[sheets][analise-compradores] extracted ${map.size} ad→buyer pairs: ` +
       [...map.entries()].slice(0, 8).map(([k, v]) => `"${k}"(${v})`).join(', '),
+  );
+
+  // Merge manual overrides (take precedence over extracted values)
+  for (const [rawName, count] of MANUAL_FORMATION_SALES_RAW) {
+    const norm = normalizeAdName(rawName);
+    if (!norm) continue;
+    map.set(norm, count);
+  }
+  console.log(
+    `[sheets][analise-compradores] after manual merge: ${map.size} pairs (+${MANUAL_FORMATION_SALES_RAW.length} manual)`,
   );
 
   return map;
