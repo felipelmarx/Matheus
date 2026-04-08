@@ -496,7 +496,21 @@ export default function AnalisesDesafios({ visaoEstrategica, resumoTecnico, anal
       </div>
 
       {subTab === 'anuncios' && (() => {
-        const merged = [...topAds, ...topAdsDesafio4]
+        // Dedupe by name: sum numeric fields, recalc CPA, concat dailyBreakdown
+        const mergedMap = new Map<string, AdMetric>();
+        for (const ad of [...topAds, ...topAdsDesafio4]) {
+          const existing = mergedMap.get(ad.name);
+          if (!existing) {
+            mergedMap.set(ad.name, { ...ad });
+          } else {
+            existing.totalSpent += ad.totalSpent;
+            existing.totalPurchases += ad.totalPurchases;
+            existing.formationSales += ad.formationSales;
+            existing.cpa = existing.totalPurchases > 0 ? existing.totalSpent / existing.totalPurchases : 0;
+            existing.dailyBreakdown = [...(existing.dailyBreakdown ?? []), ...(ad.dailyBreakdown ?? [])];
+          }
+        }
+        const merged = Array.from(mergedMap.values())
           .sort((a, b) => b.totalPurchases - a.totalPurchases)
           .map((ad, i) => ({ ...ad, rank: i + 1 }));
         return (
