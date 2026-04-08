@@ -6,13 +6,23 @@ import HeroKPIs from "@/components/HeroKPIs";
 import FunnelChart from "@/components/FunnelChart";
 import BreakdownCharts from "@/components/BreakdownCharts";
 import DailyTable from "@/components/DailyTable";
+import TabNav from "@/components/TabNav";
+import ComercialTab from "@/components/ComercialTab";
 import { getEnabledEvents, getDefaultEvent } from "@/config/events";
 import { SingleEventResponse } from "@/types/metrics";
+
+type TabId = "dashboard" | "comercial";
+
+const TABS: { id: TabId; label: string }[] = [
+  { id: "dashboard", label: "Dashboard" },
+  { id: "comercial", label: "Comercial" },
+];
 
 export default function Home() {
   const events = getEnabledEvents();
   const defaultEvent = getDefaultEvent();
 
+  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [selectedId, setSelectedId] = useState<string>(defaultEvent?.id ?? "");
   const [data, setData] = useState<SingleEventResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,28 +70,52 @@ export default function Home() {
       </Head>
 
       <Layout lastUpdated={lastUpdated}>
-        <EventSelector
-          events={events}
-          selectedId={selectedId}
-          onChange={setSelectedId}
+        <TabNav
+          tabs={TABS}
+          active={activeTab}
+          onChange={(id) => setActiveTab(id as TabId)}
         />
 
-        {loading && <LoadingSkeleton />}
+        {activeTab === "dashboard" && (
+          <div
+            id="panel-dashboard"
+            role="tabpanel"
+            aria-labelledby="tab-dashboard"
+          >
+            <EventSelector
+              events={events}
+              selectedId={selectedId}
+              onChange={setSelectedId}
+            />
 
-        {error && !loading && (
-          <ErrorBlock
-            message={error}
-            onRetry={() => fetchData(selectedId)}
-          />
+            {loading && <LoadingSkeleton />}
+
+            {error && !loading && (
+              <ErrorBlock
+                message={error}
+                onRetry={() => fetchData(selectedId)}
+              />
+            )}
+
+            {!loading && !error && data && (
+              <>
+                <HeroKPIs metrics={data.event.metrics} />
+                <FunnelChart metrics={data.event.metrics} />
+                <BreakdownCharts metrics={data.event.metrics} />
+                <DailyTable dailyData={data.event.metrics.dailyData} />
+              </>
+            )}
+          </div>
         )}
 
-        {!loading && !error && data && (
-          <>
-            <HeroKPIs metrics={data.event.metrics} />
-            <FunnelChart metrics={data.event.metrics} />
-            <BreakdownCharts metrics={data.event.metrics} />
-            <DailyTable dailyData={data.event.metrics.dailyData} />
-          </>
+        {activeTab === "comercial" && (
+          <div
+            id="panel-comercial"
+            role="tabpanel"
+            aria-labelledby="tab-comercial"
+          >
+            <ComercialTab />
+          </div>
         )}
       </Layout>
     </>
