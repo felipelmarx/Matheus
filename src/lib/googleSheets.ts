@@ -186,6 +186,7 @@ const MANUAL_FORMATION_SALES_RAW: Array<[string, number]> = [
   ['EDU REELS 4 AYAHUASCA', 3],
   ['[EDU] hook 3 cta 1', 1],
   ['AD 1 LOTE 6 COLOMBIA', 3],
+  ['Sistema Nervoso Entérico (Anderson)', 2],
 ];
 
 // Normalize an ad name for matching: lowercase, strip emoji, suffixes, extra spaces
@@ -202,6 +203,9 @@ function normalizeAdName(name: string): string {
     .replace(/\s*\bv\d+\b/gi, '')
     // normalize punctuation (hyphens, parens, brackets, underscores) to spaces
     .replace(/[\(\)\[\]\-_]+/g, ' ')
+    // insert space between letters and digits when glued (ad4 -> ad 4, lote1 -> lote 1)
+    .replace(/([a-zA-Z])(\d)/g, '$1 $2')
+    .replace(/(\d)([a-zA-Z])/g, '$1 $2')
     // collapse whitespace
     .replace(/\s+/g, ' ')
     .trim();
