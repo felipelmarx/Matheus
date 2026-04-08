@@ -12,7 +12,6 @@ import CompararView from '@/components/CompararView';
 import DesafioInfo from '@/components/DesafioInfo';
 import GuiaDesafio from '@/components/GuiaDesafio';
 import AnalisesDesafios from '@/components/AnalisesDesafios';
-import AnaliseCompradores from '@/components/AnaliseCompradores';
 import SimuladorView from '@/components/simulador/SimuladorView';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
@@ -168,13 +167,6 @@ export default function DashboardPage() {
                 <MetasCard data={activeData} />
                 <ResumoGeral data={activeData} activeTab={activeTab} />
                 <FunilVisual data={activeData} />
-                {(activeTab === 'desafio3' || activeTab === 'desafio4') && data.analiseCompradores.length > 0 && (
-                  <AnaliseCompradores
-                    sections={data.analiseCompradores}
-                    topAds={data.topAds}
-                    topAdsDesafio4={data.topAdsDesafio4}
-                  />
-                )}
                 {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
                   <DetalhamentoDia daily={data.desafio3Daily} />
                 )}
