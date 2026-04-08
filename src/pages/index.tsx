@@ -5,7 +5,6 @@ import DesafioTabs from '@/components/DesafioTabs';
 import StatCards from '@/components/StatCards';
 import ResumoGeral from '@/components/ResumoGeral';
 import FunilVisual from '@/components/FunilVisual';
-import ListaAnuncios from '@/components/ListaAnuncios';
 import DetalhamentoDia from '@/components/DetalhamentoDia';
 import PopupQualificador from '@/components/PopupQualificador';
 import MetasCard from '@/components/MetasCard';
@@ -169,8 +168,6 @@ export default function DashboardPage() {
                 <MetasCard data={activeData} />
                 <ResumoGeral data={activeData} activeTab={activeTab} />
                 <FunilVisual data={activeData} />
-                {activeTab === 'desafio3' && <ListaAnuncios ads={data.topAds} />}
-                {activeTab === 'desafio4' && <ListaAnuncios ads={data.topAdsDesafio4} />}
                 {(activeTab === 'desafio3' || activeTab === 'desafio4') && data.analiseCompradores.length > 0 && (
                   <AnaliseCompradores
                     sections={data.analiseCompradores}

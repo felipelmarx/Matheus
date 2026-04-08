@@ -9022,6 +9022,24 @@ entities:
         extensionPoints: []
       checksum: sha256:5dde817f220f1f452b53026643e267eb027e4a131d1e5fc4bbcf6ebd772da3bb
       lastVerified: '2026-02-15T19:33:09.495Z'
+    alan-advisor:
+      path: .aios-core/development/agents/alan-advisor.md
+      type: agent
+      purpose: 'Strategic Business & AI Advisor based on Alan Nicolas cognitive clone'
+      keywords:
+        - alan
+        - advisor
+        - alan-advisor
+        - conselheiro
+        - alan-nicolas
+      usedBy: []
+      dependencies: []
+      adaptability:
+        score: 0.3
+        constraints: []
+        extensionPoints: []
+      checksum: sha256:new
+      lastVerified: '2026-03-20T23:30:00.000Z'
   checklists:
     agent-quality-gate:
       path: .aios-core/development/checklists/agent-quality-gate.md
