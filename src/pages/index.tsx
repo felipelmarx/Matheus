@@ -155,6 +155,8 @@ export default function DashboardPage() {
                 resumoTecnico={data.resumoTecnico}
                 analiseAplicacoes={data.analiseAplicacoes}
                 analiseCruzada={data.analiseCruzada}
+                topAds={data.topAds}
+                topAdsDesafio4={data.topAdsDesafio4}
               />
             ) : activeTab === 'comparar' ? (
               <CompararView data={data} />

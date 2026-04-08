@@ -14,19 +14,23 @@ import {
   ChevronDown,
   ClipboardList,
   Shuffle,
+  Megaphone,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { ResumoTecnicoMetric, AnaliseCompradorSection } from '@/types/metrics';
+import type { ResumoTecnicoMetric, AnaliseCompradorSection, AdMetric } from '@/types/metrics';
 import AnaliseGeneric from './AnaliseGeneric';
+import ListaAnuncios from './ListaAnuncios';
 
 interface AnalisesDesafiosProps {
   visaoEstrategica: string[];
   resumoTecnico: { metrics: ResumoTecnicoMetric[]; analysis: string[] };
   analiseAplicacoes?: AnaliseCompradorSection[];
   analiseCruzada?: AnaliseCompradorSection[];
+  topAds?: AdMetric[];
+  topAdsDesafio4?: AdMetric[];
 }
 
-type SubTab = 'visao' | 'tecnico' | 'aplicacoes' | 'cruzada';
+type SubTab = 'visao' | 'tecnico' | 'aplicacoes' | 'cruzada' | 'anuncios';
 
 /* ─── Metric Group Definitions ─── */
 
@@ -399,7 +403,7 @@ function CollapsibleMetricGroup({
 
 /* ─── Main Component ─── */
 
-export default function AnalisesDesafios({ visaoEstrategica, resumoTecnico, analiseAplicacoes, analiseCruzada }: AnalisesDesafiosProps) {
+export default function AnalisesDesafios({ visaoEstrategica, resumoTecnico, analiseAplicacoes, analiseCruzada, topAds = [], topAdsDesafio4 = [] }: AnalisesDesafiosProps) {
   const [subTab, setSubTab] = useState<SubTab>('visao');
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(DEFAULT_OPEN));
 
@@ -477,8 +481,30 @@ export default function AnalisesDesafios({ visaoEstrategica, resumoTecnico, anal
             <Shuffle className="w-3.5 h-3.5" />
             Cruzada
           </button>
+          <button
+            onClick={() => setSubTab('anuncios')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-medium transition-all ${
+              subTab === 'anuncios'
+                ? 'bg-orange-500/15 text-orange-400 shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            }`}
+          >
+            <Megaphone className="w-3.5 h-3.5" />
+            Anúncios
+          </button>
         </div>
       </div>
+
+      {subTab === 'anuncios' && (() => {
+        const merged = [...topAds, ...topAdsDesafio4]
+          .sort((a, b) => b.totalPurchases - a.totalPurchases)
+          .map((ad, i) => ({ ...ad, rank: i + 1 }));
+        return (
+          <div className="p-5 sm:p-6">
+            <ListaAnuncios ads={merged} />
+          </div>
+        );
+      })()}
 
       {subTab === 'aplicacoes' && (
         <AnaliseGeneric
