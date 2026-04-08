@@ -1,60 +1,55 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { fetchEventoMetrics } from '@/lib/googleSheets';
 import { getEnabledEvents, getEventById } from '@/config/events';
-import { clearCache } from '@/lib/cache';
-import { EventData, MultiEventResponse } from '@/types/metrics';
+import type {
+  EventData,
+  MultiEventResponse,
+  SingleEventResponse,
+} from '@/types/metrics';
+
+type ErrorResponse = { error: string };
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<MultiEventResponse | SingleEventResponse | ErrorResponse>
 ) {
   if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { event, refresh } = req.query;
+    const { event } = req.query;
 
-    if (refresh === 'true') {
-      clearCache();
-    }
-
-    if (event === 'all') {
-      const enabledEvents = getEnabledEvents();
-      const results: EventData[] = await Promise.all(
-        enabledEvents.map(async (cfg) => ({
-          eventId: cfg.id,
-          eventLabel: cfg.label,
-          metrics: await fetchEventoMetrics(cfg.sheetTab, cfg.range),
-        }))
-      );
-      const response: MultiEventResponse = { events: results };
-      return res.status(200).json(response);
-    }
-
-    if (event && typeof event === 'string') {
+    if (typeof event === 'string' && event.length > 0) {
       const cfg = getEventById(event);
-      if (!cfg) {
-        return res.status(404).json({ error: `Event '${event}' not found` });
+      if (!cfg || !cfg.enabled) {
+        return res.status(404).json({ error: 'Event not found' });
       }
-      if (!cfg.enabled) {
-        return res.status(200).json({ placeholder: true, label: cfg.label });
-      }
+
       const metrics = await fetchEventoMetrics(cfg.sheetTab, cfg.range);
-      return res.status(200).json(metrics);
+      const data: EventData = {
+        eventId: cfg.id,
+        eventLabel: cfg.label,
+        dateLabel: cfg.dateLabel,
+        metrics,
+      };
+      return res.status(200).json({ event: data });
     }
 
-    const defaultEvent = getEnabledEvents()[0];
-    if (!defaultEvent) {
-      return res.status(404).json({ error: 'No events configured' });
-    }
-    const metrics = await fetchEventoMetrics(defaultEvent.sheetTab, defaultEvent.range);
-    res.status(200).json(metrics);
-  } catch (error) {
-    console.error('Error fetching metrics:', error);
-    res.status(500).json({
-      error: 'Failed to fetch metrics',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
+    const enabled = getEnabledEvents();
+    const events: EventData[] = await Promise.all(
+      enabled.map(async (cfg) => ({
+        eventId: cfg.id,
+        eventLabel: cfg.label,
+        dateLabel: cfg.dateLabel,
+        metrics: await fetchEventoMetrics(cfg.sheetTab, cfg.range),
+      }))
+    );
+
+    return res.status(200).json({ events });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to fetch metrics';
+    return res.status(500).json({ error: message });
   }
 }
