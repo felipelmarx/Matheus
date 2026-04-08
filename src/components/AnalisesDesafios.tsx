@@ -12,16 +12,21 @@ import {
   UserCheck,
   Trophy,
   ChevronDown,
+  ClipboardList,
+  Shuffle,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import type { ResumoTecnicoMetric } from '@/types/metrics';
+import type { ResumoTecnicoMetric, AnaliseCompradorSection } from '@/types/metrics';
+import AnaliseGeneric from './AnaliseGeneric';
 
 interface AnalisesDesafiosProps {
   visaoEstrategica: string[];
   resumoTecnico: { metrics: ResumoTecnicoMetric[]; analysis: string[] };
+  analiseAplicacoes?: AnaliseCompradorSection[];
+  analiseCruzada?: AnaliseCompradorSection[];
 }
 
-type SubTab = 'visao' | 'tecnico';
+type SubTab = 'visao' | 'tecnico' | 'aplicacoes' | 'cruzada';
 
 /* ─── Metric Group Definitions ─── */
 
@@ -394,7 +399,7 @@ function CollapsibleMetricGroup({
 
 /* ─── Main Component ─── */
 
-export default function AnalisesDesafios({ visaoEstrategica, resumoTecnico }: AnalisesDesafiosProps) {
+export default function AnalisesDesafios({ visaoEstrategica, resumoTecnico, analiseAplicacoes, analiseCruzada }: AnalisesDesafiosProps) {
   const [subTab, setSubTab] = useState<SubTab>('visao');
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(DEFAULT_OPEN));
 
@@ -450,8 +455,48 @@ export default function AnalisesDesafios({ visaoEstrategica, resumoTecnico }: An
             <BarChart3 className="w-3.5 h-3.5" />
             Relatorio Tecnico
           </button>
+          <button
+            onClick={() => setSubTab('aplicacoes')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-medium transition-all ${
+              subTab === 'aplicacoes'
+                ? 'bg-sky-500/15 text-sky-400 shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            }`}
+          >
+            <ClipboardList className="w-3.5 h-3.5" />
+            Aplicacoes
+          </button>
+          <button
+            onClick={() => setSubTab('cruzada')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-heading font-medium transition-all ${
+              subTab === 'cruzada'
+                ? 'bg-fuchsia-500/15 text-fuchsia-400 shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            }`}
+          >
+            <Shuffle className="w-3.5 h-3.5" />
+            Cruzada
+          </button>
         </div>
       </div>
+
+      {subTab === 'aplicacoes' && (
+        <AnaliseGeneric
+          sections={analiseAplicacoes ?? []}
+          title="Analise de Aplicacoes por Desafio"
+          headerIcon={ClipboardList}
+          headerGradient="from-sky-500/10 to-teal-500/10"
+        />
+      )}
+
+      {subTab === 'cruzada' && (
+        <AnaliseGeneric
+          sections={analiseCruzada ?? []}
+          title="Analise Cruzada — Compradores x Aplicacoes"
+          headerIcon={Shuffle}
+          headerGradient="from-fuchsia-500/10 to-indigo-500/10"
+        />
+      )}
 
       {/* Visao Estrategica */}
       {subTab === 'visao' && (

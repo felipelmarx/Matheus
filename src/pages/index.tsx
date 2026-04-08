@@ -14,9 +14,7 @@ import DesafioInfo from '@/components/DesafioInfo';
 import GuiaDesafio from '@/components/GuiaDesafio';
 import AnalisesDesafios from '@/components/AnalisesDesafios';
 import AnaliseCompradores from '@/components/AnaliseCompradores';
-import AnaliseGeneric from '@/components/AnaliseGeneric';
 import SimuladorView from '@/components/simulador/SimuladorView';
-import { ClipboardList, Shuffle } from 'lucide-react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
@@ -156,20 +154,8 @@ export default function DashboardPage() {
               <AnalisesDesafios
                 visaoEstrategica={data.visaoEstrategica}
                 resumoTecnico={data.resumoTecnico}
-              />
-            ) : activeTab === 'analiseAplicacoes' ? (
-              <AnaliseGeneric
-                sections={data.analiseAplicacoes}
-                title="Analise de Aplicacoes por Desafio"
-                headerIcon={ClipboardList}
-                headerGradient="from-sky-500/10 to-teal-500/10"
-              />
-            ) : activeTab === 'analiseCruzada' ? (
-              <AnaliseGeneric
-                sections={data.analiseCruzada}
-                title="Analise Cruzada — Compradores x Aplicacoes"
-                headerIcon={Shuffle}
-                headerGradient="from-fuchsia-500/10 to-indigo-500/10"
+                analiseAplicacoes={data.analiseAplicacoes}
+                analiseCruzada={data.analiseCruzada}
               />
             ) : activeTab === 'comparar' ? (
               <CompararView data={data} />
