@@ -74,7 +74,6 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>('geral');
-  const [geralMode, setGeralMode] = useState<GeralMode>('total');
 
   const fetchData = useCallback(async (force = false) => {
     try {
@@ -102,9 +101,9 @@ export default function DashboardPage() {
   const activeData = useMemo(() => {
     if (!data) return null;
     if (activeTab === 'comparar' || activeTab === 'analises' || activeTab === 'simulador' || activeTab === 'guia' || activeTab === 'analiseAplicacoes' || activeTab === 'analiseCruzada') return null;
-    if (activeTab === 'geral') return buildGeralData(data, geralMode);
+    if (activeTab === 'geral') return buildGeralData(data, 'total');
     return data[activeTab];
-  }, [data, activeTab, geralMode]);
+  }, [data, activeTab]);
 
   if (error && !data) {
     return (
@@ -161,27 +160,6 @@ export default function DashboardPage() {
               <CompararView data={data} />
             ) : activeData ? (
               <>
-                {activeTab === 'geral' && (
-                  <div className="flex items-center justify-center gap-1 bg-card border border-border rounded-xl p-1.5">
-                    {([
-                      { key: 'total' as GeralMode, label: 'Total (D1-D5)' },
-                      { key: 'meta1' as GeralMode, label: 'Meta 1 (D1+D2)' },
-                      { key: 'meta2' as GeralMode, label: 'Meta 2 (D3+D4)' },
-                    ]).map((opt) => (
-                      <button
-                        key={opt.key}
-                        onClick={() => setGeralMode(opt.key)}
-                        className={`px-4 py-2 rounded-lg text-xs font-heading font-medium transition-all ${
-                          geralMode === opt.key
-                            ? 'bg-primary text-primary-foreground shadow-sm'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
                 {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5') && (
                   <DesafioInfo desafioKey={activeTab} />
                 )}
