@@ -186,7 +186,7 @@ const MANUAL_FORMATION_SALES_RAW: Array<[string, number]> = [
   ['EDU REELS 4 AYAHUASCA', 3],
   ['[EDU] hook 3 cta 1', 1],
   ['AD 1 LOTE 6 COLOMBIA', 3],
-  ['Sistema Nervoso Entérico (Anderson)', 2],
+  ['Sistema Nervoso Entérico - Versão pra ads [Editado Anderson]', 2],
 ];
 
 // Normalize an ad name for matching: lowercase, strip emoji, suffixes, extra spaces
