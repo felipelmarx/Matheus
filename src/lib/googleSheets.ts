@@ -89,11 +89,14 @@ const sum = (arr: DailyData[], pick: (d: DailyData) => number): number =>
 
 export async function fetchEventoMetrics(
   sheetTab: string,
-  range: string
+  range: string,
+  options: { force?: boolean } = {}
 ): Promise<EventoMetrics> {
   const cacheKey = `evento-metrics-${sheetTab}`;
-  const cached = getCached<EventoMetrics>(cacheKey);
-  if (cached) return cached;
+  if (!options.force) {
+    const cached = getCached<EventoMetrics>(cacheKey);
+    if (cached) return cached;
+  }
 
   const rows = await fetchSheetRows(`'${sheetTab}'!${range}`);
 

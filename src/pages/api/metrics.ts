@@ -19,7 +19,8 @@ export default async function handler(
   }
 
   try {
-    const { event } = req.query;
+    const { event, refresh } = req.query;
+    const force = refresh === 'true' || refresh === '1';
 
     if (typeof event === 'string' && event.length > 0) {
       const cfg = getEventById(event);
@@ -27,7 +28,7 @@ export default async function handler(
         return res.status(404).json({ error: 'Event not found' });
       }
 
-      const metrics = await fetchEventoMetrics(cfg.sheetTab, cfg.range);
+      const metrics = await fetchEventoMetrics(cfg.sheetTab, cfg.range, { force });
       const data: EventData = {
         eventId: cfg.id,
         eventLabel: cfg.label,
@@ -43,7 +44,7 @@ export default async function handler(
         eventId: cfg.id,
         eventLabel: cfg.label,
         dateLabel: cfg.dateLabel,
-        metrics: await fetchEventoMetrics(cfg.sheetTab, cfg.range),
+        metrics: await fetchEventoMetrics(cfg.sheetTab, cfg.range, { force }),
       }))
     );
 

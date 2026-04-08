@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
+import { RefreshCw } from "lucide-react";
 import Layout from "@/components/Layout";
 import EventSelector from "@/components/EventSelector";
 import HeroKPIs from "@/components/HeroKPIs";
@@ -26,29 +27,38 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState<string>(defaultEvent?.id ?? "");
   const [data, setData] = useState<SingleEventResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (eventId: string) => {
-    if (!eventId) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(
-        `/api/metrics?event=${encodeURIComponent(eventId)}`
-      );
-      if (!res.ok) {
-        throw new Error(`Falha ao carregar métricas (HTTP ${res.status})`);
+  const fetchData = useCallback(
+    async (eventId: string, force = false) => {
+      if (!eventId) return;
+      if (force) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
       }
-      const json: SingleEventResponse = await res.json();
-      setData(json);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Erro desconhecido";
-      setError(msg);
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ event: eventId });
+        if (force) params.set("refresh", "true");
+        const res = await fetch(`/api/metrics?${params.toString()}`);
+        if (!res.ok) {
+          throw new Error(`Falha ao carregar métricas (HTTP ${res.status})`);
+        }
+        const json: SingleEventResponse = await res.json();
+        setData(json);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Erro desconhecido";
+        setError(msg);
+        if (!force) setData(null);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     fetchData(selectedId);
@@ -82,11 +92,29 @@ export default function Home() {
             role="tabpanel"
             aria-labelledby="tab-dashboard"
           >
-            <EventSelector
-              events={events}
-              selectedId={selectedId}
-              onChange={setSelectedId}
-            />
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+              <EventSelector
+                events={events}
+                selectedId={selectedId}
+                onChange={setSelectedId}
+              />
+              <button
+                type="button"
+                onClick={() => fetchData(selectedId, true)}
+                disabled={loading || refreshing || !selectedId}
+                aria-label="Atualizar dados da planilha"
+                className="inline-flex items-center gap-2 rounded-lg border border-brand-primary/30 bg-white px-4 py-2.5 text-sm font-semibold text-brand-primary shadow-sm transition-colors hover:bg-brand-light hover:border-brand-primary disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary/40"
+              >
+                <RefreshCw
+                  className={[
+                    "h-4 w-4",
+                    refreshing ? "animate-spin" : "",
+                  ].join(" ")}
+                  aria-hidden="true"
+                />
+                {refreshing ? "Atualizando..." : "Atualizar"}
+              </button>
+            </div>
 
             {loading && <LoadingSkeleton />}
 
