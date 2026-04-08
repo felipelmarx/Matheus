@@ -84,6 +84,14 @@ function extractDesafioData(rows: string[][], labelCol: number, valueCol: number
     ? tmf
     : (result.vendasFormacao > 0 ? result.faturamentoTotal / result.vendasFormacao : 0);
 
+  // Fallback: compute custoPorAplicacao / custoEntrevista from investimento when parser returns 0
+  if (result.custoPorAplicacao === 0 && result.investimento > 0 && result.aplicacoes > 0) {
+    result.custoPorAplicacao = result.investimento / result.aplicacoes;
+  }
+  if (result.custoEntrevista === 0 && result.investimento > 0 && result.entrevistas > 0) {
+    result.custoEntrevista = result.investimento / result.entrevistas;
+  }
+
   return result;
 }
 
