@@ -189,7 +189,7 @@ export default function CompararView({ data }: CompararViewProps) {
       {/* Comparison Tables */}
       {!tooFew && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {sections.map((section) => {
               const Icon = section.icon;
               return (
