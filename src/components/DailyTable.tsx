@@ -33,10 +33,17 @@ export default function DailyTable({ dailyData }: DailyTableProps) {
                 <th className="px-4 py-3 text-right font-semibold">
                   Investimento
                 </th>
-                <th className="px-4 py-3 text-right font-semibold">
-                  Confirmados
-                </th>
                 <th className="px-4 py-3 text-right font-semibold">Vendas</th>
+                <th className="px-4 py-3 text-right font-semibold">
+                  V. Ads
+                </th>
+                <th className="px-4 py-3 text-right font-semibold">
+                  V. Org
+                </th>
+                <th className="px-4 py-3 text-right font-semibold">CPA</th>
+                <th className="px-4 py-3 text-right font-semibold">
+                  Reemb.
+                </th>
                 <th className="px-4 py-3 text-right font-semibold">
                   Faturamento
                 </th>
@@ -48,7 +55,7 @@ export default function DailyTable({ dailyData }: DailyTableProps) {
               {rows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={10}
                     className="px-4 py-8 text-center text-sm text-brand-gray-med"
                   >
                     Nenhum dia com atividade registrada.
@@ -66,6 +73,9 @@ export default function DailyTable({ dailyData }: DailyTableProps) {
                     d.roasGeral >= 1
                       ? "text-brand-success"
                       : "text-brand-error";
+                  const reembolsoTotal = d.reembolsoAds + d.reembolsoOrg;
+                  const reembolsoColor =
+                    reembolsoTotal > 0 ? "text-brand-error" : "text-brand-text";
                   const zebra = i % 2 === 0 ? "bg-white" : "bg-brand-gray-bg";
                   return (
                     <tr
@@ -78,11 +88,22 @@ export default function DailyTable({ dailyData }: DailyTableProps) {
                       <td className="px-4 py-3 text-right tabular-nums text-brand-text">
                         {formatBRL(d.investimentoTotal)}
                       </td>
-                      <td className="px-4 py-3 text-right tabular-nums text-brand-text">
-                        {formatInt(d.confirmados)}
-                      </td>
                       <td className="px-4 py-3 text-right tabular-nums font-semibold text-brand-text">
                         {formatInt(d.vendasTotal)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums text-brand-text">
+                        {formatInt(d.vendasAds)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums text-brand-text">
+                        {formatInt(d.vendasOrganico)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums text-brand-text">
+                        {d.cpa > 0 ? formatBRL(d.cpa) : "—"}
+                      </td>
+                      <td
+                        className={`px-4 py-3 text-right tabular-nums ${reembolsoColor}`}
+                      >
+                        {reembolsoTotal > 0 ? formatInt(reembolsoTotal) : "—"}
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums text-brand-text">
                         {formatBRL(d.faturamentoTotal)}

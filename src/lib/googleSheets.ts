@@ -55,6 +55,9 @@ function parseDailyRow(row: string[]): DailyData {
     vendasOrganico: n(row, 79),
     vendasSmartPresencial: n(row, 80),
 
+    reembolsoAds: n(row, 81),
+    reembolsoOrg: n(row, 83),
+
     faturamentoAds: n(row, 84),
     faturamentoSmart: n(row, 85),
     faturamentoOrganico: n(row, 86),
@@ -65,6 +68,7 @@ function parseDailyRow(row: string[]): DailyData {
     lucroSmart: n(row, 90),
     lucroTotal: n(row, 91),
 
+    cpa: 0, // calculated below
     comprasAds: n(row, 93),
     comprasTotal: n(row, 94),
     roasAds: n(row, 96),
@@ -102,7 +106,11 @@ export async function fetchEventoMetrics(
 
   // Skip header row
   const dataRows = rows.slice(1);
-  const allDays = dataRows.map(parseDailyRow);
+  const allDays = dataRows.map((row) => {
+    const day = parseDailyRow(row);
+    day.cpa = day.vendasAds > 0 ? day.investimentoTotal / day.vendasAds : 0;
+    return day;
+  });
   const activeDays = allDays.filter(hasActivity);
 
   const totalInvestimento = sum(activeDays, d => d.investimentoTotal);
@@ -139,6 +147,11 @@ export async function fetchEventoMetrics(
   const somaFaturamentoAds = faturamentoAds;
   const roasAds = somaInvestimentoAds > 0 ? somaFaturamentoAds / somaInvestimentoAds : 0;
 
+  const reembolsosAds = sum(activeDays, d => d.reembolsoAds);
+  const reembolsosOrg = sum(activeDays, d => d.reembolsoOrg);
+  const totalReembolsos = reembolsosAds + reembolsosOrg;
+  const cpaAds = vendasAds > 0 ? totalInvestimento / vendasAds : 0;
+
   const metrics: EventoMetrics = {
     totalInvestimento,
     totalVendas,
@@ -169,6 +182,11 @@ export async function fetchEventoMetrics(
     cpcMedio,
     cpmMedio,
     custoFinalizacaoMedio,
+    cpaAds,
+
+    totalReembolsos,
+    reembolsosAds,
+    reembolsosOrg,
 
     roasAds,
 

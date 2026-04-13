@@ -46,12 +46,17 @@ export interface DailyData {
   faturamentoIngressos: number;
   faturamentoTotal: number;
 
+  // Reembolsos
+  reembolsoAds: number;
+  reembolsoOrg: number;
+
   // Lucro
   lucroAds: number;
   lucroSmart: number;
   lucroTotal: number;
 
   // Performance
+  cpa: number;
   comprasAds: number;
   comprasTotal: number;
   roasAds: number;
@@ -100,6 +105,12 @@ export interface EventoMetrics {
   cpcMedio: number;
   cpmMedio: number;
   custoFinalizacaoMedio: number;
+  cpaAds: number;
+
+  // Reembolsos
+  totalReembolsos: number;
+  reembolsosAds: number;
+  reembolsosOrg: number;
 
   // ROAS
   roasAds: number;

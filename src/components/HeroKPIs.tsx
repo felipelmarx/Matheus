@@ -5,6 +5,9 @@ import {
   PiggyBank,
   Target,
   Receipt,
+  Megaphone,
+  Leaf,
+  UserX,
   LucideIcon,
 } from "lucide-react";
 import { EventoMetrics } from "@/types/metrics";
@@ -52,6 +55,8 @@ export default function HeroKPIs({ metrics }: HeroKPIsProps) {
       ? "error"
       : "default";
 
+  const reembolsoTone = metrics.totalReembolsos > 0 ? "error" : "default";
+
   return (
     <section className="mb-10">
       <h2 className="mb-4 text-lg font-bold text-brand-text">Visão Geral</h2>
@@ -86,6 +91,31 @@ export default function HeroKPIs({ metrics }: HeroKPIsProps) {
           label="Ticket Médio"
           value={formatBRL(metrics.ticketMedioGeral)}
           Icon={Receipt}
+        />
+      </div>
+
+      <h2 className="mb-4 mt-8 text-lg font-bold text-brand-text">Vendas & Aquisição</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KPICard
+          label="Vendas Ads"
+          value={formatInt(metrics.vendasAds)}
+          Icon={Megaphone}
+        />
+        <KPICard
+          label="Vendas Orgânicas"
+          value={formatInt(metrics.vendasOrganico)}
+          Icon={Leaf}
+        />
+        <KPICard
+          label="CPA (Custo por Aquisição)"
+          value={formatBRL(metrics.cpaAds)}
+          Icon={Target}
+        />
+        <KPICard
+          label="Reembolsos"
+          value={formatInt(metrics.totalReembolsos)}
+          Icon={UserX}
+          tone={reembolsoTone}
         />
       </div>
     </section>
