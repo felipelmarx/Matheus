@@ -176,8 +176,8 @@ export default function DashboardPage() {
                 {activeTab === 'desafio5' && data.desafio5Daily.length > 0 && (
                   <DetalhamentoDia daily={data.desafio5Daily} />
                 )}
-                {activeTab === 'desafio5' && data.popupQualificador.length > 0 && (
-                  <PopupQualificador days={data.popupQualificador} />
+                {activeTab === 'desafio5' && (data.popupQualificador.length > 0 || data.popupConsolidado) && (
+                  <PopupQualificador days={data.popupQualificador} consolidado={data.popupConsolidado} />
                 )}
               </>
             ) : null}

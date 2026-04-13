@@ -1,4 +1,4 @@
-import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay, AnaliseCompradorSection } from '@/types/metrics';
+import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay, PopupQualificadorSide, AnaliseCompradorSection } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
 
@@ -392,50 +392,65 @@ function extractDesafio4Daily(rows: string[][]): DailyMetric[] {
 // Extract Pop-up Qualificador data from ABR - METRICAS GERAIS (AW5:BM19)
 // Row 0-1 = headers, row 2 = empty, data starts row 3 (= 30/03/2026)
 // Cols 0-7 = QUALIFICADOR, col 8 = investimento total, cols 9-16 = DESQUALIFICADO
-function extractPopupQualificador(rows: string[][]): PopupQualificadorDay[] {
+// Extract a PopupQualificadorSide from a row (AX:BN range = 17 cols)
+// Qualificador: cols 0-7, Investimento Total: col 8, Desqualificador: cols 9-16
+function extractPopupSide(row: string[], startCol: number): PopupQualificadorSide {
+  const p = parseSheetNumber;
+  return {
+    investimento: p(row[startCol]),
+    checkouts: p(row[startCol + 1]),
+    conversaoCheckout: p(row[startCol + 2]),
+    proporcao: p(row[startCol + 3]),
+    vendas: p(row[startCol + 4]),
+    cpaReal: p(row[startCol + 5]),
+    faturamento: p(row[startCol + 6]),
+    ticketMedio: p(row[startCol + 7]),
+  };
+}
+
+// Dates from column B (rows 8+), data from AX:BN (rows 8+)
+function extractPopupQualificador(dataRows: string[][], dateRows: string[][]): PopupQualificadorDay[] {
   const p = parseSheetNumber;
   const days: PopupQualificadorDay[] = [];
-  const startDate = new Date(2026, 2, 30); // 30/03/2026
 
-  for (let i = 3; i < rows.length; i++) {
-    const row = rows[i];
+  for (let i = 0; i < dataRows.length; i++) {
+    const row = dataRows[i];
     if (!row || row.length === 0) continue;
 
     // Skip rows where all values are zero/empty
-    const hasData = row.some((val, idx) => idx !== 0 && p(val) !== 0) || p(row[0]) !== 0;
+    const hasData = row.some((val) => p(val) !== 0);
     if (!hasData) continue;
 
-    const date = new Date(startDate);
-    date.setDate(date.getDate() + (i - 3));
-    const dateStr = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+    const dateStr = (dateRows[i]?.[0] ?? '').trim();
+    if (!dateStr) continue;
 
     days.push({
       data: dateStr,
-      qualificador: {
-        investimento: p(row[0]),
-        checkouts: p(row[1]),
-        conversaoCheckout: p(row[2]),
-        proporcao: p(row[3]),
-        vendas: p(row[4]),
-        cpaReal: p(row[5]),
-        faturamento: p(row[6]),
-        ticketMedio: p(row[7]),
-      },
-      desqualificado: {
-        investimento: p(row[9]),
-        checkouts: p(row[10]),
-        conversaoCheckout: p(row[11]),
-        proporcao: p(row[12]),
-        vendas: p(row[13]),
-        cpaReal: p(row[14]),
-        faturamento: p(row[15]),
-        ticketMedio: p(row[16]),
-      },
+      qualificador: extractPopupSide(row, 0),
+      desqualificado: extractPopupSide(row, 9),
       investimentoTotal: p(row[8]),
     });
   }
 
   return days;
+}
+
+// Extract consolidated result from row 29 (same column structure as daily rows)
+function extractPopupConsolidado(row: string[]): {
+  qualificador: PopupQualificadorSide;
+  desqualificado: PopupQualificadorSide;
+  investimentoTotal: number;
+} | null {
+  if (!row || row.length === 0) return null;
+  const p = parseSheetNumber;
+  const hasData = row.some((val) => p(val) !== 0);
+  if (!hasData) return null;
+
+  return {
+    qualificador: extractPopupSide(row, 0),
+    desqualificado: extractPopupSide(row, 9),
+    investimentoTotal: p(row[8]),
+  };
 }
 
 // Parse ANALISE-COMPRADORES tab: sections with header row + content row, separated by blank rows
@@ -491,6 +506,7 @@ function getDefaultData(): AllDesafiosData {
     desafio5: getDefaultDesafio(),
     desafio5Daily: [],
     popupQualificador: [],
+    popupConsolidado: null,
     topAds: [],
     topAdsDesafio4: [],
     visaoEstrategica: [],
@@ -555,11 +571,17 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Desafio 5 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
-    // Pop-up Qualificador fetch is independent
-    let popupRows: string[][] = [];
+    // Pop-up Qualificador fetch: dates from col B, data from AX:BN, consolidated from row 29
+    let popupDataRows: string[][] = [];
+    let popupDateRows: string[][] = [];
+    let popupConsolidadoRow: string[] = [];
     try {
-      popupRows = await fetchSheetRows("'ABR - METRICAS GERAIS'!AW5:BM19");
-      console.log(`[sheets] Popup Qualificador: ${popupRows.length} rows loaded`);
+      [popupDataRows, popupDateRows, popupConsolidadoRow] = await Promise.all([
+        fetchSheetRows("'ABR - METRICAS GERAIS'!AX8:BN28"),
+        fetchSheetRows("'ABR - METRICAS GERAIS'!B8:B28"),
+        fetchSheetRows("'ABR - METRICAS GERAIS'!AX29:BN29").then(rows => rows[0] ?? []),
+      ]);
+      console.log(`[sheets] Popup Qualificador: ${popupDataRows.length} data rows, ${popupDateRows.length} date rows loaded`);
     } catch (err) {
       console.warn('[sheets] Popup Qualificador fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
@@ -600,8 +622,11 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const desafio5Daily = extractDailyMetrics(desafio5Rows);
     console.log(`[sheets] desafio5Daily: ${desafio5Daily.length} days loaded`);
 
-    const popupQualificador = extractPopupQualificador(popupRows);
+    const popupQualificador = extractPopupQualificador(popupDataRows, popupDateRows);
     console.log(`[sheets] popupQualificador: ${popupQualificador.length} days loaded`);
+
+    const popupConsolidado = extractPopupConsolidado(popupConsolidadoRow);
+    console.log(`[sheets] popupConsolidado: ${popupConsolidado ? 'loaded' : 'no data'}`);
 
     // NEW STRATEGY: Fetch ANALISE-COMPRADORES early and derive formation sales
     // map from section 6 narrative (source of truth per Sr. Matheus).
@@ -647,6 +672,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio5: getDefaultDesafio(),
       desafio5Daily,
       popupQualificador,
+      popupConsolidado,
       topAds,
       topAdsDesafio4,
       visaoEstrategica: [],

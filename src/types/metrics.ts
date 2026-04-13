@@ -108,6 +108,11 @@ export interface AllDesafiosData {
   desafio5: DesafioData;
   desafio5Daily: DailyMetric[];
   popupQualificador: PopupQualificadorDay[];
+  popupConsolidado: {
+    qualificador: PopupQualificadorSide;
+    desqualificado: PopupQualificadorSide;
+    investimentoTotal: number;
+  } | null;
   topAds: AdMetric[];
   topAdsDesafio4: AdMetric[];
   visaoEstrategica: string[];
