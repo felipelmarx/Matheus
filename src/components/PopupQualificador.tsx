@@ -1,8 +1,33 @@
-import { FlaskConical, CalendarDays, DollarSign, ShoppingCart, Target, Percent, Users, TrendingUp, Tag } from 'lucide-react';
+import { FlaskConical, CalendarDays, DollarSign, ShoppingCart, Target, Percent, Users, TrendingUp, Tag, BarChart3, Trophy } from 'lucide-react';
 import type { PopupQualificadorDay, PopupQualificadorSide } from '@/types/metrics';
 
 interface PopupQualificadorProps {
   days: PopupQualificadorDay[];
+}
+
+function aggregateSide(days: PopupQualificadorDay[], side: 'qualificador' | 'desqualificado'): PopupQualificadorSide {
+  const totals = days.reduce(
+    (acc, day) => {
+      const s = day[side];
+      acc.investimento += s.investimento;
+      acc.checkouts += s.checkouts;
+      acc.vendas += s.vendas;
+      acc.faturamento += s.faturamento;
+      return acc;
+    },
+    { investimento: 0, checkouts: 0, vendas: 0, faturamento: 0 }
+  );
+
+  return {
+    investimento: totals.investimento,
+    checkouts: totals.checkouts,
+    conversaoCheckout: totals.checkouts > 0 ? (totals.vendas / totals.checkouts) * 100 : 0,
+    proporcao: 0,
+    vendas: totals.vendas,
+    cpaReal: totals.vendas > 0 ? totals.investimento / totals.vendas : 0,
+    faturamento: totals.faturamento,
+    ticketMedio: totals.vendas > 0 ? totals.faturamento / totals.vendas : 0,
+  };
 }
 
 export default function PopupQualificador({ days }: PopupQualificadorProps) {
@@ -15,6 +40,20 @@ export default function PopupQualificador({ days }: PopupQualificadorProps) {
 
   if (days.length === 0) return null;
 
+  const totalQ = aggregateSide(days, 'qualificador');
+  const totalD = aggregateSide(days, 'desqualificado');
+  const investimentoTotal = days.reduce((sum, d) => sum + d.investimentoTotal, 0);
+
+  const summaryMetrics: { label: string; qVal: string; dVal: string; qRaw: number; dRaw: number; lowerIsBetter?: boolean; icon: typeof DollarSign; color: string }[] = [
+    { label: 'Investimento', qVal: fmt(totalQ.investimento), dVal: fmt(totalD.investimento), qRaw: totalQ.investimento, dRaw: totalD.investimento, icon: DollarSign, color: 'text-blue-400' },
+    { label: 'Vendas', qVal: fmtNum(totalQ.vendas), dVal: fmtNum(totalD.vendas), qRaw: totalQ.vendas, dRaw: totalD.vendas, icon: ShoppingCart, color: 'text-indigo-400' },
+    { label: 'Faturamento', qVal: fmt(totalQ.faturamento), dVal: fmt(totalD.faturamento), qRaw: totalQ.faturamento, dRaw: totalD.faturamento, icon: TrendingUp, color: 'text-cyan-400' },
+    { label: 'CPA', qVal: fmt2(totalQ.cpaReal), dVal: fmt2(totalD.cpaReal), qRaw: totalQ.cpaReal, dRaw: totalD.cpaReal, lowerIsBetter: true, icon: Target, color: 'text-orange-400' },
+    { label: 'Ticket Medio', qVal: fmt2(totalQ.ticketMedio), dVal: fmt2(totalD.ticketMedio), qRaw: totalQ.ticketMedio, dRaw: totalD.ticketMedio, icon: Tag, color: 'text-amber-400' },
+    { label: 'Checkouts', qVal: fmtNum(totalQ.checkouts), dVal: fmtNum(totalD.checkouts), qRaw: totalQ.checkouts, dRaw: totalD.checkouts, icon: Users, color: 'text-violet-400' },
+    { label: 'Conv. Checkout', qVal: fmtPct(totalQ.conversaoCheckout), dVal: fmtPct(totalD.conversaoCheckout), qRaw: totalQ.conversaoCheckout, dRaw: totalD.conversaoCheckout, icon: Percent, color: 'text-emerald-400' },
+  ];
+
   const metrics: { key: keyof PopupQualificadorSide; label: string; format: (v: number) => string; icon: typeof DollarSign; color: string; lowerIsBetter?: boolean }[] = [
     { key: 'investimento', label: 'Investimento', format: fmt, icon: DollarSign, color: 'text-blue-400' },
     { key: 'checkouts', label: 'Checkouts', format: fmtNum, icon: ShoppingCart, color: 'text-indigo-400' },
@@ -26,6 +65,20 @@ export default function PopupQualificador({ days }: PopupQualificadorProps) {
     { key: 'ticketMedio', label: 'Ticket Medio', format: fmt2, icon: Tag, color: 'text-amber-400' },
   ];
 
+  // Determine winner
+  let qWins = 0;
+  let dWins = 0;
+  summaryMetrics.forEach(m => {
+    if (m.qRaw === 0 || m.dRaw === 0 || m.qRaw === m.dRaw) return;
+    if (m.lowerIsBetter) {
+      m.qRaw < m.dRaw ? qWins++ : dWins++;
+    } else {
+      m.qRaw > m.dRaw ? qWins++ : dWins++;
+    }
+  });
+  const winner = qWins > dWins ? 'Qualificador' : dWins > qWins ? 'Desqualificado' : 'Empate';
+  const winnerColor = winner === 'Qualificador' ? 'text-indigo-400' : winner === 'Desqualificado' ? 'text-orange-400' : 'text-muted-foreground';
+
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 px-1">
@@ -36,6 +89,74 @@ export default function PopupQualificador({ days }: PopupQualificadorProps) {
         <span className="text-xs text-muted-foreground/60 font-mono">
           ({days.length} {days.length === 1 ? 'dia' : 'dias'})
         </span>
+      </div>
+
+      {/* Summary Card */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-border bg-gradient-to-r from-primary/15 via-primary/5 to-transparent">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              <span className="text-sm font-heading font-semibold text-foreground">Resultado Consolidado do Teste</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-2 py-0.5 rounded">
+                Invest. total: {BRL.format(investimentoTotal)}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <Trophy className={`w-3.5 h-3.5 ${winnerColor}`} />
+                <span className={`text-[11px] font-heading font-bold ${winnerColor}`}>{winner}</span>
+                <span className="text-[10px] text-muted-foreground font-mono">({qWins}x{dWins})</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4">
+          <div className="grid grid-cols-[1fr_auto_auto] gap-x-6 mb-3 pb-2 border-b border-border/50">
+            <span className="text-[10px] text-muted-foreground font-heading uppercase tracking-wider">Metrica</span>
+            <span className="text-[10px] text-indigo-400 font-heading font-semibold text-right w-24">Qualificador</span>
+            <span className="text-[10px] text-orange-400 font-heading font-semibold text-right w-24">Desqualificado</span>
+          </div>
+
+          {summaryMetrics.map((m) => {
+            const Icon = m.icon;
+            let qBetter = false;
+            let dBetter = false;
+            if (m.qRaw !== 0 && m.dRaw !== 0 && m.qRaw !== m.dRaw) {
+              if (m.lowerIsBetter) {
+                qBetter = m.qRaw < m.dRaw;
+                dBetter = m.dRaw < m.qRaw;
+              } else {
+                qBetter = m.qRaw > m.dRaw;
+                dBetter = m.dRaw > m.qRaw;
+              }
+            }
+
+            return (
+              <div key={m.label} className="grid grid-cols-[1fr_auto_auto] gap-x-6 py-1.5">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${m.color}`} />
+                  <span className="text-xs text-muted-foreground font-heading">{m.label}</span>
+                </div>
+                <span className={`text-xs font-mono font-medium text-right w-24 ${qBetter ? 'text-indigo-400 font-bold' : 'text-foreground'}`}>
+                  {m.qVal}
+                </span>
+                <span className={`text-xs font-mono font-medium text-right w-24 ${dBetter ? 'text-orange-400 font-bold' : 'text-foreground'}`}>
+                  {m.dVal}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Daily Breakdown */}
+      <div className="flex items-center gap-2 px-1 pt-2">
+        <CalendarDays className="w-4 h-4 text-muted-foreground" />
+        <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
+          Detalhamento por Dia
+        </h3>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
