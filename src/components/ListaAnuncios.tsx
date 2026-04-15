@@ -67,7 +67,7 @@ export default function ListaAnuncios({ ads, hideFormacao = false, disclaimerVen
         </div>
         {disclaimerVendasGerais && (
           <p className="text-[10px] text-muted-foreground mt-1.5 italic">
-            ⚠ Vendas exibidas são gerais — não exclusivas deste Desafio.
+            ⚠ O número de <strong>vendas formação</strong> é geral (não exclusivo deste Desafio). Vendas de ingresso são específicas.
           </p>
         )}
       </div>

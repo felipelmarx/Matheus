@@ -193,7 +193,7 @@ export default function DashboardPage() {
                   <ListaAnuncios
                     ads={data.topAdsPorDesafio[activeTab]}
                     hideFormacao={activeTab === 'desafio5'}
-                    disclaimerVendasGerais={activeTab === 'desafio4' || activeTab === 'desafio5'}
+                    disclaimerVendasGerais={activeTab === 'desafio4'}
                   />
                 )}
               </>
