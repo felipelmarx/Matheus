@@ -1,4 +1,4 @@
-import { DollarSign, ShoppingCart, TrendingUp, Target, Ticket, Receipt, MousePointerClick, Percent, ShoppingBag } from 'lucide-react';
+import { DollarSign, ShoppingCart, TrendingUp, Target, Ticket, Receipt } from 'lucide-react';
 import type { DesafioData } from '@/types/metrics';
 
 interface StatCardsProps {
@@ -38,54 +38,6 @@ function CardGrid({ cards }: { cards: CardData[] }) {
 
 export default function StatCards({ data }: StatCardsProps) {
   const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-  const DASH = '\u2014'; // em-dash for missing data
-
-  // CPC Facebook: investimento / cliques
-  const cpcFacebook = data.cliques > 0 ? data.investimento / data.cliques : 0;
-  const cpcValue = cpcFacebook > 0
-    ? BRL.format(cpcFacebook)
-    : DASH;
-
-  // Conversão Página -> Checkout: (checkouts / viewPages) * 100
-  const hasCheckouts = typeof data.checkouts === 'number' && data.checkouts > 0;
-  const convPageCheckout = hasCheckouts && data.viewPages > 0
-    ? (((data.checkouts as number) / data.viewPages) * 100)
-    : null;
-  const convPageCheckoutValue = convPageCheckout !== null
-    ? `${convPageCheckout.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
-    : DASH;
-
-  // Conversão Checkout -> Venda: (vendas / checkouts) * 100
-  const convCheckoutVenda = hasCheckouts && (data.checkouts as number) > 0 && data.vendas > 0
-    ? ((data.vendas / (data.checkouts as number)) * 100)
-    : null;
-  const convCheckoutVendaValue = convCheckoutVenda !== null
-    ? `${convCheckoutVenda.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
-    : DASH;
-
-  const funnelCards: CardData[] = [
-    {
-      label: 'CUSTO POR CLICK (FB)',
-      value: cpcValue,
-      icon: MousePointerClick,
-      accentColor: 'text-sky-500',
-      accentBg: 'bg-sky-500/8',
-    },
-    {
-      label: 'CONV. PAGINA -> CHECKOUT',
-      value: convPageCheckoutValue,
-      icon: Percent,
-      accentColor: 'text-fuchsia-500',
-      accentBg: 'bg-fuchsia-500/8',
-    },
-    {
-      label: 'CONV. CHECKOUT -> VENDA',
-      value: convCheckoutVendaValue,
-      icon: ShoppingBag,
-      accentColor: 'text-rose-500',
-      accentBg: 'bg-rose-500/8',
-    },
-  ];
 
   const captacaoCards: CardData[] = [
     {
@@ -160,7 +112,6 @@ export default function StatCards({ data }: StatCardsProps) {
     <div className="space-y-4">
       <CardGrid cards={captacaoCards} />
       <CardGrid cards={formacaoCards} />
-      <CardGrid cards={funnelCards} />
     </div>
   );
 }

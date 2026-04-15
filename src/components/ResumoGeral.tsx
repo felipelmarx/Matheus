@@ -52,6 +52,16 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
 
   const roas = data.investimento > 0 ? (data.faturamento / data.investimento) : 0;
 
+  // Metricas de trafego adicionais (CPC FB, conversoes de checkout)
+  const cpcFacebook = data.cliques > 0 ? data.investimento / data.cliques : 0;
+  const hasCheckouts = typeof data.checkouts === 'number' && data.checkouts > 0;
+  const convPageCheckout = hasCheckouts && data.viewPages > 0
+    ? ((data.checkouts as number) / data.viewPages) * 100
+    : 0;
+  const convCheckoutVenda = hasCheckouts && (data.checkouts as number) > 0 && data.vendas > 0
+    ? (data.vendas / (data.checkouts as number)) * 100
+    : 0;
+
   // Funnel conversion rates
   const convIngressosAplic = data.ingressosTotais > 0 ? (data.aplicacoes / data.ingressosTotais) * 100 : 0;
   const convAplicAgend = data.aplicacoes > 0 ? (data.agendamentos / data.aplicacoes) * 100 : 0;
@@ -78,8 +88,11 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
       headerBg: 'from-cyan-500/10 to-transparent',
       metrics: [
         { label: 'Cliques', value: fmtNum(data.cliques) },
+        { label: 'Custo por Click (FB)', value: cpcFacebook === 0 ? '--' : fmt(cpcFacebook) },
         { label: 'View Pages', value: fmtNum(data.viewPages) },
         { label: 'Conect Rate', value: fmtPct(data.conectRate), isHighlight: data.conectRate >= 70 },
+        { label: 'Conv. Página → Checkout', value: convPageCheckout === 0 ? '--' : `${convPageCheckout.toFixed(1)}%` },
+        { label: 'Conv. Checkout → Venda', value: convCheckoutVenda === 0 ? '--' : `${convCheckoutVenda.toFixed(1)}%`, isHighlight: convCheckoutVenda >= 30 },
         { label: 'Investimento', value: fmt(data.investimento), isHighlight: true },
         { label: 'Vendas', value: fmtNum(data.vendas) },
         { label: 'Ingressos Totais (vendas + cortesia)', value: fmtNum(data.ingressosTotais) },
