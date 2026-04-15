@@ -196,8 +196,8 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
         const metricsCount = group.metrics.length;
 
         return (
+          <React.Fragment key={group.title}>
           <div
-            key={group.title}
             className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80"
           >
             <button
@@ -269,10 +269,13 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
               )}
             </div>
           </div>
+          {/* Comparecimentos logo abaixo do Funil (antes de Cancelamentos) */}
+          {group.title === 'Funil' && (
+            <ComparecimentosCard data={data} siteOnly={comparecimentosSiteOnly} />
+          )}
+          </React.Fragment>
         );
       })}
-      {/* Comparecimentos sempre no final da aba (ordem narrativa: Trafego -> Funil -> Cancelamentos -> Comparecimentos) */}
-      <ComparecimentosCard data={data} siteOnly={comparecimentosSiteOnly} />
     </div>
   );
 }
