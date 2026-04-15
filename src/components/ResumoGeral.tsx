@@ -53,7 +53,9 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
   const roas = data.investimento > 0 ? (data.faturamento / data.investimento) : 0;
 
   // Metricas de trafego adicionais (CPC FB, conversoes de checkout)
-  const cpcFacebook = data.cliques > 0 ? data.investimento / data.cliques : 0;
+  // CPC usa investimentoCaptacao (trafego puro) — fallback para investimento se nao houver
+  const investTrafego = data.investimentoCaptacao > 0 ? data.investimentoCaptacao : data.investimento;
+  const cpcFacebook = data.cliques > 0 ? investTrafego / data.cliques : 0;
   const hasCheckouts = typeof data.checkouts === 'number' && data.checkouts > 0;
   const convPageCheckout = hasCheckouts && data.viewPages > 0
     ? ((data.checkouts as number) / data.viewPages) * 100

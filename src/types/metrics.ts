@@ -21,7 +21,8 @@ export interface DesafioData {
   checkouts: number | null;
 
   // Investment & Revenue
-  investimento: number;
+  investimento: number;            // Investimento bruto (total: trafego + API + extras)
+  investimentoCaptacao: number;    // Investimento so de trafego (ads/FB)
   vendas: number;
   cortesias: number;
   ingressosTotais: number;

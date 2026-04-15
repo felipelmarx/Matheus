@@ -60,6 +60,7 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
     conectRate: cliques > 0 ? Math.round((viewPages / cliques) * 100) : 0,
     checkouts,
     investimento: inv,
+    investimentoCaptacao: sum(d => d.investimentoCaptacao),
     vendas,
     cortesias,
     ingressosTotais,

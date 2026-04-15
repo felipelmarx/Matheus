@@ -59,7 +59,10 @@ function extractDesafioData(rows: string[][], labelCol: number, valueCol: number
       return parsed > 0 ? parsed : null;
     })(),
 
-    investimento: p(findValue(rows, /investimento/i, labelCol, valueCol)),
+    // Investimento bruto: "Investimento bruto" OU "Investimento" puro (exclui "Investimento captacao")
+    investimento: p(findValue(rows, /^investimento(\s+bruto)?$/i, labelCol, valueCol)),
+    // Investimento de trafego: "Investimento captacao"
+    investimentoCaptacao: p(findValue(rows, /investimento\s*capta[cç][aã]o/i, labelCol, valueCol)),
     vendas: p(findValue(rows, /vendas\s*(ingresso|$)/i, labelCol, valueCol)),
     cortesias: p(findValue(rows, /^cortesias?$/i, labelCol, valueCol)),
     ingressosTotais: p(findValue(rows, /ingressos?\s*totais/i, labelCol, valueCol)),
@@ -112,7 +115,7 @@ function getDefaultDesafio(): DesafioData {
     captacao: '', aoVivo: '',
     cliques: 0, viewPages: 0, conectRate: 0,
     checkouts: null,
-    investimento: 0, vendas: 0, cortesias: 0, ingressosTotais: 0, cpa: 0, ticketMedio: 0, faturamento: 0, lucroPrejuizo: 0,
+    investimento: 0, investimentoCaptacao: 0, vendas: 0, cortesias: 0, ingressosTotais: 0, cpa: 0, ticketMedio: 0, faturamento: 0, lucroPrejuizo: 0,
     aplicacoes: 0, custoPorAplicacao: 0,
     agendamentos: 0, entrevistas: 0, custoEntrevista: 0,
     vendasFormacao: 0, custoVendasFormacao: 0, faturamentoTotal: 0, ticketMedioFormacao: 0,
