@@ -36,10 +36,20 @@ const simplesSections: { title: string; color: string; fields: FieldConfig[] }[]
     ],
   },
   {
+    title: 'Qualificacao',
+    color: 'text-pink-400',
+    fields: [
+      { key: 'taxaAplicacao', label: 'Inscritos -> Aplicacao', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+      { key: 'taxaAgendamento', label: 'Aplicacao -> Agendamento', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+      { key: 'taxaEntrevista', label: 'Agendamento -> Entrevista', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+    ],
+  },
+  {
     title: 'Cortesias & Formacao',
     color: 'text-violet-400',
     fields: [
       { key: 'taxaCortesia', label: 'Taxa de Cortesia (% sobre vendas)', min: 0, max: 100, step: 0.5, unit: '%', decimal: 1 },
+      { key: 'taxaVendaFormacao', label: 'Entrevista -> Venda Formacao', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
       { key: 'ticketFormacao', label: 'Ticket Formacao', min: 0, max: 50000, step: 100, unit: 'R$' },
     ],
   },
