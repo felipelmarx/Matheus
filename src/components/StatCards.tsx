@@ -13,19 +13,22 @@ interface CardData {
   accentBg: string;
 }
 
-function CardGrid({ cards }: { cards: CardData[] }) {
+function CardGrid({ cards, cols }: { cards: CardData[]; cols: 4 | 5 }) {
+  const gridClass = cols === 5
+    ? 'grid grid-cols-2 lg:grid-cols-5 gap-3'
+    : 'grid grid-cols-2 lg:grid-cols-4 gap-3';
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className={gridClass}>
       {cards.map((card) => {
         const Icon = card.icon;
         return (
-          <div key={card.label} className="card-3d p-3 sm:p-5">
-            <div className="flex items-center justify-between mb-2 sm:mb-3 gap-1">
-              <p className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground font-heading leading-tight">
+          <div key={card.label} className="card-3d p-2 sm:p-3">
+            <div className="flex items-center justify-between mb-1.5 gap-1">
+              <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-heading leading-tight">
                 {card.label}
               </p>
-              <div className={`p-1 sm:p-1.5 rounded-lg shrink-0 ${card.accentBg} ${card.accentColor}`}>
-                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <div className={`p-1 rounded-md shrink-0 ${card.accentBg} ${card.accentColor}`}>
+                <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </div>
             </div>
             <p className="text-xs sm:text-sm font-bold font-mono text-foreground break-words leading-tight">{card.value}</p>
@@ -109,9 +112,9 @@ export default function StatCards({ data }: StatCardsProps) {
   ];
 
   return (
-    <div className="space-y-4">
-      <CardGrid cards={captacaoCards} />
-      <CardGrid cards={formacaoCards} />
+    <div className="space-y-3">
+      <CardGrid cards={captacaoCards} cols={5} />
+      <CardGrid cards={formacaoCards} cols={4} />
     </div>
   );
 }
