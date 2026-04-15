@@ -1,4 +1,4 @@
-import { FlaskConical, CalendarDays, DollarSign, ShoppingCart, Target, Percent, Users, TrendingUp, Tag, BarChart3, Trophy } from 'lucide-react';
+import { FlaskConical, CalendarDays, DollarSign, ShoppingCart, Target, Percent, Users, TrendingUp, Tag, BarChart3, Trophy, ChevronDown } from 'lucide-react';
 import type { PopupQualificadorDay, PopupQualificadorSide } from '@/types/metrics';
 
 interface PopupQualificadorProps {
@@ -148,21 +148,27 @@ export default function PopupQualificador({ days, consolidado }: PopupQualificad
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {days.map((day, idx) => (
-              <div
+              <details
                 key={idx}
-                className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                className="group bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 open:border-primary/40"
               >
-                <div className="px-4 py-2.5 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <CalendarDays className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-sm font-heading font-semibold text-foreground">{day.data}</span>
+                <summary className="px-4 py-2.5 border-b border-transparent group-open:border-border bg-gradient-to-r from-primary/10 to-transparent cursor-pointer list-none select-none">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <CalendarDays className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span className="text-sm font-heading font-semibold text-foreground truncate">{day.data}</span>
                     </div>
-                    <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-2 py-0.5 rounded">
-                      Invest. total: {BRL.format(day.investimentoTotal)}
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-mono text-muted-foreground bg-muted/50 px-2 py-0.5 rounded">
+                        Invest. total: {BRL.format(day.investimentoTotal)}
+                      </span>
+                      <ChevronDown
+                        aria-hidden
+                        className="w-4 h-4 text-muted-foreground transition-transform duration-200 group-open:rotate-180"
+                      />
+                    </div>
                   </div>
-                </div>
+                </summary>
 
                 <div className="p-3">
                   <div className="grid grid-cols-[1fr_auto_auto] gap-x-3 mb-2 pb-2 border-b border-border/50">
@@ -204,7 +210,7 @@ export default function PopupQualificador({ days, consolidado }: PopupQualificad
                     );
                   })}
                 </div>
-              </div>
+              </details>
             ))}
           </div>
         </>

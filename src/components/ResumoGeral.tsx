@@ -1,5 +1,7 @@
+import React from 'react';
 import { MousePointerClick, GitBranch, UserX, ExternalLink } from 'lucide-react';
 import type { DesafioData, TabKey } from '@/types/metrics';
+import ComparecimentosCard from './ComparecimentosCard';
 
 const LANDING_PAGES: Partial<Record<TabKey, { url: string; label: string }>> = {
   desafio1: {
@@ -19,6 +21,11 @@ const LANDING_PAGES: Partial<Record<TabKey, { url: string; label: string }>> = {
 interface ResumoGeralProps {
   data: DesafioData;
   activeTab?: TabKey;
+  /**
+   * Quando true, o card de Comparecimentos (renderizado entre Trafego e Funil)
+   * exibe o subtitulo "(Site)" em vez de "(Zoom + Site)". Usado no D5.
+   */
+  comparecimentosSiteOnly?: boolean;
 }
 
 interface MetricItem {
@@ -34,9 +41,10 @@ interface MetricGroup {
   accentColor: string;
   headerBg: string;
   metrics: MetricItem[];
+  isFunnel?: boolean;
 }
 
-export default function ResumoGeral({ data, activeTab }: ResumoGeralProps) {
+export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly = false }: ResumoGeralProps) {
   const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmt = (v: number) => (v === 0 ? '--' : BRL.format(v));
   const fmtNum = (v: number) => (v === 0 ? '--' : v.toLocaleString('pt-BR'));
@@ -49,6 +57,18 @@ export default function ResumoGeral({ data, activeTab }: ResumoGeralProps) {
   const convAplicAgend = data.aplicacoes > 0 ? (data.agendamentos / data.aplicacoes) * 100 : 0;
   const convAgendEntrev = data.agendamentos > 0 ? (data.entrevistas / data.agendamentos) * 100 : 0;
   const convEntrevVendas = data.entrevistas > 0 ? (data.vendasFormacao / data.entrevistas) * 100 : 0;
+
+  // Funnel steps: pairs of cards + conversion rows in between
+  type FunnelStep = { type: 'cards'; left: MetricItem; right: MetricItem } | { type: 'conv'; label: string; value: string; isHighlight?: boolean };
+  const funnelSteps: FunnelStep[] = [
+    { type: 'cards' as const, left: { label: 'Ingressos Totais', value: fmtNum(data.ingressosTotais) }, right: { label: 'Aplicações', value: fmtNum(data.aplicacoes) } },
+    { type: 'conv' as const, label: 'Conv. Ingressos → Aplicações', value: fmtPct(parseFloat(convIngressosAplic.toFixed(2))), isHighlight: convIngressosAplic > 0 },
+    { type: 'cards' as const, left: { label: 'Custo / Aplicação', value: fmt(data.custoPorAplicacao) }, right: { label: 'Agendamentos', value: fmtNum(data.agendamentos) } },
+    { type: 'conv' as const, label: 'Conv. Aplicações → Agendamentos', value: fmtPct(parseFloat(convAplicAgend.toFixed(2))), isHighlight: convAplicAgend > 0 },
+    { type: 'cards' as const, left: { label: 'Entrevistas', value: fmtNum(data.entrevistas) }, right: { label: 'Custo / Entrevista', value: fmt(data.custoEntrevista) } },
+    { type: 'conv' as const, label: 'Conv. Agendamentos → Entrevistas', value: fmtPct(parseFloat(convAgendEntrev.toFixed(2))), isHighlight: convAgendEntrev > 0 },
+    { type: 'conv' as const, label: 'Conv. Entrevistas → Vendas', value: fmtPct(parseFloat(convEntrevVendas.toFixed(2))), isHighlight: convEntrevVendas > 0 },
+  ];
 
   const groups: MetricGroup[] = [
     {
@@ -80,16 +100,20 @@ export default function ResumoGeral({ data, activeTab }: ResumoGeralProps) {
       accentColor: 'text-violet-400',
       headerBg: 'from-violet-500/10 to-transparent',
       metrics: [
-        { label: 'Ingressos Totais (vendas + cortesia)', value: fmtNum(data.ingressosTotais) },
-        { label: 'Conv. Ingressos → Aplicações', value: fmtPct(parseFloat(convIngressosAplic.toFixed(2))), isHighlight: convIngressosAplic > 0 },
+        // 1. Metricas absolutas do funil (Ingressos Totais omitido — ja exibido em Trafego)
         { label: 'Aplicações', value: fmtNum(data.aplicacoes) },
-        { label: 'Custo / Aplicação', value: fmt(data.custoPorAplicacao) },
-        { label: 'Conv. Aplicações → Agendamentos', value: fmtPct(parseFloat(convAplicAgend.toFixed(2))), isHighlight: convAplicAgend > 0 },
         { label: 'Agendamentos', value: fmtNum(data.agendamentos) },
-        { label: 'Conv. Agendamentos → Entrevistas', value: fmtPct(parseFloat(convAgendEntrev.toFixed(2))), isHighlight: convAgendEntrev > 0 },
         { label: 'Entrevistas', value: fmtNum(data.entrevistas) },
+        // 2. Custos por etapa
+        { label: 'Custo / Aplicação', value: fmt(data.custoPorAplicacao) },
         { label: 'Custo / Entrevista', value: fmt(data.custoEntrevista) },
+        // 3. Conversoes entre etapas
+        { label: 'Conv. Ingressos → Aplicações', value: fmtPct(parseFloat(convIngressosAplic.toFixed(2))), isHighlight: convIngressosAplic > 0 },
+        { label: 'Conv. Aplicações → Agendamentos', value: fmtPct(parseFloat(convAplicAgend.toFixed(2))), isHighlight: convAplicAgend > 0 },
+        { label: 'Conv. Agendamentos → Entrevistas', value: fmtPct(parseFloat(convAgendEntrev.toFixed(2))), isHighlight: convAgendEntrev > 0 },
         { label: 'Conv. Entrevistas → Vendas', value: fmtPct(parseFloat(convEntrevVendas.toFixed(2))), isHighlight: convEntrevVendas > 0 },
+        // 4. Resultado final
+        { label: 'Vendas Formação', value: fmtNum(data.vendasFormacao), isHighlight: data.vendasFormacao > 0 },
       ],
     },
   ];
@@ -109,11 +133,12 @@ export default function ResumoGeral({ data, activeTab }: ResumoGeralProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 gap-4">
       {groups.map((group) => {
         const Icon = group.icon;
         return (
-          <div key={group.title} className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">
+          <React.Fragment key={group.title}>
+          <div className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">
             <div className={`px-5 py-3 border-b border-border bg-gradient-to-r ${group.headerBg}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -135,26 +160,34 @@ export default function ResumoGeral({ data, activeTab }: ResumoGeralProps) {
                 )}
               </div>
             </div>
-            <div className="p-5 space-y-4">
+            <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
               {group.metrics.map((m) => (
-                <div key={m.label} className="flex items-baseline justify-between gap-2">
-                  <p className="text-xs text-muted-foreground font-heading shrink-0">{m.label}</p>
-                  <div className="border-b border-dotted border-border/50 flex-1 mb-1 mx-1" />
-                  <p
-                    className={`text-sm font-mono font-medium whitespace-nowrap ${
-                      m.isNegative
-                        ? 'text-destructive'
-                        : m.isHighlight
-                          ? 'text-primary font-bold'
-                          : 'text-foreground'
-                    }`}
-                  >
-                    {m.value}
-                  </p>
+                <div key={m.label} className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <div className={`rounded-lg border border-border/20 p-2 sm:p-4 flex items-center justify-center bg-gradient-to-br ${group.headerBg}`}>
+                    <p className="text-[11px] sm:text-sm font-heading font-bold text-center text-muted-foreground leading-tight">{m.label}</p>
+                  </div>
+                  <div className={`rounded-lg border border-border/20 p-2 sm:p-4 flex items-center justify-center bg-gradient-to-br ${group.headerBg}`}>
+                    <p
+                      className={`text-xs sm:text-base md:text-xl font-mono font-bold text-center leading-tight break-words ${
+                        m.isNegative
+                          ? 'text-destructive'
+                          : m.isHighlight
+                            ? 'text-primary'
+                            : 'text-foreground'
+                      }`}
+                    >
+                      {m.value}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
+          {/* Comparecimentos aparece entre Trafego e Funil */}
+          {group.title === 'Tráfego' && (
+            <ComparecimentosCard data={data} siteOnly={comparecimentosSiteOnly} />
+          )}
+          </React.Fragment>
         );
       })}
     </div>

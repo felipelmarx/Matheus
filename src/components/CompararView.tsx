@@ -75,6 +75,7 @@ const sections: MetricSection[] = [
       { label: 'Conv. Agendamentos → Entrevistas', compute: (d) => d.agendamentos > 0 ? parseFloat(((d.entrevistas / d.agendamentos) * 100).toFixed(2)) : 0, format: 'pct' },
       { label: 'Custo / Entrevista', key: 'custoEntrevista', format: 'brl', invertColor: true },
       { label: 'Conv. Entrevistas → Vendas', compute: (d) => d.entrevistas > 0 ? parseFloat(((d.vendasFormacao / d.entrevistas) * 100).toFixed(2)) : 0, format: 'pct' },
+      { label: 'Vendas Formacao', key: 'vendasFormacao', format: 'num' },
     ],
   },
   {
@@ -108,6 +109,26 @@ const desafioOptions: { key: DesafioKey; label: string; num: string }[] = [
   { key: 'desafio4', label: 'Desafio 4', num: '04' },
   { key: 'desafio5', label: 'Desafio 5', num: '05' },
 ];
+
+function getTrendInfo(
+  current: number,
+  previous: number | null,
+  invertColor?: boolean
+): { arrow: string; pct: string; colorClass: string } | null {
+  if (previous === null || previous === 0 || current === 0) return null;
+  const pctChange = ((current - previous) / Math.abs(previous)) * 100;
+  if (pctChange === 0) return null;
+
+  const isIncrease = pctChange > 0;
+  const arrow = isIncrease ? '↑' : '↓';
+  const pct = `${Math.abs(pctChange).toFixed(1)}%`;
+
+  // Determine if the change is "good"
+  const isGood = invertColor ? !isIncrease : isIncrease;
+  const colorClass = isGood ? 'text-green-500' : 'text-red-500';
+
+  return { arrow, pct, colorClass };
+}
 
 function getValueColor(
   value: number,
@@ -222,36 +243,47 @@ export default function CompararView({ data }: CompararViewProps) {
                       return (
                         <div key={row.key ?? `computed-${rowIdx}`}>
                           {/* Desktop layout */}
-                          <div style={gridStyle} className="hidden sm:grid gap-2 items-baseline">
-                            <p className="text-xs text-muted-foreground font-heading truncate">{row.label}</p>
+                          <div style={gridStyle} className="hidden sm:grid gap-2 items-baseline border-b border-border/30 pb-3">
+                            <p className="text-base text-muted-foreground font-heading font-bold truncate">{row.label}</p>
                             {selectedData.map((s, i) => {
                               const v = values[i];
-                              const color = getValueColor(v, values, row.invertColor);
+                              const prev = i > 0 ? values[i - 1] : null;
+                              const trend = getTrendInfo(v, prev, row.invertColor);
                               return (
-                                <p
-                                  key={s.key}
-                                  className={`text-sm font-mono font-medium text-right whitespace-nowrap overflow-hidden text-ellipsis ${color}`}
-                                >
-                                  {formatValue(v, row.format)}
-                                </p>
+                                <div key={s.key} className="text-right">
+                                  <p className="text-lg font-mono font-medium whitespace-nowrap overflow-hidden text-ellipsis text-foreground">
+                                    {formatValue(v, row.format)}
+                                  </p>
+                                  {trend && (
+                                    <p className={`text-xs font-mono ${trend.colorClass}`}>
+                                      {trend.arrow} {trend.pct}
+                                    </p>
+                                  )}
+                                </div>
                               );
                             })}
                           </div>
                           {/* Mobile layout - stacked */}
                           <div className="sm:hidden space-y-1">
-                            <p className="text-xs text-muted-foreground font-heading">{row.label}</p>
+                            <p className="text-xs text-muted-foreground font-heading font-bold">{row.label}</p>
                             <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${colCount}, 1fr)` }}>
                               {selectedData.map((s, i) => {
                                 const v = values[i];
-                                const color = getValueColor(v, values, row.invertColor);
+                                const prev = i > 0 ? values[i - 1] : null;
+                                const trend = getTrendInfo(v, prev, row.invertColor);
                                 return (
                                   <div key={s.key}>
                                     <p className="text-[10px] text-muted-foreground/60 font-heading">
                                       {desafioOptions.find((o) => o.key === s.key)?.label}
                                     </p>
-                                    <p className={`text-xs font-mono font-medium ${color}`}>
+                                    <p className="text-xs font-mono font-medium text-foreground">
                                       {formatValue(v, row.format)}
                                     </p>
+                                    {trend && (
+                                      <p className={`text-[10px] font-mono ${trend.colorClass}`}>
+                                        {trend.arrow} {trend.pct}
+                                      </p>
+                                    )}
                                   </div>
                                 );
                               })}

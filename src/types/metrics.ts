@@ -17,9 +17,13 @@ export interface DesafioData {
   viewPages: number;
   conectRate: number;
 
+  // Checkout funnel (may be null if not available in sheet yet)
+  checkouts: number | null;
+
   // Investment & Revenue
   investimento: number;
   vendas: number;
+  cortesias: number;
   ingressosTotais: number;
   cpa: number;
   ticketMedio: number;
@@ -44,6 +48,9 @@ export interface DesafioData {
   // Cancellations & No-show
   cancelamentos: number;
   noShow: number;
+
+  // Comparecimentos (participacao por sessao 1..5) — RESUMO-TECNICO
+  comparecimentos: number[];
 }
 
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5';

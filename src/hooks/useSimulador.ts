@@ -2,90 +2,76 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 
 // ─── Inputs ─────────────────────────────────────────────
 export interface SimuladorInputs {
+  // Investimento — somente tráfego (API agora é derivado de cortesias)
+  investimentoTrafego: number;
+
   // Tráfego
-  investimento: number;
   cpc: number;
+  connectRate: number;
 
-  // Conversão da Página
-  taxaConversao: number;
+  // Checkout (2 estágios)
+  taxaLPVCheckout: number;
+  taxaCheckoutVenda: number;
 
-  // Produto Principal (Ingresso)
-  precoProduto: number;
-  custoProduto: number;
-  taxaReembolso: number;
+  // Produto
+  precoIngresso: number;
+  ticketMedio: number;
 
-  // Order Bump
-  precoBump: number;
-  taxaBump: number;
+  // Cortesias (modelo v3) — cada lead pago gera N% de cortesia, custo por lead na API
+  taxaCortesia: number;   // % de leads pagos que convidam cortesia
+  custoPorLead: number;   // R$ por inscrito (pago + cortesia) na API de lembretes
 
-  // Upsell
-  precoUpsell: number;
-  taxaUpsell: number;
+  // API extra (fixo) — soma ao API derivado, não afeta números de ingressos
+  investimentoApiExtra: number;
 
-  // Downsell
-  precoDownsell: number;
-  taxaDownsell: number;
-
-  // Qualificação (Back-end)
+  // Backend — Qualificação
   taxaAplicacao: number;
   taxaAgendamento: number;
   taxaEntrevista: number;
 
-  // Formação (High-Ticket)
+  // Backend — Formação
   taxaVendaFormacao: number;
   ticketFormacao: number;
 }
 
 // ─── Outputs ────────────────────────────────────────────
 export interface SimuladorOutputs {
+  // Investimento
+  investimentoTrafego: number;   // passthrough do input (para display)
+  investimentoBruto: number;
+  investimentoLiquido: number;
+  investimentoApi: number;       // DERIVADO: inscritosTotais * custoPorLead + extra
+
   // Tráfego
   cliques: number;
+  viewPage: number;
 
-  // Front-end: Vendas
+  // Checkout
+  checkouts: number;
   vendas: number;
-  receitaProduto: number;
-  vendasBump: number;
-  receitaBump: number;
-  vendasUpsell: number;
-  receitaUpsell: number;
-  recusaramUpsell: number;
-  vendasDownsell: number;
-  receitaDownsell: number;
+  faturamentoCaptacao: number;
 
-  // Front-end: Totais
-  faturamentoFrontEnd: number;
-  ticketMedioFrontEnd: number;
-  saldoFrontEnd: number;
+  // Cortesias
+  leadsCortesia: number;
+  inscritosTotais: number;
 
-  // Back-end: Qualificação
+  // Backend
   aplicacoes: number;
   agendamentos: number;
   entrevistas: number;
-
-  // Back-end: Formação
   vendasFormacao: number;
-  faturamentoBackEnd: number;
+  faturamentoFormacao: number;
 
-  // Custos
-  receitaBruta: number;
-  reembolsos: number;
-  custosProduto: number;
-
-  // Totais Gerais
-  faturamentoTotal: number;
-  ticketMedioGeral: number;
+  // KPIs
   cpa: number;
-  epc: number;
-  custoAplicacao: number;
-  custoAgendamento: number;
-  custoEntrevista: number;
   custoVendaFormacao: number;
-  ticketMedioFormacao: number;
   tmCac: number;
+  faturamentoTotal: number;
   lucro: number;
   roi: number;
   roas: number;
   breakevenVendas: number;
+  epc: number;
 }
 
 // ─── Alertas ────────────────────────────────────────────
@@ -94,6 +80,7 @@ export interface SimuladorAlert { level: AlertLevel; message: string; }
 
 // ─── Dream Goal ─────────────────────────────────────────
 export interface DreamGoalResult {
+  vendasFormacaoNecessarias: number;
   vendasNecessarias: number;
   cliquesNecessarios: number;
   investimentoNecessario: number;
@@ -104,94 +91,124 @@ export interface CenarioResult { label: string; outputs: SimuladorOutputs; }
 
 // ─── Defaults ───────────────────────────────────────────
 const DEFAULTS: SimuladorInputs = {
-  investimento: 50000,
-  cpc: 2,
-  taxaConversao: 3,
-  precoProduto: 7,
-  custoProduto: 0,
-  taxaReembolso: 0,
-  precoBump: 27,
-  taxaBump: 20,
-  precoUpsell: 47,
-  taxaUpsell: 15,
-  precoDownsell: 17,
-  taxaDownsell: 30,
-  taxaAplicacao: 12,
-  taxaAgendamento: 79,
-  taxaEntrevista: 58,
-  taxaVendaFormacao: 28,
-  ticketFormacao: 7275,
+  investimentoTrafego: 78723,
+  cpc: 2.84,
+  connectRate: 64.6,
+  taxaLPVCheckout: 19.0,
+  taxaCheckoutVenda: 38.6,
+  precoIngresso: 7,
+  ticketMedio: 18,
+  taxaCortesia: 25,
+  custoPorLead: 9,
+  investimentoApiExtra: 0,
+  taxaAplicacao: 10.2,
+  taxaAgendamento: 69.6,
+  taxaEntrevista: 55.6,
+  taxaVendaFormacao: 43.1,
+  ticketFormacao: 6594,
 };
+
+// Chaves obrigatórias do novo shape (para detecção de migração do localStorage)
+const REQUIRED_KEYS: (keyof SimuladorInputs)[] = [
+  'investimentoTrafego',
+  'cpc',
+  'connectRate',
+  'taxaLPVCheckout',
+  'taxaCheckoutVenda',
+  'precoIngresso',
+  'ticketMedio',
+  'taxaCortesia',
+  'custoPorLead',
+  'investimentoApiExtra',
+  'taxaAplicacao',
+  'taxaAgendamento',
+  'taxaEntrevista',
+  'taxaVendaFormacao',
+  'ticketFormacao',
+];
 
 // ─── Compute ────────────────────────────────────────────
 export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
-  const { investimento, cpc, taxaConversao, precoProduto, custoProduto, taxaReembolso } = inputs;
+  const {
+    investimentoTrafego,
+    cpc,
+    connectRate,
+    taxaLPVCheckout,
+    taxaCheckoutVenda,
+    ticketMedio,
+    taxaCortesia,
+    custoPorLead,
+    investimentoApiExtra,
+    taxaAplicacao,
+    taxaAgendamento,
+    taxaEntrevista,
+    taxaVendaFormacao,
+    ticketFormacao,
+  } = inputs;
 
   // === TRÁFEGO ===
-  const cliques = cpc > 0 ? Math.round(investimento / cpc) : 0;
+  const cliques = cpc > 0 ? Math.round(investimentoTrafego / cpc) : 0;
+  const viewPage = Math.round(cliques * (connectRate / 100));
 
-  // === FRONT-END ===
-  const vendas = Math.round(cliques * (taxaConversao / 100));
-  const receitaProduto = vendas * precoProduto;
+  // === CHECKOUT (2 estágios) ===
+  const checkouts = Math.round(viewPage * (taxaLPVCheckout / 100));
+  const vendas = Math.round(checkouts * (taxaCheckoutVenda / 100));
+  const faturamentoCaptacao = vendas * ticketMedio;
 
-  const vendasBump = Math.round(vendas * (inputs.taxaBump / 100));
-  const receitaBump = vendasBump * inputs.precoBump;
+  // === CORTESIAS (modelo v3) ===
+  const leadsCortesia = Math.round(vendas * (taxaCortesia / 100));
+  const inscritosTotais = vendas + leadsCortesia;
 
-  const vendasUpsell = Math.round(vendas * (inputs.taxaUpsell / 100));
-  const receitaUpsell = vendasUpsell * inputs.precoUpsell;
+  // === INVESTIMENTO (API derivado + extra fixo) ===
+  const investimentoApi = inscritosTotais * custoPorLead + investimentoApiExtra;
+  const investimentoBruto = investimentoTrafego + investimentoApi;
 
-  const recusaramUpsell = vendas - vendasUpsell;
-  const vendasDownsell = Math.round(recusaramUpsell * (inputs.taxaDownsell / 100));
-  const receitaDownsell = vendasDownsell * inputs.precoDownsell;
+  // === BACKEND ===
+  const aplicacoes = Math.round(inscritosTotais * (taxaAplicacao / 100));
+  const agendamentos = Math.round(aplicacoes * (taxaAgendamento / 100));
+  const entrevistas = Math.round(agendamentos * (taxaEntrevista / 100));
+  const vendasFormacao = Math.round(entrevistas * (taxaVendaFormacao / 100));
+  const faturamentoFormacao = vendasFormacao * ticketFormacao;
 
-  const faturamentoFrontEnd = receitaProduto + receitaBump + receitaUpsell + receitaDownsell;
-  const ticketMedioFrontEnd = vendas > 0 ? faturamentoFrontEnd / vendas : 0;
-  const saldoFrontEnd = faturamentoFrontEnd - investimento;
-
-  // === BACK-END: QUALIFICAÇÃO ===
-  const aplicacoes = Math.round(vendas * (inputs.taxaAplicacao / 100));
-  const agendamentos = Math.round(aplicacoes * (inputs.taxaAgendamento / 100));
-  const entrevistas = Math.round(agendamentos * (inputs.taxaEntrevista / 100));
-
-  // === BACK-END: FORMAÇÃO ===
-  const vendasFormacao = Math.round(entrevistas * (inputs.taxaVendaFormacao / 100));
-  const faturamentoBackEnd = vendasFormacao * inputs.ticketFormacao;
-
-  // === CUSTOS ===
-  const receitaBruta = faturamentoFrontEnd + faturamentoBackEnd;
-  const reembolsos = Math.round(vendas * (taxaReembolso / 100)) * precoProduto;
-  const custosProduto = vendas * custoProduto;
-
-  // === TOTAIS ===
-  const faturamentoTotal = receitaBruta - reembolsos - custosProduto;
+  // === RESULTADO ===
+  const investimentoLiquido = investimentoBruto - faturamentoCaptacao;
+  const cpa = vendas > 0 ? investimentoTrafego / vendas : 0;
+  const custoVendaFormacao = vendasFormacao > 0 ? investimentoLiquido / vendasFormacao : 0;
+  const tmCac = custoVendaFormacao > 0 ? ticketFormacao / custoVendaFormacao : 0;
+  const faturamentoTotal = faturamentoCaptacao + faturamentoFormacao;
+  const lucro = faturamentoTotal - investimentoBruto;
+  const roi = investimentoBruto > 0 ? (lucro / investimentoBruto) * 100 : 0;
+  const roas = investimentoBruto > 0 ? faturamentoTotal / investimentoBruto : 0;
   const ticketMedioGeral = vendas > 0 ? faturamentoTotal / vendas : 0;
-  const cpa = vendas > 0 ? investimento / vendas : 0;
+  const breakevenVendas = ticketMedioGeral > 0 ? Math.ceil(investimentoBruto / ticketMedioGeral) : 0;
   const epc = cliques > 0 ? faturamentoTotal / cliques : 0;
-  const custoAplicacao = aplicacoes > 0 ? investimento / aplicacoes : 0;
-  const custoAgendamento = agendamentos > 0 ? investimento / agendamentos : 0;
-  const custoEntrevista = entrevistas > 0 ? investimento / entrevistas : 0;
-  const custoVendaFormacao = (saldoFrontEnd < 0 && vendasFormacao > 0) ? Math.abs(saldoFrontEnd) / vendasFormacao : 0;
-  const ticketMedioFormacao = vendasFormacao > 0 ? faturamentoBackEnd / vendasFormacao : 0;
-  const tmCac = custoVendaFormacao > 0 ? ticketMedioFormacao / custoVendaFormacao : 0;
-  const lucro = faturamentoTotal - investimento;
-  const roi = investimento > 0 ? (lucro / investimento) * 100 : 0;
-  const roas = investimento > 0 ? faturamentoTotal / investimento : 0;
-  const breakevenVendas = ticketMedioGeral > 0 ? Math.ceil(investimento / ticketMedioGeral) : 0;
 
   return {
-    cliques, vendas,
-    receitaProduto, vendasBump, receitaBump,
-    vendasUpsell, receitaUpsell, recusaramUpsell,
-    vendasDownsell, receitaDownsell,
-    faturamentoFrontEnd, ticketMedioFrontEnd, saldoFrontEnd,
-    aplicacoes, agendamentos, entrevistas,
-    vendasFormacao, faturamentoBackEnd,
-    receitaBruta, reembolsos, custosProduto,
-    faturamentoTotal, ticketMedioGeral, cpa, epc,
-    custoAplicacao, custoAgendamento,
-    custoEntrevista, custoVendaFormacao,
-    ticketMedioFormacao, tmCac,
-    lucro, roi, roas, breakevenVendas,
+    investimentoTrafego,
+    investimentoBruto,
+    investimentoLiquido,
+    investimentoApi,
+    cliques,
+    viewPage,
+    checkouts,
+    vendas,
+    faturamentoCaptacao,
+    leadsCortesia,
+    inscritosTotais,
+    aplicacoes,
+    agendamentos,
+    entrevistas,
+    vendasFormacao,
+    faturamentoFormacao,
+    cpa,
+    custoVendaFormacao,
+    tmCac,
+    faturamentoTotal,
+    lucro,
+    roi,
+    roas,
+    breakevenVendas,
+    epc,
   };
 }
 
@@ -199,22 +216,65 @@ export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
 export function computeAlerts(inputs: SimuladorInputs, outputs: SimuladorOutputs): SimuladorAlert[] {
   const alerts: SimuladorAlert[] = [];
 
+  // Prejuízo geral
   if (outputs.vendas > 0 && outputs.lucro < 0) {
-    alerts.push({ level: 'danger', message: `Prejuizo de R$ ${Math.abs(outputs.lucro).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` });
+    alerts.push({
+      level: 'danger',
+      message: `Prejuizo de R$ ${Math.abs(outputs.lucro).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
+    });
   } else if (outputs.roi > 0 && outputs.roi < 30) {
-    alerts.push({ level: 'warning', message: `ROI de ${outputs.roi.toFixed(1)}% — margem apertada` });
+    alerts.push({
+      level: 'warning',
+      message: `ROI de ${outputs.roi.toFixed(1)}% — margem apertada`,
+    });
   }
 
-  if (outputs.cpa > inputs.precoProduto && outputs.vendas > 0) {
-    alerts.push({ level: 'danger', message: `CPA (R$ ${outputs.cpa.toFixed(2)}) > preco do ingresso. Front-end no prejuizo` });
+  // CPA do tráfego vs ticket médio de captação
+  if (outputs.cpa > inputs.ticketMedio && outputs.vendas > 0) {
+    alerts.push({
+      level: 'danger',
+      message: `CPA (R$ ${outputs.cpa.toFixed(2)}) > ticket medio (R$ ${inputs.ticketMedio.toFixed(2)}). Captacao no prejuizo`,
+    });
   }
 
-  if (inputs.taxaConversao < 1) {
-    alerts.push({ level: 'warning', message: `Conversao em ${inputs.taxaConversao}% — gargalo na pagina` });
+  // Connect rate baixo
+  if (inputs.connectRate < 40) {
+    alerts.push({
+      level: 'warning',
+      message: `Connect Rate em ${inputs.connectRate.toFixed(1)}% — cliques nao carregam a LP`,
+    });
   }
 
-  if (outputs.saldoFrontEnd < 0 && outputs.faturamentoBackEnd > 0) {
-    alerts.push({ level: 'info', message: `Front-end: -R$ ${Math.abs(outputs.saldoFrontEnd).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}. Back-end cobre com R$ ${outputs.faturamentoBackEnd.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}` });
+  // Conversão LPV → Checkout baixa
+  if (inputs.taxaLPVCheckout < 5) {
+    alerts.push({
+      level: 'warning',
+      message: `LPV -> Checkout em ${inputs.taxaLPVCheckout.toFixed(1)}% — gargalo na pagina`,
+    });
+  }
+
+  // Conversão Checkout → Venda baixa
+  if (inputs.taxaCheckoutVenda < 20) {
+    alerts.push({
+      level: 'warning',
+      message: `Checkout -> Venda em ${inputs.taxaCheckoutVenda.toFixed(1)}% — recuperacao de carrinho fraca`,
+    });
+  }
+
+  // TM/CAC da formação
+  if (outputs.vendasFormacao > 0 && outputs.tmCac > 0 && outputs.tmCac < 1) {
+    alerts.push({
+      level: 'danger',
+      message: `TM/CAC em ${outputs.tmCac.toFixed(2)}x — formacao nao paga o custo de aquisicao`,
+    });
+  }
+
+  // Captação positiva (info)
+  if (outputs.investimentoLiquido < 0 && outputs.faturamentoFormacao > 0) {
+    alerts.push({
+      level: 'info',
+      message: `Captacao lucrativa em R$ ${Math.abs(outputs.investimentoLiquido).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}. Formacao e bonus.`,
+    });
   }
 
   return alerts;
@@ -224,24 +284,77 @@ export function computeAlerts(inputs: SimuladorInputs, outputs: SimuladorOutputs
 export function computeCenarios(inputs: SimuladorInputs, variacao: number = 20): CenarioResult[] {
   const f = variacao / 100;
   return [
-    { label: 'Pessimista', outputs: computeOutputs({ ...inputs, taxaConversao: inputs.taxaConversao * (1 - f), cpc: inputs.cpc * (1 + f) }) },
+    {
+      label: 'Pessimista',
+      outputs: computeOutputs({
+        ...inputs,
+        taxaLPVCheckout: inputs.taxaLPVCheckout * (1 - f),
+        taxaCheckoutVenda: inputs.taxaCheckoutVenda * (1 - f),
+        cpc: inputs.cpc * (1 + f),
+      }),
+    },
     { label: 'Base', outputs: computeOutputs(inputs) },
-    { label: 'Otimista', outputs: computeOutputs({ ...inputs, taxaConversao: inputs.taxaConversao * (1 + f), cpc: inputs.cpc * (1 - f) }) },
+    {
+      label: 'Otimista',
+      outputs: computeOutputs({
+        ...inputs,
+        taxaLPVCheckout: inputs.taxaLPVCheckout * (1 + f),
+        taxaCheckoutVenda: inputs.taxaCheckoutVenda * (1 + f),
+        cpc: inputs.cpc * (1 - f),
+      }),
+    },
   ];
 }
 
 // ─── Dream Goal ─────────────────────────────────────────
-export function computeDreamGoal(inputs: SimuladorInputs, outputs: SimuladorOutputs, lucroDesejado: number): DreamGoalResult | null {
-  if (outputs.lucro <= 0 || outputs.vendas <= 0) return null;
+export function computeDreamGoal(
+  inputs: SimuladorInputs,
+  outputs: SimuladorOutputs,
+  lucroDesejado: number,
+): DreamGoalResult | null {
+  if (outputs.lucro <= 0 || outputs.vendas <= 0 || outputs.vendasFormacao <= 0) return null;
+
   const lucroPorVenda = outputs.lucro / outputs.vendas;
   const vendasNecessarias = Math.ceil(lucroDesejado / lucroPorVenda);
-  const cliquesNecessarios = Math.ceil(vendasNecessarias / (inputs.taxaConversao / 100));
+
+  // Proporção vendas formação / vendas captação (mesmo funil)
+  const ratioFormacao = outputs.vendasFormacao / outputs.vendas;
+  const vendasFormacaoNecessarias = Math.ceil(vendasNecessarias * ratioFormacao);
+
+  // Cliques necessários: desfazer o funil de captação
+  // vendas = cliques * (connectRate/100) * (taxaLPVCheckout/100) * (taxaCheckoutVenda/100)
+  const taxaGlobal =
+    (inputs.connectRate / 100) *
+    (inputs.taxaLPVCheckout / 100) *
+    (inputs.taxaCheckoutVenda / 100);
+  const cliquesNecessarios = taxaGlobal > 0 ? Math.ceil(vendasNecessarias / taxaGlobal) : 0;
   const investimentoNecessario = Math.ceil(cliquesNecessarios * inputs.cpc);
-  return { vendasNecessarias, cliquesNecessarios, investimentoNecessario };
+
+  return {
+    vendasFormacaoNecessarias,
+    vendasNecessarias,
+    cliquesNecessarios,
+    investimentoNecessario,
+  };
 }
 
 // ─── Storage ──────────────────────────────────────────────
 const STORAGE_KEY = 'simulador-inputs';
+
+function isValidShape(parsed: unknown): parsed is Partial<SimuladorInputs> {
+  if (!parsed || typeof parsed !== 'object') return false;
+  const p = parsed as Record<string, unknown>;
+  // Shape v3 (atual): requer taxaCortesia + custoPorLead (introduzidos em v3)
+  // Se tiver investimentoApi como número no shape antigo (pré-v3), rejeitar para reset
+  const hasV3Keys =
+    typeof p.taxaCortesia === 'number' &&
+    typeof p.custoPorLead === 'number';
+  const hasCoreKeys =
+    typeof p.investimentoTrafego === 'number' &&
+    typeof p.connectRate === 'number' &&
+    typeof p.taxaLPVCheckout === 'number';
+  return hasCoreKeys && hasV3Keys;
+}
 
 function loadSaved(): SimuladorInputs {
   if (typeof window === 'undefined') return DEFAULTS;
@@ -249,7 +362,21 @@ function loadSaved(): SimuladorInputs {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw);
-    return { ...DEFAULTS, ...parsed };
+    // Migração graceful: shape antigo → reset para DEFAULTS
+    if (!isValidShape(parsed)) {
+      localStorage.removeItem(STORAGE_KEY);
+      return DEFAULTS;
+    }
+    // Merge restrito: apenas chaves conhecidas do shape atual entram.
+    // Isso elimina qualquer `investimentoApi` legado que tenha persistido.
+    const merged: SimuladorInputs = { ...DEFAULTS };
+    for (const key of REQUIRED_KEYS) {
+      const val = (parsed as Record<string, unknown>)[key];
+      if (typeof val === 'number' && Number.isFinite(val)) {
+        merged[key] = val;
+      }
+    }
+    return merged;
   } catch {
     return DEFAULTS;
   }
@@ -258,10 +385,14 @@ function loadSaved(): SimuladorInputs {
 // ─── Hook ───────────────────────────────────────────────
 export function useSimulador() {
   const [inputs, setInputs] = useState<SimuladorInputs>(loadSaved);
-  const [lucroDesejado, setLucroDesejado] = useState(50000);
+  const [lucroDesejado, setLucroDesejado] = useState(100000);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(inputs));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(inputs));
+    } catch {
+      // silencioso — quota exceeded ou storage indisponível
+    }
   }, [inputs]);
 
   const updateInput = useCallback(<K extends keyof SimuladorInputs>(key: K, value: SimuladorInputs[K]) => {
@@ -275,5 +406,16 @@ export function useSimulador() {
   const cenarios = useMemo(() => computeCenarios(inputs), [inputs]);
   const dreamGoal = useMemo(() => computeDreamGoal(inputs, outputs, lucroDesejado), [inputs, outputs, lucroDesejado]);
 
-  return { inputs, outputs, alerts, cenarios, dreamGoal, lucroDesejado, setLucroDesejado, updateInput, resetDefaults, defaults: DEFAULTS };
+  return {
+    inputs,
+    outputs,
+    alerts,
+    cenarios,
+    dreamGoal,
+    lucroDesejado,
+    setLucroDesejado,
+    updateInput,
+    resetDefaults,
+    defaults: DEFAULTS,
+  };
 }

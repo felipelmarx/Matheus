@@ -48,12 +48,18 @@ export default function SimuladorDreamGoal({ lucroDesejado, onChangeLucro, resul
         </div>
 
         {result ? (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="bg-gradient-to-br from-violet-500/10 to-transparent border border-violet-500/20 rounded-lg p-3 text-center">
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-heading mb-1">
-                Vendas necessarias
+                Vendas captacao
               </p>
               <p className="text-lg font-mono font-bold text-foreground">{fmtNum(result.vendasNecessarias)}</p>
+            </div>
+            <div className="bg-gradient-to-br from-violet-500/10 to-transparent border border-violet-500/20 rounded-lg p-3 text-center">
+              <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-heading mb-1">
+                Vendas formacao
+              </p>
+              <p className="text-lg font-mono font-bold text-foreground">{fmtNum(result.vendasFormacaoNecessarias)}</p>
             </div>
             <div className="bg-gradient-to-br from-violet-500/10 to-transparent border border-violet-500/20 rounded-lg p-3 text-center">
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-heading mb-1">
@@ -63,7 +69,7 @@ export default function SimuladorDreamGoal({ lucroDesejado, onChangeLucro, resul
             </div>
             <div className="bg-gradient-to-br from-violet-500/10 to-transparent border border-violet-500/20 rounded-lg p-3 text-center">
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-heading mb-1">
-                Investimento necessario
+                Investimento trafego
               </p>
               <p className="text-lg font-mono font-bold text-violet-400">{BRL.format(result.investimentoNecessario)}</p>
             </div>

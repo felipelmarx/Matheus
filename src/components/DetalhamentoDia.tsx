@@ -1,4 +1,4 @@
-import { CalendarDays, DollarSign, ShoppingCart, Target, Tag, TrendingUp, TrendingDown, Gift, Ticket, UserCheck, UserX } from 'lucide-react';
+import { CalendarDays, DollarSign, ShoppingCart, Target, Tag, TrendingUp, TrendingDown, Gift, Ticket, UserCheck, UserX, ChevronDown } from 'lucide-react';
 import type { DailyMetric } from '@/types/metrics';
 
 interface DetalhamentoDiaProps {
@@ -39,18 +39,22 @@ export default function DetalhamentoDia({ daily }: DetalhamentoDiaProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {daily.map((day, idx) => (
-          <div
+          <details
             key={idx}
-            className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+            className="group bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 open:border-primary/40"
           >
-            <div className="px-4 py-2.5 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="w-3.5 h-3.5 text-primary" />
-                <span className="text-sm font-heading font-semibold text-foreground">
+            <summary className="px-4 py-2.5 border-b border-transparent group-open:border-border bg-gradient-to-r from-primary/10 to-transparent cursor-pointer list-none flex items-center justify-between gap-2 select-none">
+              <div className="flex items-center gap-2 min-w-0">
+                <CalendarDays className="w-3.5 h-3.5 text-primary shrink-0" />
+                <span className="text-sm font-heading font-semibold text-foreground truncate">
                   {day.data}
                 </span>
               </div>
-            </div>
+              <ChevronDown
+                aria-hidden
+                className="w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200 group-open:rotate-180"
+              />
+            </summary>
 
             <div className="p-4 space-y-3">
               {metrics.map((m) => {
@@ -82,7 +86,7 @@ export default function DetalhamentoDia({ daily }: DetalhamentoDiaProps) {
                 );
               })}
             </div>
-          </div>
+          </details>
         ))}
       </div>
     </div>

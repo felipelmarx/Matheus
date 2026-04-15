@@ -19,68 +19,60 @@ interface FieldConfig {
 
 const sections: { title: string; color: string; fields: FieldConfig[] }[] = [
   {
-    title: 'Trafego',
+    title: 'Investimento',
     color: 'text-blue-400',
     fields: [
-      { key: 'investimento', label: 'Investimento', min: 100, max: 500000, step: 100, unit: 'R$' },
-      { key: 'cpc', label: 'Custo por Clique', min: 0.1, max: 50, step: 0.1, unit: 'R$', decimal: 2 },
+      { key: 'investimentoTrafego', label: 'Investimento Trafego (Ads)', min: 0, max: 500000, step: 100, unit: 'R$' },
     ],
   },
   {
-    title: 'Pagina de Vendas',
-    color: 'text-cyan-400',
-    fields: [
-      { key: 'taxaConversao', label: 'Taxa de Conversao', min: 0.1, max: 30, step: 0.1, unit: '%', decimal: 1 },
-    ],
-  },
-  {
-    title: 'Produto Principal',
-    color: 'text-primary',
-    fields: [
-      { key: 'precoProduto', label: 'Preco', min: 1, max: 10000, step: 1, unit: 'R$' },
-      { key: 'custoProduto', label: 'Custo do Produto', min: 0, max: 5000, step: 1, unit: 'R$' },
-      { key: 'taxaReembolso', label: 'Taxa de Reembolso', min: 0, max: 50, step: 1, unit: '%' },
-    ],
-  },
-  {
-    title: 'Order Bump',
+    title: 'Cortesias',
     color: 'text-amber-400',
     fields: [
-      { key: 'precoBump', label: 'Preco', min: 0, max: 5000, step: 1, unit: 'R$' },
-      { key: 'taxaBump', label: 'Taxa de Aceitacao', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'taxaCortesia', label: 'Taxa de Cortesia (% sobre vendas)', min: 0, max: 100, step: 0.5, unit: '%', decimal: 1 },
+      { key: 'custoPorLead', label: 'Custo por Lead (API Lembretes)', min: 0, max: 50, step: 0.5, unit: 'R$', decimal: 2 },
+      { key: 'investimentoApiExtra', label: 'API Extra (fixo, nao afeta ingressos)', min: 0, max: 100000, step: 100, unit: 'R$' },
     ],
   },
   {
-    title: 'Upsell',
-    color: 'text-indigo-400',
+    title: 'Trafego',
+    color: 'text-cyan-400',
     fields: [
-      { key: 'precoUpsell', label: 'Preco', min: 0, max: 10000, step: 1, unit: 'R$' },
-      { key: 'taxaUpsell', label: 'Taxa de Aceitacao', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'cpc', label: 'Custo por Clique', min: 0.1, max: 50, step: 0.01, unit: 'R$', decimal: 2 },
+      { key: 'connectRate', label: 'Connect Rate (Cliques -> LPV)', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
     ],
   },
   {
-    title: 'Downsell',
-    color: 'text-orange-400',
+    title: 'Checkout (2 estagios)',
+    color: 'text-emerald-400',
     fields: [
-      { key: 'precoDownsell', label: 'Preco', min: 0, max: 5000, step: 1, unit: 'R$' },
-      { key: 'taxaDownsell', label: 'Taxa de Aceitacao', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'taxaLPVCheckout', label: 'LPV -> Checkout', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+      { key: 'taxaCheckoutVenda', label: 'Checkout -> Venda', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+    ],
+  },
+  {
+    title: 'Produto',
+    color: 'text-primary',
+    fields: [
+      { key: 'precoIngresso', label: 'Preco do Ingresso', min: 1, max: 1000, step: 1, unit: 'R$' },
+      { key: 'ticketMedio', label: 'Ticket Medio (com bumps)', min: 1, max: 200, step: 1, unit: 'R$' },
     ],
   },
   {
     title: 'Qualificacao',
     color: 'text-pink-400',
     fields: [
-      { key: 'taxaAplicacao', label: 'Taxa de Aplicacao', min: 0, max: 100, step: 1, unit: '%' },
-      { key: 'taxaAgendamento', label: 'Taxa de Agendamento', min: 0, max: 100, step: 1, unit: '%' },
-      { key: 'taxaEntrevista', label: 'Taxa de Entrevista', min: 0, max: 100, step: 1, unit: '%' },
+      { key: 'taxaAplicacao', label: 'Inscritos -> Aplicacao', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+      { key: 'taxaAgendamento', label: 'Aplicacao -> Agendamento', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+      { key: 'taxaEntrevista', label: 'Agendamento -> Entrevista', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
     ],
   },
   {
     title: 'Formacao (High-Ticket)',
     color: 'text-violet-400',
     fields: [
-      { key: 'taxaVendaFormacao', label: 'Taxa de Venda', min: 0, max: 100, step: 1, unit: '%' },
-      { key: 'ticketFormacao', label: 'Ticket Formacao', min: 0, max: 50000, step: 500, unit: 'R$' },
+      { key: 'taxaVendaFormacao', label: 'Entrevista -> Venda Formacao', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+      { key: 'ticketFormacao', label: 'Ticket Formacao', min: 0, max: 50000, step: 100, unit: 'R$' },
     ],
   },
 ];
@@ -115,7 +107,6 @@ export default function SimuladorInputs({ inputs, onUpdate, onReset }: Simulador
             </p>
             {section.fields.map((field) => {
               const value = inputs[field.key];
-              const pct = field.max > field.min ? ((value - field.min) / (field.max - field.min)) * 100 : 0;
               return (
                 <div key={field.key}>
                   <div className="flex items-center justify-between mb-1">

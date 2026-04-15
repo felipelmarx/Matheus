@@ -5,13 +5,14 @@ import SimuladorInputs from './SimuladorInputs';
 import SimuladorKPIs from './SimuladorKPIs';
 import SimuladorFunil from './SimuladorFunil';
 import SimuladorReferencia from './SimuladorReferencia';
+import SimuladorAlertas from './SimuladorAlertas';
 
 interface SimuladorViewProps {
   data?: AllDesafiosData | null;
 }
 
 export default function SimuladorView({ data }: SimuladorViewProps) {
-  const { inputs, outputs, updateInput, resetDefaults } = useSimulador();
+  const { inputs, outputs, alerts, updateInput, resetDefaults } = useSimulador();
 
   const desafios = data ? [
     { key: 'desafio1', label: 'Desafio 1', data: data.desafio1 },
@@ -36,6 +37,9 @@ export default function SimuladorView({ data }: SimuladorViewProps) {
 
       {/* KPIs - Full width */}
       <SimuladorKPIs outputs={outputs} />
+
+      {/* Alertas */}
+      <SimuladorAlertas alerts={alerts} />
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

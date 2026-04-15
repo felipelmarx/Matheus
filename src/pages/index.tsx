@@ -35,9 +35,22 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
   const cliques = sum(d => d.cliques);
   const viewPages = sum(d => d.viewPages);
   const ingressosTotais = sum(d => d.ingressosTotais);
+  const cortesias = sum(d => d.cortesias ?? 0);
   const cancelamentos = sum(d => d.cancelamentos);
   const noShow = sum(d => d.noShow);
   const tmFormacao = vendasForm > 0 ? fatTotal / vendasForm : 0;
+
+  // Soma comparecimentos por sessao (5 sessoes) para o agregado Geral
+  const comparecimentos: number[] = [0, 0, 0, 0, 0];
+  for (let i = 0; i < 5; i++) {
+    comparecimentos[i] = desafios.reduce((acc, d) => acc + (d.comparecimentos?.[i] ?? 0), 0);
+  }
+
+  // Agrega checkouts somente se pelo menos um desafio tiver o dado; caso contrario, null
+  const hasAnyCheckouts = desafios.some(d => typeof d.checkouts === 'number' && d.checkouts > 0);
+  const checkouts: number | null = hasAnyCheckouts
+    ? desafios.reduce((acc, d) => acc + (typeof d.checkouts === 'number' ? d.checkouts : 0), 0)
+    : null;
 
   return {
     captacao: '',
@@ -45,8 +58,10 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
     cliques,
     viewPages,
     conectRate: cliques > 0 ? Math.round((viewPages / cliques) * 100) : 0,
+    checkouts,
     investimento: inv,
     vendas,
+    cortesias,
     ingressosTotais,
     cpa: vendas > 0 ? Math.round(inv / vendas) : 0,
     ticketMedio: vendas > 0 ? Math.round(fat / vendas) : 0,
@@ -63,6 +78,7 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
     ticketMedioFormacao: Math.round(tmFormacao),
     cancelamentos,
     noShow,
+    comparecimentos,
   };
 }
 
@@ -165,7 +181,11 @@ export default function DashboardPage() {
                 )}
                 <StatCards data={activeData} />
                 <MetasCard data={activeData} />
-                <ResumoGeral data={activeData} activeTab={activeTab} />
+                <ResumoGeral
+                  data={activeData}
+                  activeTab={activeTab}
+                  comparecimentosSiteOnly={activeTab === 'desafio5'}
+                />
                 <FunilVisual data={activeData} />
                 {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
                   <DetalhamentoDia daily={data.desafio3Daily} />

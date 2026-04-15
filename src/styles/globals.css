@@ -23,15 +23,15 @@
 
   .dark {
     --background: 225 20% 7%;
-    --foreground: 0 0% 98%;
+    --foreground: 0 0% 100%;
     --card: 225 18% 10%;
-    --card-foreground: 0 0% 98%;
+    --card-foreground: 0 0% 100%;
     --primary: 230 70% 60%;
     --primary-foreground: 0 0% 100%;
     --secondary: 225 14% 16%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 225 14% 16%;
-    --muted-foreground: 220 12% 70%;
+    --muted-foreground: 0 0% 100%;
     --border: 225 14% 20%;
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;

@@ -22,9 +22,11 @@ interface Row {
 const rows: Row[] = [
   { label: 'Cliques', get: (c) => c.outputs.cliques.toLocaleString('pt-BR') },
   { label: 'Vendas', get: (c) => c.outputs.vendas.toLocaleString('pt-BR') },
-  { label: 'Receita', get: (c) => BRL.format(c.outputs.faturamentoTotal) },
+  { label: 'Vendas Form.', get: (c) => c.outputs.vendasFormacao.toLocaleString('pt-BR') },
+  { label: 'Faturamento', get: (c) => BRL.format(c.outputs.faturamentoTotal) },
   { label: 'CPA', get: (c) => BRL.format(c.outputs.cpa) },
-  { label: 'EPC', get: (c) => `R$ ${c.outputs.epc.toFixed(2)}` },
+  { label: 'Custo/Venda Form.', get: (c) => BRL.format(c.outputs.custoVendaFormacao) },
+  { label: 'TM/CAC', get: (c) => `${c.outputs.tmCac.toFixed(2)}x`, color: (c) => c.outputs.tmCac >= 1 ? 'text-indigo-400' : 'text-red-400' },
   { label: 'Lucro', get: (c) => BRL.format(c.outputs.lucro), color: (c) => c.outputs.lucro >= 0 ? 'text-indigo-400' : 'text-red-400' },
   { label: 'ROI', get: (c) => `${c.outputs.roi.toFixed(1)}%`, color: (c) => c.outputs.roi >= 0 ? 'text-indigo-400' : 'text-red-400' },
   { label: 'ROAS', get: (c) => `${c.outputs.roas.toFixed(2)}x`, color: (c) => c.outputs.roas >= 1 ? 'text-indigo-400' : 'text-red-400' },
@@ -35,7 +37,7 @@ export default function SimuladorCenarios({ cenarios }: SimuladorCenariosProps) 
     <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div className="px-5 py-3 border-b border-border bg-gradient-to-r from-primary/10 to-transparent">
         <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
-          Cenarios (±20% conversao e CPC)
+          Cenarios (±20% Checkout e CPC)
         </h3>
       </div>
 

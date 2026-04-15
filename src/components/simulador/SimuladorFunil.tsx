@@ -21,11 +21,14 @@ const conversionRate = (from: number, to: number) => {
 
 export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
   const stages: FunnelStage[] = [
-    { label: 'Ingressos', value: outputs.vendas, width: '100%', color: 'bg-violet-500' },
-    { label: 'Aplicações', value: outputs.aplicacoes, width: '78%', color: 'bg-violet-500/85' },
-    { label: 'Agendamentos', value: outputs.agendamentos, width: '58%', color: 'bg-violet-500/70' },
-    { label: 'Entrevistas', value: outputs.entrevistas, width: '42%', color: 'bg-violet-500/55' },
-    { label: 'Vendas Formação', value: outputs.vendasFormacao, width: '28%', color: 'bg-indigo-500' },
+    { label: 'Cliques', value: outputs.cliques, width: '100%', color: 'bg-blue-500' },
+    { label: 'View Page', value: outputs.viewPage, width: '88%', color: 'bg-cyan-500' },
+    { label: 'Checkouts', value: outputs.checkouts, width: '72%', color: 'bg-emerald-500' },
+    { label: 'Inscritos Totais', value: outputs.inscritosTotais, width: '58%', color: 'bg-amber-500' },
+    { label: 'Aplicacoes', value: outputs.aplicacoes, width: '44%', color: 'bg-pink-500' },
+    { label: 'Agendamentos', value: outputs.agendamentos, width: '34%', color: 'bg-pink-500/85' },
+    { label: 'Entrevistas', value: outputs.entrevistas, width: '26%', color: 'bg-pink-500/70' },
+    { label: 'Vendas Formacao', value: outputs.vendasFormacao, width: '18%', color: 'bg-violet-500' },
   ];
 
   return (
@@ -34,7 +37,7 @@ export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
         <div className="flex items-center gap-2">
           <GitBranch className="w-4 h-4 text-violet-400" />
           <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
-            Funil de Conversão
+            Funil de Conversao
           </h3>
         </div>
       </div>

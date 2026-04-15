@@ -1,4 +1,4 @@
-import type { DesafioData, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay, PopupQualificadorSide, AnaliseCompradorSection } from '@/types/metrics';
+import type { DesafioData, DesafioKey, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay, PopupQualificadorSide, AnaliseCompradorSection } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
 
@@ -51,8 +51,17 @@ function extractDesafioData(rows: string[][], labelCol: number, valueCol: number
     viewPages: p(findValue(rows, /view\s*pages?/i, labelCol, valueCol)),
     conectRate: p(findValue(rows, /conect\s*rate/i, labelCol, valueCol)),
 
+    // Checkouts: graceful extraction — null when sheet row absent/empty
+    checkouts: (() => {
+      const raw = findValue(rows, /checkouts?(\s*iniciad)?/i, labelCol, valueCol);
+      if (!raw || raw.trim() === '' || raw.trim() === '-') return null;
+      const parsed = p(raw);
+      return parsed > 0 ? parsed : null;
+    })(),
+
     investimento: p(findValue(rows, /investimento/i, labelCol, valueCol)),
     vendas: p(findValue(rows, /vendas\s*(ingresso|$)/i, labelCol, valueCol)),
+    cortesias: p(findValue(rows, /^cortesias?$/i, labelCol, valueCol)),
     ingressosTotais: p(findValue(rows, /ingressos?\s*totais/i, labelCol, valueCol)),
     cpa: p(findValue(rows, /^cp[ai]$/i, labelCol, valueCol)),
     ticketMedio: p(findValue(rows, /ticket\s*m[eé]dio/i, labelCol, valueCol)),
@@ -75,6 +84,7 @@ function extractDesafioData(rows: string[][], labelCol: number, valueCol: number
     ticketMedioFormacao: 0,
     cancelamentos: 0,
     noShow: 0,
+    comparecimentos: [0, 0, 0, 0, 0],
   };
 
   // ticketMedioFormacao: try sheet extraction, fallback to computed value
@@ -101,11 +111,13 @@ function getDefaultDesafio(): DesafioData {
   return {
     captacao: '', aoVivo: '',
     cliques: 0, viewPages: 0, conectRate: 0,
-    investimento: 0, vendas: 0, ingressosTotais: 0, cpa: 0, ticketMedio: 0, faturamento: 0, lucroPrejuizo: 0,
+    checkouts: null,
+    investimento: 0, vendas: 0, cortesias: 0, ingressosTotais: 0, cpa: 0, ticketMedio: 0, faturamento: 0, lucroPrejuizo: 0,
     aplicacoes: 0, custoPorAplicacao: 0,
     agendamentos: 0, entrevistas: 0, custoEntrevista: 0,
     vendasFormacao: 0, custoVendasFormacao: 0, faturamentoTotal: 0, ticketMedioFormacao: 0,
     cancelamentos: 0, noShow: 0,
+    comparecimentos: [0, 0, 0, 0, 0],
   };
 }
 
@@ -691,21 +703,21 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log(`[sheets] ${col.key}: inv=${desafioData.investimento} vendas=${desafioData.vendas} fat=${desafioData.faturamentoTotal}`);
     }
 
-    // Cancelamentos & No-show from RESUMO - GERAL B35:T39
-    // Columns: B=0, H=6, N=12, T=18 (0-indexed from B)
-    // Rows: 0=header, 1="cancelamento", 2=cancel value, 3="no-show", 4=noshow value
+    // Cancelamentos & No-show from RESUMO - GERAL B35:AD40
+    // D1-D4: row37=cancel value (idx 2), row39=noShow value (idx 4)
+    // D5 is shifted 1 row down: row38=cancel value (idx 3), row40=noShow value (idx 5)
     try {
-      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:AD39');
-      const cancelCols: { key: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5'; col: number }[] = [
-        { key: 'desafio1', col: 0 },   // B
-        { key: 'desafio2', col: 6 },   // H
-        { key: 'desafio3', col: 12 },  // N
-        { key: 'desafio4', col: 18 },  // T
-        { key: 'desafio5', col: 24 },  // Z/AA
+      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:AD40');
+      const cancelCols: { key: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5'; col: number; cancelRow: number; noShowRow: number }[] = [
+        { key: 'desafio1', col: 0, cancelRow: 2, noShowRow: 4 },   // B
+        { key: 'desafio2', col: 6, cancelRow: 2, noShowRow: 4 },   // H
+        { key: 'desafio3', col: 12, cancelRow: 2, noShowRow: 4 },  // N
+        { key: 'desafio4', col: 18, cancelRow: 2, noShowRow: 4 },  // T
+        { key: 'desafio5', col: 24, cancelRow: 3, noShowRow: 5 },  // Z (shifted 1 row down)
       ];
       for (const cc of cancelCols) {
-        data[cc.key].cancelamentos = parseSheetNumber(cancelRows[2]?.[cc.col] ?? '');
-        data[cc.key].noShow = parseSheetNumber(cancelRows[4]?.[cc.col] ?? '');
+        data[cc.key].cancelamentos = parseSheetNumber(cancelRows[cc.cancelRow]?.[cc.col] ?? '');
+        data[cc.key].noShow = parseSheetNumber(cancelRows[cc.noShowRow]?.[cc.col] ?? '');
       }
       console.log('[sheets] Cancelamentos/No-show loaded');
     } catch (err) {
@@ -723,7 +735,8 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
     // RESUMO-TECNICO: metrics (rows 1-65) + analysis (rows 72+)
     try {
-      const rtRows = await fetchSheetRows('RESUMO-TECNICO!A1:K112');
+      // Range expandido ate coluna S para capturar comparecimentos do D4 (col O=14) e D5 (col S=18)
+      const rtRows = await fetchSheetRows('RESUMO-TECNICO!A1:S112');
       const metrics: ResumoTecnicoMetric[] = [];
       const maxMetricRow = Math.min(65, rtRows.length);
       for (let i = 0; i < maxMetricRow; i++) {
@@ -745,6 +758,30 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       }
       data.resumoTecnico = { metrics, analysis };
       console.log(`[sheets] Resumo Tecnico: ${metrics.length} metrics, ${analysis.length} analysis lines`);
+
+      // Extract comparecimentos por sessao para cada desafio.
+      // Colunas de VALOR: D1=B(1), D2=F(5), D3=K(10), D4=O(14), D5=S(18). 5 sessoes no total.
+      const comparecimentoCols: { key: DesafioKey; col: number }[] = [
+        { key: 'desafio1', col: 1 },
+        { key: 'desafio2', col: 5 },
+        { key: 'desafio3', col: 10 },
+        { key: 'desafio4', col: 14 },
+        { key: 'desafio5', col: 18 },
+      ];
+      let sessionIdx = 0;
+      for (const row of rtRows) {
+        const label = (row?.[0] ?? '').trim();
+        // Captura apenas as linhas "Participou sessão NN ..." (total ZOOM + SITE).
+        if (!/^Participou\s+sess[aã]o\s+\d+/i.test(label)) continue;
+        if (sessionIdx >= 5) break;
+        for (const cc of comparecimentoCols) {
+          const raw = (row?.[cc.col] ?? '').trim();
+          const val = parseSheetNumber(raw);
+          data[cc.key].comparecimentos[sessionIdx] = val;
+        }
+        sessionIdx++;
+      }
+      console.log(`[sheets] Comparecimentos: ${sessionIdx} sessoes carregadas para 5 desafios`);
     } catch (err) {
       console.warn('[sheets] Resumo Tecnico fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
