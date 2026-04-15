@@ -1,5 +1,5 @@
-import React from 'react';
-import { MousePointerClick, GitBranch, UserX, ExternalLink } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { MousePointerClick, GitBranch, UserX, ExternalLink, ChevronDown, ChevronRight } from 'lucide-react';
 import type { DesafioData, TabKey } from '@/types/metrics';
 import ComparecimentosCard from './ComparecimentosCard';
 
@@ -18,11 +18,13 @@ const LANDING_PAGES: Partial<Record<TabKey, { url: string; label: string }>> = {
   },
 };
 
+const COLLAPSE_STORAGE_KEY = 'desafio-collapsed-sections';
+
 interface ResumoGeralProps {
   data: DesafioData;
   activeTab?: TabKey;
   /**
-   * Quando true, o card de Comparecimentos (renderizado entre Trafego e Funil)
+   * Quando true, o card de Comparecimentos (renderizado no final da aba)
    * exibe o subtitulo "(Site)" em vez de "(Zoom + Site)". Usado no D5.
    */
   comparecimentosSiteOnly?: boolean;
@@ -44,11 +46,48 @@ interface MetricGroup {
   isFunnel?: boolean;
 }
 
+function sectionId(title: string): string {
+  return title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+}
+
 export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly = false }: ResumoGeralProps) {
   const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmt = (v: number) => (v === 0 ? '--' : BRL.format(v));
   const fmtNum = (v: number) => (v === 0 ? '--' : v.toLocaleString('pt-BR'));
   const fmtPct = (v: number) => (v === 0 ? '--' : `${v}%`);
+
+  // Estado de colapso por seção (persiste em localStorage). Default: todas expandidas ({}).
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+  // Hidrata do localStorage apenas no client-side, uma vez.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = window.localStorage.getItem(COLLAPSE_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          setCollapsed(parsed as Record<string, boolean>);
+        }
+      }
+    } catch {
+      // Ignora JSON inválido — mantém default expandido.
+    }
+  }, []);
+
+  // Persiste toda mudança.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.localStorage.setItem(COLLAPSE_STORAGE_KEY, JSON.stringify(collapsed));
+    } catch {
+      // Silencia quota/storage errors.
+    }
+  }, [collapsed]);
+
+  const toggleSection = (title: string) => {
+    setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
 
   const roas = data.investimento > 0 ? (data.faturamento / data.investimento) : 0;
 
@@ -151,60 +190,89 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
     <div className="grid grid-cols-1 gap-4">
       {groups.map((group) => {
         const Icon = group.icon;
+        const isCollapsed = !!collapsed[group.title];
+        const contentId = `section-content-${sectionId(group.title)}`;
+        const ChevronIcon = isCollapsed ? ChevronRight : ChevronDown;
+        const metricsCount = group.metrics.length;
+
         return (
-          <React.Fragment key={group.title}>
-          <div className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">
-            <div className={`px-5 py-3 border-b border-border bg-gradient-to-r ${group.headerBg}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Icon className={`w-4 h-4 ${group.accentColor}`} />
-                  <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold">
+          <div
+            key={group.title}
+            className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80"
+          >
+            <button
+              type="button"
+              onClick={() => toggleSection(group.title)}
+              aria-expanded={!isCollapsed}
+              aria-controls={contentId}
+              className={`w-full px-5 py-3 border-b border-border bg-gradient-to-r ${group.headerBg} hover:bg-muted/50 cursor-pointer text-left transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${isCollapsed ? 'border-b-transparent' : ''}`}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Icon className={`w-4 h-4 flex-shrink-0 ${group.accentColor}`} />
+                  <h3 className="text-xs uppercase tracking-wider text-muted-foreground font-heading font-semibold truncate">
                     {group.title}
                   </h3>
                 </div>
-                {group.title === 'Tráfego' && activeTab && LANDING_PAGES[activeTab] && (
-                  <a
-                    href={LANDING_PAGES[activeTab]!.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-[10px] font-heading font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    {LANDING_PAGES[activeTab]!.label}
-                  </a>
-                )}
-              </div>
-            </div>
-            <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
-              {group.metrics.map((m) => (
-                <div key={m.label} className="grid grid-cols-2 gap-2 sm:gap-3">
-                  <div className={`rounded-lg border border-border/20 p-2 sm:p-4 flex items-center justify-center bg-gradient-to-br ${group.headerBg}`}>
-                    <p className="text-[11px] sm:text-sm font-heading font-bold text-center text-muted-foreground leading-tight">{m.label}</p>
-                  </div>
-                  <div className={`rounded-lg border border-border/20 p-2 sm:p-4 flex items-center justify-center bg-gradient-to-br ${group.headerBg}`}>
-                    <p
-                      className={`text-xs sm:text-base md:text-xl font-mono font-bold text-center leading-tight break-words ${
-                        m.isNegative
-                          ? 'text-destructive'
-                          : m.isHighlight
-                            ? 'text-primary'
-                            : 'text-foreground'
-                      }`}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {group.title === 'Tráfego' && activeTab && LANDING_PAGES[activeTab] && (
+                    <a
+                      href={LANDING_PAGES[activeTab]!.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center gap-1.5 text-[10px] font-heading font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
                     >
-                      {m.value}
-                    </p>
-                  </div>
+                      <ExternalLink className="w-3 h-3" />
+                      {LANDING_PAGES[activeTab]!.label}
+                    </a>
+                  )}
+                  {isCollapsed && (
+                    <span className="text-[10px] font-heading text-muted-foreground">
+                      {metricsCount} métricas
+                    </span>
+                  )}
+                  <ChevronIcon className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
                 </div>
-              ))}
+              </div>
+            </button>
+            <div
+              id={contentId}
+              role="region"
+              aria-label={group.title}
+              hidden={isCollapsed}
+              className="transition-all duration-200 motion-reduce:transition-none"
+            >
+              {!isCollapsed && (
+                <div className="p-3 sm:p-4 space-y-2 sm:space-y-3">
+                  {group.metrics.map((m) => (
+                    <div key={m.label} className="grid grid-cols-2 gap-2 sm:gap-3">
+                      <div className={`rounded-lg border border-border/20 p-2 sm:p-4 flex items-center justify-center bg-gradient-to-br ${group.headerBg}`}>
+                        <p className="text-[11px] sm:text-sm font-heading font-bold text-center text-muted-foreground leading-tight">{m.label}</p>
+                      </div>
+                      <div className={`rounded-lg border border-border/20 p-2 sm:p-4 flex items-center justify-center bg-gradient-to-br ${group.headerBg}`}>
+                        <p
+                          className={`text-xs sm:text-base md:text-xl font-mono font-bold text-center leading-tight break-words ${
+                            m.isNegative
+                              ? 'text-destructive'
+                              : m.isHighlight
+                                ? 'text-primary'
+                                : 'text-foreground'
+                          }`}
+                        >
+                          {m.value}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-          {/* Comparecimentos aparece entre Trafego e Funil */}
-          {group.title === 'Tráfego' && (
-            <ComparecimentosCard data={data} siteOnly={comparecimentosSiteOnly} />
-          )}
-          </React.Fragment>
         );
       })}
+      {/* Comparecimentos sempre no final da aba (ordem narrativa: Trafego -> Funil -> Cancelamentos -> Comparecimentos) */}
+      <ComparecimentosCard data={data} siteOnly={comparecimentosSiteOnly} />
     </div>
   );
 }
