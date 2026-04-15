@@ -20,7 +20,8 @@ const conversionRate = (from: number, to: number) => {
 };
 
 export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
-  const stages: FunnelStage[] = [
+  // Filtra estagios zerados (modo simples nao usa cliques/viewPage/checkouts/aplicacoes/agendamentos/entrevistas)
+  const allStages: FunnelStage[] = [
     { label: 'Cliques', value: outputs.cliques, width: '100%', color: 'bg-blue-500' },
     { label: 'View Page', value: outputs.viewPage, width: '88%', color: 'bg-cyan-500' },
     { label: 'Checkouts', value: outputs.checkouts, width: '72%', color: 'bg-emerald-500' },
@@ -30,6 +31,7 @@ export default function SimuladorFunil({ outputs }: SimuladorFunilProps) {
     { label: 'Entrevistas', value: outputs.entrevistas, width: '26%', color: 'bg-pink-500/70' },
     { label: 'Vendas Formacao', value: outputs.vendasFormacao, width: '18%', color: 'bg-violet-500' },
   ];
+  const stages = allStages.filter((s) => s.value > 0);
 
   return (
     <div className="bg-card border border-border rounded-xl overflow-hidden transition-all hover:border-border/80">

@@ -1,7 +1,14 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 
+// ─── Modo de UI ────────────────────────────────────────
+// Simples: mostra apenas 5 campos essenciais. Compute usa funil completo
+// com valores atuais (setados manualmente ou via "Aplicar Dx").
+export type SimuladorMode = 'simples' | 'avancado';
+
 // ─── Inputs ─────────────────────────────────────────────
 export interface SimuladorInputs {
+  mode: SimuladorMode;
+
   // Investimento — somente tráfego (API agora é derivado de cortesias)
   investimentoTrafego: number;
 
@@ -91,6 +98,7 @@ export interface CenarioResult { label: string; outputs: SimuladorOutputs; }
 
 // ─── Defaults ───────────────────────────────────────────
 const DEFAULTS: SimuladorInputs = {
+  mode: 'simples',
   investimentoTrafego: 78723,
   cpc: 2.84,
   connectRate: 64.6,
@@ -110,6 +118,7 @@ const DEFAULTS: SimuladorInputs = {
 
 // Chaves obrigatórias do novo shape (para detecção de migração do localStorage)
 const REQUIRED_KEYS: (keyof SimuladorInputs)[] = [
+  'mode',
   'investimentoTrafego',
   'cpc',
   'connectRate',
@@ -128,6 +137,8 @@ const REQUIRED_KEYS: (keyof SimuladorInputs)[] = [
 ];
 
 // ─── Compute ────────────────────────────────────────────
+// Compute e' unico — nao depende do modo. O modo so afeta a UI (quais campos
+// sao visiveis). Valores "ocultos" vem dos defaults ou do botao "Aplicar Dx".
 export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
   const {
     investimentoTrafego,
@@ -370,8 +381,15 @@ function loadSaved(): SimuladorInputs {
     // Merge restrito: apenas chaves conhecidas do shape atual entram.
     // Isso elimina qualquer `investimentoApi` legado que tenha persistido.
     const merged: SimuladorInputs = { ...DEFAULTS };
-    for (const key of REQUIRED_KEYS) {
-      const val = (parsed as Record<string, unknown>)[key];
+    const source = parsed as Record<string, unknown>;
+    // Mode e' string literal — tratar separado dos numericos
+    if (source.mode === 'simples' || source.mode === 'avancado') {
+      merged.mode = source.mode;
+    }
+    // Demais chaves sao todas numericas
+    const numericKeys = REQUIRED_KEYS.filter((k) => k !== 'mode') as Exclude<keyof SimuladorInputs, 'mode'>[];
+    for (const key of numericKeys) {
+      const val = source[key];
       if (typeof val === 'number' && Number.isFinite(val)) {
         merged[key] = val;
       }

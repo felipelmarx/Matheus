@@ -348,6 +348,85 @@ investimentoBruto = investimentoTrafego + investimentoApi  // continua igual
 
 ---
 
+---
+
+## Amendment v4 — 2026-04-15 — UX Polish Pass
+
+### A4.1 — Simulador Referencia: botões simples (sem métricas)
+
+**Atual:** `SimuladorReferencia.tsx` exibe 2 cards grandes (Melhor + Último Desafio) com 5 seções de métricas detalhadas + botão "Aplicar Tudo" em cada.
+
+**Novo:** Substituir os cards detalhados por **apenas botões compactos** — um para cada Desafio disponível (D1, D2, D3, D4, D5 quando têm dados).
+
+**Requisitos:**
+- Layout horizontal de botões (ou grid 2/3 colunas em mobile)
+- Cada botão mostra: rótulo do Desafio + ícone de aplicar + (opcional) data/período pequena
+- Mantém a função `metricsToInputs` e o `onApply` existentes
+- Remove todo o código de exibição de `formatSections`, `MetricCard`, `ExtractedMetrics` display
+- Mantém a lógica de `extractMetrics` (só usa o resultado ao clicar no botão)
+- Mantém exclusão: se o desafio tem `cliques<=0 || vendas<=0`, não aparece botão
+
+### A4.2 — Cards colapsáveis por seção na aba Desafios
+
+**Atual:** Em `ResumoGeral.tsx`, cada seção (Tráfego, Funil, Cancelamentos) tem um header com ícone e título. O card sempre aparece expandido.
+
+**Novo:** Adicionar **botão de toggle colapsar/expandir** em cada seção, permitindo ocultar o conteúdo (mantendo só o header visível).
+
+**Requisitos:**
+- Ícone `ChevronUp` / `ChevronDown` (ou `Minimize2` / `Maximize2`) no canto direito do header da seção
+- Estado local por seção (useState com `Record<string, boolean>` para tracking)
+- Padrão: todas as seções começam **expandidas**
+- Persistência opcional em localStorage (nice-to-have, não obrigatório) — se implementar, key: `desafio-collapsed-sections`
+- Transição suave (Tailwind `transition-all duration-200`)
+- Clicar no header inteiro também alterna (área maior de hit)
+
+### A4.3 — Comparecimentos no final da aba
+
+**Atual:** O card "Comparecimentos" é renderizado entre "Tráfego" e "Funil" (ver `ResumoGeral.tsx:186-187`).
+
+**Novo:** Mover para o **final** da aba do Desafio (após Funil e Cancelamentos&No-show se aplicável).
+
+**Requisitos:**
+- Remover o render condicional em `{group.title === 'Tráfego' && (...)` 
+- Renderizar uma única vez **após o loop de `groups.map`**
+- Preservar o comportamento atual (mostrar apenas se houver dados)
+
+### Design Spec (validado por @ux / Uma)
+
+**A4.1 Buttons layout:**
+- Horizontal flex-wrap row de pill buttons, um por Desafio
+- Conteúdo: primary line `D{n} — Aplicar`, secondary line `text-xs text-muted` com período de captação
+- `gap-2`, `variant="outline"` (padrão existente do dashboard)
+
+**A4.2 Collapse UX:**
+- Ícones: `ChevronDown` (expandido) / `ChevronRight` (colapsado) — lucide-react
+- Posição: canto direito do header, mantém ícone de seção à esquerda
+- Header inteiro é clicável (hit area maior, `cursor-pointer`, hover `bg-muted/50`)
+- Quando colapsado: header + badge sutil "N métricas" antes do chevron
+- Persistência: `localStorage` key `desafio-collapsed-sections` (Record<sectionId, boolean>)
+- Default: todas expandidas
+
+**A4.3 Comparecimentos:**
+- Renderizar sempre no FINAL da aba, após Cancelamentos (se existir)
+- Ordem narrativa: Tráfego → Funil → Cancelamentos → Comparecimentos
+
+**Acessibilidade (obrigatório):**
+- Elemento `<button>` nativo (não `<div onClick>`)
+- `aria-expanded={isOpen}`, `aria-controls={contentId}`
+- Panel: `id={contentId}`, `role="region"`, `aria-label={sectionTitle}`
+- Respeitar `prefers-reduced-motion` (skip transition se usuário preferir)
+
+### AC adicionais
+
+- [ ] AC21: `SimuladorReferencia.tsx` — UI reduzida a botões simples, mantendo função de aplicar
+- [ ] AC22: `ResumoGeral.tsx` — toggle colapsar/expandir em cada seção (Tráfego, Funil, Cancelamentos)
+- [ ] AC23: `ResumoGeral.tsx` — Comparecimentos renderizado somente no final da aba, após Cancelamentos
+- [ ] AC24: localStorage persistence para estado de colapso
+- [ ] AC25: Acessibilidade: aria-expanded, aria-controls, keyboard nav, prefers-reduced-motion
+- [ ] AC26: `type-check` + `lint` + `build` passam
+
+---
+
 ## File List (preenchido pelo @dev após implementação)
 
 - [x] src/hooks/useSimulador.ts
