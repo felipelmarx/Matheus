@@ -269,10 +269,6 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
               )}
             </div>
           </div>
-          {/* Comparecimentos logo abaixo do Funil (antes de Cancelamentos) */}
-          {group.title === 'Funil' && (
-            <ComparecimentosCard data={data} siteOnly={comparecimentosSiteOnly} />
-          )}
           </React.Fragment>
         );
       })}
