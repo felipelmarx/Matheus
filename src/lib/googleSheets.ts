@@ -706,17 +706,18 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log(`[sheets] ${col.key}: inv=${desafioData.investimento} vendas=${desafioData.vendas} fat=${desafioData.faturamentoTotal}`);
     }
 
-    // Cancelamentos & No-show from RESUMO - GERAL B35:AD40
-    // D1-D4: row37=cancel value (idx 2), row39=noShow value (idx 4)
-    // D5 is shifted 1 row down: row38=cancel value (idx 3), row40=noShow value (idx 5)
+    // Cancelamentos & No-show from RESUMO - GERAL B35:AD46
+    // Layout atual na planilha (sheet rows / indices relativos a B35=0):
+    //   D1-D4: sheet row 43 = idx 8 (cancel value), sheet row 45 = idx 10 (no-show value)
+    //   D5 esta shifted 1 row: sheet row 44 = idx 9 (cancel), sheet row 46 = idx 11 (no-show)
     try {
-      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:AD40');
+      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:AD46');
       const cancelCols: { key: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5'; col: number; cancelRow: number; noShowRow: number }[] = [
-        { key: 'desafio1', col: 0, cancelRow: 2, noShowRow: 4 },   // B
-        { key: 'desafio2', col: 6, cancelRow: 2, noShowRow: 4 },   // H
-        { key: 'desafio3', col: 12, cancelRow: 2, noShowRow: 4 },  // N
-        { key: 'desafio4', col: 18, cancelRow: 2, noShowRow: 4 },  // T
-        { key: 'desafio5', col: 24, cancelRow: 3, noShowRow: 5 },  // Z (shifted 1 row down)
+        { key: 'desafio1', col: 0, cancelRow: 8, noShowRow: 10 },   // B
+        { key: 'desafio2', col: 6, cancelRow: 8, noShowRow: 10 },   // H
+        { key: 'desafio3', col: 12, cancelRow: 8, noShowRow: 10 },  // N
+        { key: 'desafio4', col: 18, cancelRow: 8, noShowRow: 10 },  // T
+        { key: 'desafio5', col: 24, cancelRow: 9, noShowRow: 11 },  // Z (shifted 1 row down)
       ];
       for (const cc of cancelCols) {
         data[cc.key].cancelamentos = parseSheetNumber(cancelRows[cc.cancelRow]?.[cc.col] ?? '');
