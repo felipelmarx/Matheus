@@ -19,6 +19,7 @@ export default function SimuladorView({ data }: SimuladorViewProps) {
     { key: 'desafio2', label: 'Desafio 2', data: data.desafio2 },
     { key: 'desafio3', label: 'Desafio 3', data: data.desafio3 },
     { key: 'desafio4', label: 'Desafio 4', data: data.desafio4 },
+    { key: 'desafio5', label: 'Desafio 5', data: data.desafio5 },
   ] : [];
 
   const handleApplyMetrics = (metrics: Partial<InputsType>) => {
