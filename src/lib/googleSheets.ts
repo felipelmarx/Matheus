@@ -699,7 +699,8 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio2: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio2.start, ADS_DATE_RANGES.desafio2.end), adsMapAll),
       desafio3: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio3.start, ADS_DATE_RANGES.desafio3.end), adsMapD3),
       desafio4: topAdsDesafio4,
-      desafio5: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio5.start, ADS_DATE_RANGES.desafio5.end), adsMapAll),
+      // D5: sem formationSalesMap -> todos os ads retornam formationSales=0
+      desafio5: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio5.start, ADS_DATE_RANGES.desafio5.end)),
     };
     console.log(`[sheets] topAdsPorDesafio: D1=${topAdsPorDesafio.desafio1.length} D2=${topAdsPorDesafio.desafio2.length} D3=${topAdsPorDesafio.desafio3.length} D4=${topAdsPorDesafio.desafio4.length} D5=${topAdsPorDesafio.desafio5.length}`);
 
