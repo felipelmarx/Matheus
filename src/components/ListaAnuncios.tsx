@@ -3,6 +3,10 @@ import type { AdMetric } from '@/types/metrics';
 
 interface ListaAnunciosProps {
   ads: AdMetric[];
+  /** Oculta o badge de "vendas formacao" (usado no D5 — sem dados consolidados ainda) */
+  hideFormacao?: boolean;
+  /** Mostra um disclaimer avisando que a coluna "vendas" representa vendas gerais (nao exclusivas do desafio) */
+  disclaimerVendasGerais?: boolean;
 }
 
 const AD_LINKS: { pattern: string; link: string; type: 'video' | 'image' }[] = [
@@ -28,7 +32,7 @@ function findAdLink(adName: string) {
   return AD_LINKS.find((entry) => lower.includes(entry.pattern.toLowerCase())) ?? null;
 }
 
-export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
+export default function ListaAnuncios({ ads, hideFormacao = false, disclaimerVendasGerais = false }: ListaAnunciosProps) {
   const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
   if (ads.length === 0) {
@@ -61,6 +65,11 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
             Top Anúncios
           </h3>
         </div>
+        {disclaimerVendasGerais && (
+          <p className="text-[10px] text-muted-foreground mt-1.5 italic">
+            ⚠ Vendas exibidas são gerais — não exclusivas deste Desafio.
+          </p>
+        )}
       </div>
 
       <div className="divide-y divide-border">
@@ -116,7 +125,7 @@ export default function ListaAnuncios({ ads }: ListaAnunciosProps) {
                     {ad.cpa > 0 ? BRL.format(ad.cpa) : '--'}
                   </span>
                 </span>
-                {ad.formationSales > 0 && (
+                {!hideFormacao && ad.formationSales > 0 && (
                   <span className="flex items-center gap-1 text-xs font-heading text-emerald-500 bg-emerald-500/10 rounded-md px-2 py-1">
                     <ShoppingCart className="w-3 h-3" />
                     <span className="font-mono font-bold">{ad.formationSales}</span> venda{ad.formationSales > 1 ? 's' : ''} formação

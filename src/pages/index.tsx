@@ -190,7 +190,11 @@ export default function DashboardPage() {
                 <FunilVisual data={activeData} />
                 <ComparecimentosCard data={activeData} siteOnly={activeTab === 'desafio5'} />
                 {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5') && (
-                  <ListaAnuncios ads={data.topAdsPorDesafio[activeTab]} />
+                  <ListaAnuncios
+                    ads={data.topAdsPorDesafio[activeTab]}
+                    hideFormacao={activeTab === 'desafio5'}
+                    disclaimerVendasGerais={activeTab === 'desafio4' || activeTab === 'desafio5'}
+                  />
                 )}
               </>
             ) : null}
