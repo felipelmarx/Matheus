@@ -123,6 +123,13 @@ export interface AllDesafiosData {
   } | null;
   topAds: AdMetric[];
   topAdsDesafio4: AdMetric[];
+  topAdsPorDesafio: {
+    desafio1: AdMetric[];
+    desafio2: AdMetric[];
+    desafio3: AdMetric[];
+    desafio4: AdMetric[];
+    desafio5: AdMetric[];
+  };
   visaoEstrategica: string[];
   resumoTecnico: { metrics: ResumoTecnicoMetric[]; analysis: string[] };
   analiseCompradores: AnaliseCompradorSection[];

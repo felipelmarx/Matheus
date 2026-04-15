@@ -6,6 +6,7 @@ import StatCards from '@/components/StatCards';
 import ResumoGeral from '@/components/ResumoGeral';
 import FunilVisual from '@/components/FunilVisual';
 import ComparecimentosCard from '@/components/ComparecimentosCard';
+import ListaAnuncios from '@/components/ListaAnuncios';
 import MetasCard from '@/components/MetasCard';
 import CompararView from '@/components/CompararView';
 import DesafioInfo from '@/components/DesafioInfo';
@@ -188,6 +189,9 @@ export default function DashboardPage() {
                 />
                 <FunilVisual data={activeData} />
                 <ComparecimentosCard data={activeData} siteOnly={activeTab === 'desafio5'} />
+                {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5') && (
+                  <ListaAnuncios ads={data.topAdsPorDesafio[activeTab]} />
+                )}
               </>
             ) : null}
           </>

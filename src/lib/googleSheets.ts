@@ -524,6 +524,9 @@ function getDefaultData(): AllDesafiosData {
     popupConsolidado: null,
     topAds: [],
     topAdsDesafio4: [],
+    topAdsPorDesafio: {
+      desafio1: [], desafio2: [], desafio3: [], desafio4: [], desafio5: [],
+    },
     visaoEstrategica: [],
     resumoTecnico: { metrics: [], analysis: [] },
     analiseCompradores: [],
@@ -612,17 +615,31 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Ads fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
-    // Desafio 4 ads from AT tab (from 16/03/2026 onwards)
-    let adsD4Rows: string[][] = [];
+    // AT tab rows (fonte de anuncios por desafio — filtrados por data)
+    let allAtRows: string[][] = [];
     try {
       if (ADS_SPREADSHEET_ID) {
-        const allAtRows = await fetchSheetRows('AT!A2:D10000', ADS_SPREADSHEET_ID);
-        adsD4Rows = allAtRows.filter(r => (r[0] ?? '') >= '2026-03-16');
-        console.log(`[sheets] Ads D4: ${adsD4Rows.length} rows loaded (from AT tab, >= 2026-03-16)`);
+        allAtRows = await fetchSheetRows('AT!A2:D20000', ADS_SPREADSHEET_ID);
+        console.log(`[sheets] Ads (AT tab): ${allAtRows.length} rows loaded`);
       }
     } catch (err) {
-      console.warn('[sheets] Ads D4 fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+      console.warn('[sheets] Ads AT fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
+
+    // Ranges de data por desafio (captacao -> ao vivo)
+    const ADS_DATE_RANGES: Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5', { start: string; end: string }> = {
+      desafio1: { start: '2026-01-24', end: '2026-02-06' },
+      desafio2: { start: '2026-02-16', end: '2026-02-27' },
+      desafio3: { start: '2026-03-02', end: '2026-03-13' },
+      desafio4: { start: '2026-03-16', end: '2026-03-27' },
+      desafio5: { start: '2026-03-30', end: '2026-04-10' },
+    };
+    const filterByRange = (start: string, end: string) =>
+      allAtRows.filter((r) => {
+        const d = r[0] ?? '';
+        return d >= start && d <= end;
+      });
+    const adsD4Rows = filterByRange(ADS_DATE_RANGES.desafio4.start, ADS_DATE_RANGES.desafio4.end);
 
     // Extract geral data from RESUMO - GERAL (label=col0/C, value=col1/D)
     const geralData = extractDesafioData(resumoRows, 0, 1);
@@ -676,6 +693,16 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const topAdsDesafio4 = extractAdsData(adsD4Rows, adsMapAll);
     console.log(`[sheets] topAdsDesafio4: ${topAdsDesafio4.length} ads ranked`);
 
+    // Anuncios por desafio (filtrados por data na tab AT)
+    const topAdsPorDesafio = {
+      desafio1: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio1.start, ADS_DATE_RANGES.desafio1.end), adsMapAll),
+      desafio2: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio2.start, ADS_DATE_RANGES.desafio2.end), adsMapAll),
+      desafio3: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio3.start, ADS_DATE_RANGES.desafio3.end), adsMapD3),
+      desafio4: topAdsDesafio4,
+      desafio5: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio5.start, ADS_DATE_RANGES.desafio5.end), adsMapAll),
+    };
+    console.log(`[sheets] topAdsPorDesafio: D1=${topAdsPorDesafio.desafio1.length} D2=${topAdsPorDesafio.desafio2.length} D3=${topAdsPorDesafio.desafio3.length} D4=${topAdsPorDesafio.desafio4.length} D5=${topAdsPorDesafio.desafio5.length}`);
+
     const data: AllDesafiosData = {
       geral: geralData,
       desafio1: getDefaultDesafio(),
@@ -690,6 +717,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       popupConsolidado,
       topAds,
       topAdsDesafio4,
+      topAdsPorDesafio,
       visaoEstrategica: [],
       resumoTecnico: { metrics: [], analysis: [] },
       analiseCompradores: [],
