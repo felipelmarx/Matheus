@@ -6,8 +6,6 @@ import StatCards from '@/components/StatCards';
 import ResumoGeral from '@/components/ResumoGeral';
 import FunilVisual from '@/components/FunilVisual';
 import ComparecimentosCard from '@/components/ComparecimentosCard';
-import DetalhamentoDia from '@/components/DetalhamentoDia';
-import PopupQualificador from '@/components/PopupQualificador';
 import MetasCard from '@/components/MetasCard';
 import CompararView from '@/components/CompararView';
 import DesafioInfo from '@/components/DesafioInfo';
@@ -190,18 +188,6 @@ export default function DashboardPage() {
                 />
                 <FunilVisual data={activeData} />
                 <ComparecimentosCard data={activeData} siteOnly={activeTab === 'desafio5'} />
-                {activeTab === 'desafio3' && data.desafio3Daily.length > 0 && (
-                  <DetalhamentoDia daily={data.desafio3Daily} />
-                )}
-                {activeTab === 'desafio4' && data.desafio4Daily.length > 0 && (
-                  <DetalhamentoDia daily={data.desafio4Daily} />
-                )}
-                {activeTab === 'desafio5' && data.desafio5Daily.length > 0 && (
-                  <DetalhamentoDia daily={data.desafio5Daily} />
-                )}
-                {activeTab === 'desafio5' && (data.popupQualificador.length > 0 || data.popupConsolidado) && (
-                  <PopupQualificador days={data.popupQualificador} consolidado={data.popupConsolidado} />
-                )}
               </>
             ) : null}
           </>
