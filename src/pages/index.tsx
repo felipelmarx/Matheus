@@ -192,8 +192,6 @@ export default function DashboardPage() {
                 {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5') && (
                   <ListaAnuncios
                     ads={data.topAdsPorDesafio[activeTab]}
-                    hideFormacao={activeTab === 'desafio5'}
-                    disclaimerVendasGerais={activeTab === 'desafio4'}
                   />
                 )}
               </>

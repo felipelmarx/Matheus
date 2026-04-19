@@ -1,6 +1,7 @@
 import type { DesafioData, DesafioKey, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay, PopupQualificadorSide, AnaliseCompradorSection } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
+import adsDesafiosCsv from '@/data/ads-desafios.json';
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID ?? '';
 const ADS_SPREADSHEET_ID = process.env.ADS_SPREADSHEET_ID ?? '';
@@ -154,6 +155,33 @@ function extractDailyMetrics(rows: string[][]): DailyMetric[] {
 
 // Aggregate ads data: group by ad name, sum spent/purchases, rank by purchases
 // formationSalesMap maps normalized ad name → formation sales count
+// Overrides manuais por desafio — aplicados sobre as linhas do CSV antes da agregacao.
+// `remove`: remove todas as linhas com esses nomes exatos (usado para "zerar" valores do CSV antes de injetar novos).
+// `add`: injeta linhas sinteticas [day, name, spent, purchases] que entram na agregacao normal.
+type AdsOverride = {
+  remove?: string[];
+  add?: { name: string; spent: number; purchases: number; day?: string }[];
+};
+
+const ADS_OVERRIDES: Partial<Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5', AdsOverride>> = {
+  desafio5: {
+    // Zera os R$ 33 / 0 vendas do CSV para nao somar com o override
+    remove: ['AD 2 ( Gabriel Editor ) VIDEO BEBE - Copy'],
+    add: [
+      { name: 'AD 2 ( Gabriel Editor ) VIDEO BEBE - Copy', spent: 6782.40, purchases: 120, day: '2026-04-01' },
+    ],
+  },
+};
+
+function applyAdsOverrides(desafio: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5', rows: string[][]): string[][] {
+  const ov = ADS_OVERRIDES[desafio];
+  if (!ov) return rows;
+  const removeSet = new Set((ov.remove ?? []).map((n) => n.trim()));
+  const filtered = removeSet.size > 0 ? rows.filter((r) => !removeSet.has((r[1] ?? '').trim())) : rows;
+  const added: string[][] = (ov.add ?? []).map((a) => [a.day ?? '2026-04-01', a.name, String(a.spent), String(a.purchases)]);
+  return added.length > 0 ? [...filtered, ...added] : filtered;
+}
+
 function extractAdsData(rows: string[][], formationSalesMap?: Map<string, number>): AdMetric[] {
   const p = parseSheetNumber;
   const adsMap = new Map<string, { spent: number; purchases: number; daily: Map<string, { spent: number; purchases: number }> }>();
@@ -693,16 +721,18 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     const topAdsDesafio4 = extractAdsData(adsD4Rows, adsMapAll);
     console.log(`[sheets] topAdsDesafio4: ${topAdsDesafio4.length} ads ranked`);
 
-    // Anuncios por desafio (filtrados por data na tab AT)
+    // Anuncios por desafio — fonte: CSVs do Meta Ads via `npm run ingest-ads`
+    // (substitui o filtro por data na tab AT do Google Sheets)
+    const csvRows = adsDesafiosCsv as Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5', string[][]>;
     const topAdsPorDesafio = {
-      desafio1: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio1.start, ADS_DATE_RANGES.desafio1.end), adsMapAll),
-      desafio2: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio2.start, ADS_DATE_RANGES.desafio2.end), adsMapAll),
-      desafio3: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio3.start, ADS_DATE_RANGES.desafio3.end), adsMapD3),
-      desafio4: topAdsDesafio4,
+      desafio1: extractAdsData(applyAdsOverrides('desafio1', csvRows.desafio1 ?? []), adsMapAll),
+      desafio2: extractAdsData(applyAdsOverrides('desafio2', csvRows.desafio2 ?? []), adsMapAll),
+      desafio3: extractAdsData(applyAdsOverrides('desafio3', csvRows.desafio3 ?? []), adsMapD3),
+      desafio4: extractAdsData(applyAdsOverrides('desafio4', csvRows.desafio4 ?? []), adsMapAll),
       // D5: sem formationSalesMap -> todos os ads retornam formationSales=0
-      desafio5: extractAdsData(filterByRange(ADS_DATE_RANGES.desafio5.start, ADS_DATE_RANGES.desafio5.end)),
+      desafio5: extractAdsData(applyAdsOverrides('desafio5', csvRows.desafio5 ?? [])),
     };
-    console.log(`[sheets] topAdsPorDesafio: D1=${topAdsPorDesafio.desafio1.length} D2=${topAdsPorDesafio.desafio2.length} D3=${topAdsPorDesafio.desafio3.length} D4=${topAdsPorDesafio.desafio4.length} D5=${topAdsPorDesafio.desafio5.length}`);
+    console.log(`[sheets] topAdsPorDesafio (CSV source): D1=${topAdsPorDesafio.desafio1.length} D2=${topAdsPorDesafio.desafio2.length} D3=${topAdsPorDesafio.desafio3.length} D4=${topAdsPorDesafio.desafio4.length} D5=${topAdsPorDesafio.desafio5.length}`);
 
     const data: AllDesafiosData = {
       geral: geralData,

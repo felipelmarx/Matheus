@@ -7,7 +7,8 @@
     "build": "cross-env NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "ingest-ads": "node scripts/ingest-ads.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
