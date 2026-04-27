@@ -7,8 +7,9 @@ interface ExtractedMetrics {
   investimentoTrafego: number;   // apenas ads (total - API)
   // Trafego
   cpc: number;                   // investimentoTrafego / cliques
-  connectRate: number;
-  // Checkout 2 estagios
+  // Conversao direta do funil de captacao
+  taxaCliqueVenda: number;       // vendas / cliques * 100
+  // Checkout 2 estagios — diagnostico avancado
   taxaLPVCheckout: number;       // checkouts / viewPages
   taxaCheckoutVenda: number;     // vendas / checkouts
   taxaLPVVenda: number;          // display only (combinado)
@@ -41,12 +42,8 @@ function extractMetrics(d: DesafioData, label: string): ExtractedMetrics | null 
 
   const cpc = d.cliques > 0 ? investimentoTrafego / d.cliques : 0;
 
-  const connectRate =
-    d.conectRate > 0
-      ? d.conectRate
-      : d.cliques > 0 && d.viewPages > 0
-        ? (d.viewPages / d.cliques) * 100
-        : 0;
+  // Conversao direta Clique -> Venda (taxa global de captacao).
+  const taxaCliqueVenda = d.cliques > 0 ? (d.vendas / d.cliques) * 100 : 0;
 
   // Checkout 2 estagios — usa `checkouts` se disponivel, senao heuristica
   const hasCheckouts = d.checkouts !== null && d.checkouts > 0;
@@ -67,7 +64,7 @@ function extractMetrics(d: DesafioData, label: string): ExtractedMetrics | null 
     label,
     investimentoTrafego,
     cpc,
-    connectRate,
+    taxaCliqueVenda,
     taxaLPVCheckout,
     taxaCheckoutVenda,
     taxaLPVVenda,
@@ -92,7 +89,10 @@ function metricsToInputs(m: ExtractedMetrics): Partial<SimuladorInputs> {
 
   if (m.investimentoTrafego > 0) partial.investimentoTrafego = Math.round(m.investimentoTrafego);
   if (m.cpc > 0) partial.cpc = Math.round(m.cpc * 100) / 100;
-  if (m.connectRate > 0) partial.connectRate = Math.round(m.connectRate * 10) / 10;
+  // Taxa direta clique -> venda. Tipicamente <10%, mantemos 2 casas decimais.
+  if (m.taxaCliqueVenda > 0) {
+    partial.taxaCliqueVenda = Math.max(0, Math.min(100, Math.round(m.taxaCliqueVenda * 100) / 100));
+  }
 
   // Checkout 2 estagios — usa valores reais se extractMetrics conseguiu calcular
   if (m.taxaLPVCheckout > 0 && m.taxaCheckoutVenda > 0) {

@@ -78,13 +78,17 @@ const avancadoSections: { title: string; color: string; fields: FieldConfig[] }[
     color: 'text-cyan-400',
     fields: [
       { key: 'cpc', label: 'Custo por Clique', min: 0.1, max: 50, step: 0.01, unit: 'R$', decimal: 2 },
-      { key: 'connectRate', label: 'Connect Rate (Cliques -> LPV)', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
+      // Conversão direta: o que importa para a captação. Step e decimal pequenos
+      // porque a taxa é tipicamente <10% (baseline histórico ~4.7%).
+      { key: 'taxaCliqueVenda', label: 'Conversao Clique -> Venda', min: 0, max: 100, step: 0.05, unit: '%', decimal: 2 },
     ],
   },
   {
-    title: 'Checkout (2 estagios)',
+    title: 'Diagnostico Checkout (avancado)',
     color: 'text-emerald-400',
     fields: [
+      // Diagnóstico avançado: estágios intermediários do funil.
+      // viewPage e checkouts são derivados retroativamente a partir de vendas.
       { key: 'taxaLPVCheckout', label: 'LPV -> Checkout', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
       { key: 'taxaCheckoutVenda', label: 'Checkout -> Venda', min: 0, max: 100, step: 0.1, unit: '%', decimal: 1 },
     ],

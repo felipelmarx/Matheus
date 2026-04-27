@@ -14,9 +14,12 @@ export interface SimuladorInputs {
 
   // Tráfego
   cpc: number;
-  connectRate: number;
 
-  // Checkout (2 estágios)
+  // Conversão direta Clique -> Venda (taxa global do funil de captação)
+  taxaCliqueVenda: number;
+
+  // Checkout (2 estágios) — diagnóstico avançado.
+  // viewPage e checkouts são DERIVADOS de vendas via essas taxas (ver computeOutputs).
   taxaLPVCheckout: number;
   taxaCheckoutVenda: number;
 
@@ -101,7 +104,8 @@ const DEFAULTS: SimuladorInputs = {
   mode: 'simples',
   investimentoTrafego: 78723,
   cpc: 2.84,
-  connectRate: 64.6,
+  // 4.7% = produto histórico aproximado: 64.6% × 19.0% × 38.6% ≈ 4.74%
+  taxaCliqueVenda: 4.7,
   taxaLPVCheckout: 19.0,
   taxaCheckoutVenda: 38.6,
   precoIngresso: 7,
@@ -121,7 +125,7 @@ const REQUIRED_KEYS: (keyof SimuladorInputs)[] = [
   'mode',
   'investimentoTrafego',
   'cpc',
-  'connectRate',
+  'taxaCliqueVenda',
   'taxaLPVCheckout',
   'taxaCheckoutVenda',
   'precoIngresso',
@@ -143,7 +147,7 @@ export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
   const {
     investimentoTrafego,
     cpc,
-    connectRate,
+    taxaCliqueVenda,
     taxaLPVCheckout,
     taxaCheckoutVenda,
     ticketMedio,
@@ -159,12 +163,20 @@ export function computeOutputs(inputs: SimuladorInputs): SimuladorOutputs {
 
   // === TRÁFEGO ===
   const cliques = cpc > 0 ? Math.round(investimentoTrafego / cpc) : 0;
-  const viewPage = Math.round(cliques * (connectRate / 100));
 
-  // === CHECKOUT (2 estágios) ===
-  const checkouts = Math.round(viewPage * (taxaLPVCheckout / 100));
-  const vendas = Math.round(checkouts * (taxaCheckoutVenda / 100));
+  // === CAPTAÇÃO ===
+  // Conversão direta: a taxa única Clique -> Venda determina o volume final.
+  // viewPage e checkouts são derivados retroativamente para alimentar o gráfico
+  // do funil sem perder coerência diagnóstica (taxas internas continuam editáveis).
+  const vendas = Math.round(cliques * (taxaCliqueVenda / 100));
   const faturamentoCaptacao = vendas * ticketMedio;
+
+  // Derivação retroativa: dado vendas e as taxas internas, reconstrói os estágios
+  // intermediários. Se as taxas forem 0, os estágios derivados zeram (UI cuida disso).
+  const taxaCheckoutVendaFrac = taxaCheckoutVenda / 100;
+  const taxaLPVCheckoutFrac = taxaLPVCheckout / 100;
+  const checkouts = taxaCheckoutVendaFrac > 0 ? Math.round(vendas / taxaCheckoutVendaFrac) : 0;
+  const viewPage = taxaLPVCheckoutFrac > 0 ? Math.round(checkouts / taxaLPVCheckoutFrac) : 0;
 
   // === CORTESIAS (modelo v3) ===
   const leadsCortesia = Math.round(vendas * (taxaCortesia / 100));
@@ -248,15 +260,17 @@ export function computeAlerts(inputs: SimuladorInputs, outputs: SimuladorOutputs
     });
   }
 
-  // Connect rate baixo
-  if (inputs.connectRate < 40) {
+  // Conversão Clique -> Venda baixa
+  // Threshold de 1.5%: produto histórico real fica entre 4-5%, então abaixo de 1.5% indica
+  // funil quebrado (cliques mortos, página fora do ar, ou checkout indisponível).
+  if (inputs.taxaCliqueVenda < 1.5) {
     alerts.push({
       level: 'warning',
-      message: `Connect Rate em ${inputs.connectRate.toFixed(1)}% — cliques nao carregam a LP`,
+      message: `Conversao Clique -> Venda em ${inputs.taxaCliqueVenda.toFixed(2)}% — abaixo do baseline historico`,
     });
   }
 
-  // Conversão LPV → Checkout baixa
+  // Conversão LPV → Checkout baixa (diagnostico avançado)
   if (inputs.taxaLPVCheckout < 5) {
     alerts.push({
       level: 'warning',
@@ -264,7 +278,7 @@ export function computeAlerts(inputs: SimuladorInputs, outputs: SimuladorOutputs
     });
   }
 
-  // Conversão Checkout → Venda baixa
+  // Conversão Checkout → Venda baixa (diagnostico avançado)
   if (inputs.taxaCheckoutVenda < 20) {
     alerts.push({
       level: 'warning',
@@ -299,8 +313,7 @@ export function computeCenarios(inputs: SimuladorInputs, variacao: number = 20):
       label: 'Pessimista',
       outputs: computeOutputs({
         ...inputs,
-        taxaLPVCheckout: inputs.taxaLPVCheckout * (1 - f),
-        taxaCheckoutVenda: inputs.taxaCheckoutVenda * (1 - f),
+        taxaCliqueVenda: inputs.taxaCliqueVenda * (1 - f),
         cpc: inputs.cpc * (1 + f),
       }),
     },
@@ -309,8 +322,7 @@ export function computeCenarios(inputs: SimuladorInputs, variacao: number = 20):
       label: 'Otimista',
       outputs: computeOutputs({
         ...inputs,
-        taxaLPVCheckout: inputs.taxaLPVCheckout * (1 + f),
-        taxaCheckoutVenda: inputs.taxaCheckoutVenda * (1 + f),
+        taxaCliqueVenda: inputs.taxaCliqueVenda * (1 + f),
         cpc: inputs.cpc * (1 - f),
       }),
     },
@@ -333,11 +345,8 @@ export function computeDreamGoal(
   const vendasFormacaoNecessarias = Math.ceil(vendasNecessarias * ratioFormacao);
 
   // Cliques necessários: desfazer o funil de captação
-  // vendas = cliques * (connectRate/100) * (taxaLPVCheckout/100) * (taxaCheckoutVenda/100)
-  const taxaGlobal =
-    (inputs.connectRate / 100) *
-    (inputs.taxaLPVCheckout / 100) *
-    (inputs.taxaCheckoutVenda / 100);
+  // vendas = cliques * (taxaCliqueVenda/100). Modelo direto sem fatores intermediários.
+  const taxaGlobal = inputs.taxaCliqueVenda / 100;
   const cliquesNecessarios = taxaGlobal > 0 ? Math.ceil(vendasNecessarias / taxaGlobal) : 0;
   const investimentoNecessario = Math.ceil(cliquesNecessarios * inputs.cpc);
 
@@ -355,16 +364,16 @@ const STORAGE_KEY = 'simulador-inputs';
 function isValidShape(parsed: unknown): parsed is Partial<SimuladorInputs> {
   if (!parsed || typeof parsed !== 'object') return false;
   const p = parsed as Record<string, unknown>;
-  // Shape v3 (atual): requer taxaCortesia + custoPorLead (introduzidos em v3)
-  // Se tiver investimentoApi como número no shape antigo (pré-v3), rejeitar para reset
+  // Shape v4 (atual): requer taxaCliqueVenda como input direto.
+  // Shapes anteriores (v3 com connectRate) são rejeitados para forçar reset aos DEFAULTS.
+  const hasV4Key = typeof p.taxaCliqueVenda === 'number';
   const hasV3Keys =
     typeof p.taxaCortesia === 'number' &&
     typeof p.custoPorLead === 'number';
   const hasCoreKeys =
     typeof p.investimentoTrafego === 'number' &&
-    typeof p.connectRate === 'number' &&
     typeof p.taxaLPVCheckout === 'number';
-  return hasCoreKeys && hasV3Keys;
+  return hasCoreKeys && hasV3Keys && hasV4Key;
 }
 
 function loadSaved(): SimuladorInputs {
