@@ -98,6 +98,12 @@ function extractDesafioData(rows: string[][], labelCol: number, valueCol: number
     ? tmf
     : (result.vendasFormacao > 0 ? result.faturamentoTotal / result.vendasFormacao : 0);
 
+  // Fallback: se "Investimento bruto" estiver vazio/0 mas houver "Investimento captacao",
+  // usa o de captacao (cenario tipico de desafio em andamento — bruto so e consolidado depois)
+  if (result.investimento === 0 && result.investimentoCaptacao > 0) {
+    result.investimento = result.investimentoCaptacao;
+  }
+
   // Fallback: compute custoPorAplicacao / custoEntrevista a partir do investimento liquido
   // (campo lucroPrejuizo carrega o valor da linha "Investimento Liquido" da planilha)
   const invLiquido = result.lucroPrejuizo > 0 ? result.lucroPrejuizo : result.investimento;
