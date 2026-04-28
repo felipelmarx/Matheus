@@ -9,6 +9,7 @@ interface DesafioTabsProps {
     desafio3: DesafioData;
     desafio4: DesafioData;
     desafio5: DesafioData;
+    desafio6: DesafioData;
   };
 }
 
@@ -19,6 +20,7 @@ const tabs: { key: TabKey; label: string; num: string }[] = [
   { key: 'desafio3', label: 'Desafio 3', num: '03' },
   { key: 'desafio4', label: 'Desafio 4', num: '04' },
   { key: 'desafio5', label: 'Desafio 5', num: '05' },
+  { key: 'desafio6', label: 'Desafio 6', num: '06' },
   { key: 'analises', label: 'Analises', num: '📊' },
   { key: 'simulador', label: 'Simulador', num: '⚡' },
   { key: 'comparar', label: 'Comparar', num: '⇄' },
@@ -30,7 +32,7 @@ export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTab
     <div className="flex flex-col sm:flex-row gap-3">
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
-        const isDesafio = ['desafio1','desafio2','desafio3','desafio4','desafio5'].includes(tab.key);
+        const isDesafio = ['desafio1','desafio2','desafio3','desafio4','desafio5','desafio6'].includes(tab.key);
         const desafioData = isDesafio ? data[tab.key as DesafioKey] : null;
         const hasData = !isDesafio || (desafioData !== null && (desafioData.investimento > 0 || desafioData.vendas > 0));
         return (

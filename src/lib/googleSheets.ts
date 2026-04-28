@@ -163,7 +163,7 @@ type AdsOverride = {
   add?: { name: string; spent: number; purchases: number; day?: string }[];
 };
 
-const ADS_OVERRIDES: Partial<Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5', AdsOverride>> = {
+const ADS_OVERRIDES: Partial<Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5' | 'desafio6', AdsOverride>> = {
   desafio5: {
     // Zera os R$ 33 / 0 vendas do CSV para nao somar com o override
     remove: ['AD 2 ( Gabriel Editor ) VIDEO BEBE - Copy'],
@@ -173,7 +173,7 @@ const ADS_OVERRIDES: Partial<Record<'desafio1' | 'desafio2' | 'desafio3' | 'desa
   },
 };
 
-function applyAdsOverrides(desafio: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5', rows: string[][]): string[][] {
+function applyAdsOverrides(desafio: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5' | 'desafio6', rows: string[][]): string[][] {
   const ov = ADS_OVERRIDES[desafio];
   if (!ov) return rows;
   const removeSet = new Set((ov.remove ?? []).map((n) => n.trim()));
@@ -400,6 +400,35 @@ async function fetchFormationSalesData(): Promise<{ d3: Map<string, number>; all
   return { d3: d3Map, all: allMap };
 }
 
+// Extract daily metrics for Desafio 6 from GW6:GZ16
+// Range columns (0-based from GW): 0=DATA, 1=MODIFICACOES, 2=INVESTIMENTO GERAL, 3=INVESTIMENTO CAPTACAO
+// Demais campos (vendas, CPA, etc.) ainda nao existem na planilha — preenchidos com 0.
+function extractDesafio6Daily(rows: string[][]): DailyMetric[] {
+  const p = parseSheetNumber;
+  const daily: DailyMetric[] = [];
+
+  for (const row of rows) {
+    const dateVal = (row?.[0] ?? '').trim();
+    if (!dateVal || !/\d{2}\/\d{2}\/\d{4}/.test(dateVal)) continue;
+
+    daily.push({
+      data: dateVal,
+      investimento: p(row[2]),
+      vendas: 0,
+      cpa: 0,
+      ticketMedio: 0,
+      faturamento: 0,
+      lucroPrejuizo: 0,
+      cortesia: 0,
+      ingressosTotais: 0,
+      qualificados: 0,
+      desqualificados: 0,
+    });
+  }
+
+  return daily;
+}
+
 // Extract daily metrics for Desafio 4 from FN4:JF16
 // Column indices (0-based from FN):
 // 7=date, 9=investimento, 77=cortesias, 78=vendas ads,
@@ -548,12 +577,14 @@ function getDefaultData(): AllDesafiosData {
     desafio4Daily: [],
     desafio5: getDefaultDesafio(),
     desafio5Daily: [],
+    desafio6: getDefaultDesafio(),
+    desafio6Daily: [],
     popupQualificador: [],
     popupConsolidado: null,
     topAds: [],
     topAdsDesafio4: [],
     topAdsPorDesafio: {
-      desafio1: [], desafio2: [], desafio3: [], desafio4: [], desafio5: [],
+      desafio1: [], desafio2: [], desafio3: [], desafio4: [], desafio5: [], desafio6: [],
     },
     visaoEstrategica: [],
     resumoTecnico: { metrics: [], analysis: [] },
@@ -565,17 +596,20 @@ function getDefaultData(): AllDesafiosData {
   };
 }
 
-// Column mappings for RESUMO - GERAL (C1:X77 → indices 0-21)
+// Column mappings for RESUMO - GERAL (C1:AJ77 → indices 0-33)
 // DESAFIO 1: label=0 (C), value=1 (D)
 // DESAFIO 2: label=6 (I), value=7 (J)
 // DESAFIO 3: label=12 (O), value=13 (P)
 // DESAFIO 4: label=18 (U), value=19 (V)
+// DESAFIO 5: label=24 (AA), value=25 (AB)
+// DESAFIO 6: label=30 (AG), value=31 (AH)
 const DESAFIO_COLS = [
   { key: 'desafio1' as const, labelCol: 0, valueCol: 1 },
   { key: 'desafio2' as const, labelCol: 6, valueCol: 7 },
   { key: 'desafio3' as const, labelCol: 12, valueCol: 13 },
   { key: 'desafio4' as const, labelCol: 18, valueCol: 19 },
   { key: 'desafio5' as const, labelCol: 24, valueCol: 25 },
+  { key: 'desafio6' as const, labelCol: 30, valueCol: 31 },
 ];
 
 export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
@@ -589,7 +623,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
   try {
     console.log('[sheets] Fetching from RESUMO - GERAL, MAR/ABR MÉTRICAS GERAIS, and ADS...');
-    const resumoRows = await fetchSheetRows('RESUMO - GERAL!C1:AD77');
+    const resumoRows = await fetchSheetRows('RESUMO - GERAL!C1:AJ77');
 
     // Daily fetch is independent - don't let it break the main data
     let dailyRows: string[][] = [];
@@ -615,6 +649,17 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log(`[sheets] Desafio 5 daily: ${desafio5Rows.length} rows loaded`);
     } catch (err) {
       console.warn('[sheets] Desafio 5 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    // Desafio 6 daily fetch (planilha so traz DATA/INVESTIMENTO ate ao vivo iniciar)
+    // Range cobre DATA + INVESTIMENTOS em GW6:GZ16 do tab 'ABR - METRICAS GERAIS'.
+    // extractDesafio6Daily faz parse minimal — outras metricas voltam 0 ate serem populadas.
+    let desafio6Rows: string[][] = [];
+    try {
+      desafio6Rows = await fetchSheetRows("'ABR - METRICAS GERAIS'!GW6:GZ16");
+      console.log(`[sheets] Desafio 6 daily: ${desafio6Rows.length} rows loaded`);
+    } catch (err) {
+      console.warn('[sheets] Desafio 6 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
     // Pop-up Qualificador fetch: dates from col B, data from AX:BN, consolidated from row 29
@@ -655,12 +700,13 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
     }
 
     // Ranges de data por desafio (captacao -> ao vivo)
-    const ADS_DATE_RANGES: Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5', { start: string; end: string }> = {
+    const ADS_DATE_RANGES: Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5' | 'desafio6', { start: string; end: string }> = {
       desafio1: { start: '2026-01-24', end: '2026-02-06' },
       desafio2: { start: '2026-02-16', end: '2026-02-27' },
       desafio3: { start: '2026-03-02', end: '2026-03-13' },
       desafio4: { start: '2026-03-16', end: '2026-03-27' },
       desafio5: { start: '2026-03-30', end: '2026-04-10' },
+      desafio6: { start: '2026-04-27', end: '2026-05-08' },
     };
     const filterByRange = (start: string, end: string) =>
       allAtRows.filter((r) => {
@@ -681,6 +727,9 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
     const desafio5Daily = extractDailyMetrics(desafio5Rows);
     console.log(`[sheets] desafio5Daily: ${desafio5Daily.length} days loaded`);
+
+    const desafio6Daily = extractDesafio6Daily(desafio6Rows);
+    console.log(`[sheets] desafio6Daily: ${desafio6Daily.length} days loaded`);
 
     const popupQualificador = extractPopupQualificador(popupDataRows, popupDateRows);
     console.log(`[sheets] popupQualificador: ${popupQualificador.length} days loaded`);
@@ -723,7 +772,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
     // Anuncios por desafio — fonte: CSVs do Meta Ads via `npm run ingest-ads`
     // (substitui o filtro por data na tab AT do Google Sheets)
-    const csvRows = adsDesafiosCsv as Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5', string[][]>;
+    const csvRows = adsDesafiosCsv as Partial<Record<'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5' | 'desafio6', string[][]>>;
     const topAdsPorDesafio = {
       desafio1: extractAdsData(applyAdsOverrides('desafio1', csvRows.desafio1 ?? []), adsMapAll),
       desafio2: extractAdsData(applyAdsOverrides('desafio2', csvRows.desafio2 ?? []), adsMapAll),
@@ -731,8 +780,10 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio4: extractAdsData(applyAdsOverrides('desafio4', csvRows.desafio4 ?? []), adsMapAll),
       // D5: sem formationSalesMap -> todos os ads retornam formationSales=0
       desafio5: extractAdsData(applyAdsOverrides('desafio5', csvRows.desafio5 ?? [])),
+      // D6: ainda sem CSV ingerido — array vazio ate `npm run ingest-ads` rodar com dados de D6
+      desafio6: extractAdsData(applyAdsOverrides('desafio6', csvRows.desafio6 ?? [])),
     };
-    console.log(`[sheets] topAdsPorDesafio (CSV source): D1=${topAdsPorDesafio.desafio1.length} D2=${topAdsPorDesafio.desafio2.length} D3=${topAdsPorDesafio.desafio3.length} D4=${topAdsPorDesafio.desafio4.length} D5=${topAdsPorDesafio.desafio5.length}`);
+    console.log(`[sheets] topAdsPorDesafio (CSV source): D1=${topAdsPorDesafio.desafio1.length} D2=${topAdsPorDesafio.desafio2.length} D3=${topAdsPorDesafio.desafio3.length} D4=${topAdsPorDesafio.desafio4.length} D5=${topAdsPorDesafio.desafio5.length} D6=${topAdsPorDesafio.desafio6.length}`);
 
     const data: AllDesafiosData = {
       geral: geralData,
@@ -744,6 +795,8 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       desafio4Daily,
       desafio5: getDefaultDesafio(),
       desafio5Daily,
+      desafio6: getDefaultDesafio(),
+      desafio6Daily,
       popupQualificador,
       popupConsolidado,
       topAds,
@@ -765,18 +818,20 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log(`[sheets] ${col.key}: inv=${desafioData.investimento} vendas=${desafioData.vendas} fat=${desafioData.faturamentoTotal}`);
     }
 
-    // Cancelamentos & No-show from RESUMO - GERAL B35:AD46
+    // Cancelamentos & No-show from RESUMO - GERAL B35:AJ46
     // Layout atual na planilha (sheet rows / indices relativos a B35=0):
     //   D1-D4: sheet row 43 = idx 8 (cancel value), sheet row 45 = idx 10 (no-show value)
     //   D5 esta shifted 1 row: sheet row 44 = idx 9 (cancel), sheet row 46 = idx 11 (no-show)
+    //   D6: ainda sem dados de cancelamento (desafio em captacao) — fallback 0
     try {
-      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:AD46');
-      const cancelCols: { key: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5'; col: number; cancelRow: number; noShowRow: number }[] = [
+      const cancelRows = await fetchSheetRows('RESUMO - GERAL!B35:AJ46');
+      const cancelCols: { key: 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5' | 'desafio6'; col: number; cancelRow: number; noShowRow: number }[] = [
         { key: 'desafio1', col: 0, cancelRow: 8, noShowRow: 10 },   // B
         { key: 'desafio2', col: 6, cancelRow: 8, noShowRow: 10 },   // H
         { key: 'desafio3', col: 12, cancelRow: 8, noShowRow: 10 },  // N
         { key: 'desafio4', col: 18, cancelRow: 8, noShowRow: 10 },  // T
         { key: 'desafio5', col: 24, cancelRow: 9, noShowRow: 11 },  // Z (shifted 1 row down)
+        { key: 'desafio6', col: 30, cancelRow: 9, noShowRow: 11 },  // AF (mesmo shift do D5)
       ];
       for (const cc of cancelCols) {
         data[cc.key].cancelamentos = parseSheetNumber(cancelRows[cc.cancelRow]?.[cc.col] ?? '');
@@ -798,8 +853,8 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
     // RESUMO-TECNICO: metrics (rows 1-65) + analysis (rows 72+)
     try {
-      // Range expandido ate coluna S para capturar comparecimentos do D4 (col O=14) e D5 (col S=18)
-      const rtRows = await fetchSheetRows('RESUMO-TECNICO!A1:S112');
+      // Range expandido ate coluna W para capturar comparecimentos do D4 (col O=14), D5 (col S=18) e D6 (col W=22)
+      const rtRows = await fetchSheetRows('RESUMO-TECNICO!A1:W112');
       const metrics: ResumoTecnicoMetric[] = [];
       const maxMetricRow = Math.min(65, rtRows.length);
       for (let i = 0; i < maxMetricRow; i++) {
@@ -823,13 +878,15 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.log(`[sheets] Resumo Tecnico: ${metrics.length} metrics, ${analysis.length} analysis lines`);
 
       // Extract comparecimentos por sessao para cada desafio.
-      // Colunas de VALOR: D1=B(1), D2=F(5), D3=K(10), D4=O(14), D5=S(18). 5 sessoes no total.
+      // Colunas de VALOR: D1=B(1), D2=F(5), D3=K(10), D4=O(14), D5=S(18), D6=W(22). 5 sessoes no total.
+      // D6 ainda sem dados (planilha so vai ate col T) — parseSheetNumber retorna 0 em ausencia.
       const comparecimentoCols: { key: DesafioKey; col: number }[] = [
         { key: 'desafio1', col: 1 },
         { key: 'desafio2', col: 5 },
         { key: 'desafio3', col: 10 },
         { key: 'desafio4', col: 14 },
         { key: 'desafio5', col: 18 },
+        { key: 'desafio6', col: 22 },
       ];
       let sessionIdx = 0;
       for (const row of rtRows) {

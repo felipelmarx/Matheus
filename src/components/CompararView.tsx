@@ -108,6 +108,7 @@ const desafioOptions: { key: DesafioKey; label: string; num: string }[] = [
   { key: 'desafio3', label: 'Desafio 3', num: '03' },
   { key: 'desafio4', label: 'Desafio 4', num: '04' },
   { key: 'desafio5', label: 'Desafio 5', num: '05' },
+  { key: 'desafio6', label: 'Desafio 6', num: '06' },
 ];
 
 function getTrendInfo(

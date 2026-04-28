@@ -54,7 +54,7 @@ export interface DesafioData {
   comparecimentos: number[];
 }
 
-export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5';
+export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5' | 'desafio6';
 export type TabKey = 'geral' | DesafioKey | 'comparar' | 'analises' | 'analiseAplicacoes' | 'analiseCruzada' | 'simulador' | 'guia';
 export type GeralMode = 'total' | 'meta1' | 'meta2';
 
@@ -115,6 +115,8 @@ export interface AllDesafiosData {
   desafio4Daily: DailyMetric[];
   desafio5: DesafioData;
   desafio5Daily: DailyMetric[];
+  desafio6: DesafioData;
+  desafio6Daily: DailyMetric[];
   popupQualificador: PopupQualificadorDay[];
   popupConsolidado: {
     qualificador: PopupQualificadorSide;
@@ -129,6 +131,7 @@ export interface AllDesafiosData {
     desafio3: AdMetric[];
     desafio4: AdMetric[];
     desafio5: AdMetric[];
+    desafio6: AdMetric[];
   };
   visaoEstrategica: string[];
   resumoTecnico: { metrics: ResumoTecnicoMetric[]; analysis: string[] };

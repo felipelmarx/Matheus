@@ -20,7 +20,7 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
     ? [data.desafio1, data.desafio2]
     : mode === 'meta2'
       ? [data.desafio3, data.desafio4]
-      : [data.desafio1, data.desafio2, data.desafio3, data.desafio4, data.desafio5];
+      : [data.desafio1, data.desafio2, data.desafio3, data.desafio4, data.desafio5, data.desafio6];
 
   const sum = (fn: (d: DesafioData) => number) => desafios.reduce((acc, d) => acc + fn(d), 0);
 
@@ -177,7 +177,7 @@ export default function DashboardPage() {
               <CompararView data={data} />
             ) : activeData ? (
               <>
-                {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5') && (
+                {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5' || activeTab === 'desafio6') && (
                   <DesafioInfo desafioKey={activeTab} />
                 )}
                 <StatCards data={activeData} />
@@ -189,7 +189,7 @@ export default function DashboardPage() {
                 />
                 <FunilVisual data={activeData} />
                 <ComparecimentosCard data={activeData} siteOnly={activeTab === 'desafio5'} />
-                {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5') && (
+                {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5' || activeTab === 'desafio6') && (
                   <ListaAnuncios
                     ads={data.topAdsPorDesafio[activeTab]}
                   />
