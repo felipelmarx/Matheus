@@ -13,6 +13,7 @@ import DesafioInfo from '@/components/DesafioInfo';
 import GuiaDesafio from '@/components/GuiaDesafio';
 import AnalisesDesafios from '@/components/AnalisesDesafios';
 import SimuladorView from '@/components/simulador/SimuladorView';
+import Organico from '@/components/Organico';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
 
 function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
@@ -115,7 +116,7 @@ export default function DashboardPage() {
 
   const activeData = useMemo(() => {
     if (!data) return null;
-    if (activeTab === 'comparar' || activeTab === 'analises' || activeTab === 'simulador' || activeTab === 'guia' || activeTab === 'analiseAplicacoes' || activeTab === 'analiseCruzada') return null;
+    if (activeTab === 'comparar' || activeTab === 'analises' || activeTab === 'simulador' || activeTab === 'guia' || activeTab === 'analiseAplicacoes' || activeTab === 'analiseCruzada' || activeTab === 'organico') return null;
     if (activeTab === 'geral') return buildGeralData(data, 'total');
     return data[activeTab];
   }, [data, activeTab]);
@@ -175,6 +176,8 @@ export default function DashboardPage() {
               />
             ) : activeTab === 'comparar' ? (
               <CompararView data={data} />
+            ) : activeTab === 'organico' ? (
+              <Organico data={data.organicoFontes} />
             ) : activeData ? (
               <>
                 {(activeTab === 'desafio1' || activeTab === 'desafio2' || activeTab === 'desafio3' || activeTab === 'desafio4' || activeTab === 'desafio5' || activeTab === 'desafio6') && (

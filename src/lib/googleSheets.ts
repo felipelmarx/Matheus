@@ -1,4 +1,4 @@
-import type { DesafioData, DesafioKey, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay, PopupQualificadorSide, AnaliseCompradorSection } from '@/types/metrics';
+import type { DesafioData, DesafioKey, DailyMetric, AdMetric, AllDesafiosData, ResumoTecnicoMetric, PopupQualificadorDay, PopupQualificadorSide, AnaliseCompradorSection, OrganicoFontes, OrganicoSourceRow } from '@/types/metrics';
 import { parseSheetNumber } from './metricsCalculator';
 import { getCached, getStale, setCache } from './cache';
 import adsDesafiosCsv from '@/data/ads-desafios.json';
@@ -157,6 +157,45 @@ function extractDailyMetrics(rows: string[][]): DailyMetric[] {
   }
 
   return daily;
+}
+
+// Extract resumo organico (Comercial e Midias) from 'ABR - METRICAS GERAIS'!KV3:LF30
+// Colunas relativas a KV (j=0):
+// 0=FONTES (label), 1=Edson, 2=Ellid, 3=Geovana (SS),
+// 4=Stories, 5=Direct-Automacao, 6=Feed, 7=Bio, 8=Pulmonautas (INSTAGRAM),
+// 9=YOUTUBE, 10=EXTRA
+function extractOrganicoFontes(rows: string[][]): OrganicoFontes {
+  const p = parseSheetNumber;
+  const empty = (label: string): OrganicoSourceRow => ({
+    data: label, edson: 0, ellid: 0, geovana: 0, stories: 0,
+    directAutomacao: 0, feed: 0, bio: 0, pulmonautas: 0, youtube: 0, extra: 0,
+  });
+  const parseRow = (label: string, row: string[]): OrganicoSourceRow => ({
+    data: label,
+    edson: p(row[1]),
+    ellid: p(row[2]),
+    geovana: p(row[3]),
+    stories: p(row[4]),
+    directAutomacao: p(row[5]),
+    feed: p(row[6]),
+    bio: p(row[7]),
+    pulmonautas: p(row[8]),
+    youtube: p(row[9]),
+    extra: p(row[10]),
+  });
+
+  let soma = empty('SOMA');
+  const out: OrganicoSourceRow[] = [];
+  for (const row of rows) {
+    const label = (row[0] ?? '').trim();
+    if (!label) continue;
+    if (/^soma$/i.test(label)) { soma = parseRow('SOMA', row); continue; }
+    if (/^fontes$/i.test(label)) continue;
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(label)) {
+      out.push(parseRow(label, row));
+    }
+  }
+  return { soma, rows: out };
 }
 
 // Aggregate ads data: group by ad name, sum spent/purchases, rank by purchases
@@ -597,6 +636,10 @@ function getDefaultData(): AllDesafiosData {
     analiseCompradores: [],
     analiseAplicacoes: [],
     analiseCruzada: [],
+    organicoFontes: {
+      soma: { data: 'SOMA', edson: 0, ellid: 0, geovana: 0, stories: 0, directAutomacao: 0, feed: 0, bio: 0, pulmonautas: 0, youtube: 0, extra: 0 },
+      rows: [],
+    },
     lastUpdated: new Date().toISOString(),
     fromCache: false,
   };
@@ -668,6 +711,15 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Desafio 6 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
+    // Resumo Organico (Comercial e Midias) — 'ABR - METRICAS GERAIS'!KV3:LF30
+    let organicoRows: string[][] = [];
+    try {
+      organicoRows = await fetchSheetRows("'ABR - METRICAS GERAIS'!KV3:LF30");
+      console.log(`[sheets] Organico fontes: ${organicoRows.length} rows loaded`);
+    } catch (err) {
+      console.warn('[sheets] Organico fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
     // Pop-up Qualificador fetch: dates from col B, data from AX:BN, consolidated from row 29
     let popupDataRows: string[][] = [];
     let popupDateRows: string[][] = [];
@@ -736,6 +788,9 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
 
     const desafio6Daily = extractDesafio6Daily(desafio6Rows);
     console.log(`[sheets] desafio6Daily: ${desafio6Daily.length} days loaded`);
+
+    const organicoFontes = extractOrganicoFontes(organicoRows);
+    console.log(`[sheets] organicoFontes: ${organicoFontes.rows.length} days loaded`);
 
     const popupQualificador = extractPopupQualificador(popupDataRows, popupDateRows);
     console.log(`[sheets] popupQualificador: ${popupQualificador.length} days loaded`);
@@ -813,6 +868,7 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       analiseCompradores: [],
       analiseAplicacoes: [],
       analiseCruzada: [],
+      organicoFontes,
       lastUpdated: new Date().toISOString(),
       fromCache: false,
     };

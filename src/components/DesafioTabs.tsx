@@ -25,6 +25,7 @@ const tabs: { key: TabKey; label: string; num: string }[] = [
   { key: 'simulador', label: 'Simulador', num: '⚡' },
   { key: 'comparar', label: 'Comparar', num: '⇄' },
   { key: 'guia', label: 'Guia', num: '📖' },
+  { key: 'organico', label: 'Orgânico', num: '🌱' },
 ];
 
 export default function DesafioTabs({ activeTab, onTabChange, data }: DesafioTabsProps) {

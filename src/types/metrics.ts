@@ -55,8 +55,27 @@ export interface DesafioData {
 }
 
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5' | 'desafio6';
-export type TabKey = 'geral' | DesafioKey | 'comparar' | 'analises' | 'analiseAplicacoes' | 'analiseCruzada' | 'simulador' | 'guia';
+export type TabKey = 'geral' | DesafioKey | 'comparar' | 'analises' | 'analiseAplicacoes' | 'analiseCruzada' | 'simulador' | 'guia' | 'organico';
 export type GeralMode = 'total' | 'meta1' | 'meta2';
+
+export interface OrganicoSourceRow {
+  data: string;             // 'SOMA' ou data dd/mm/yyyy
+  edson: number;
+  ellid: number;
+  geovana: number;
+  stories: number;
+  directAutomacao: number;
+  feed: number;
+  bio: number;
+  pulmonautas: number;
+  youtube: number;
+  extra: number;
+}
+
+export interface OrganicoFontes {
+  soma: OrganicoSourceRow;
+  rows: OrganicoSourceRow[];
+}
 
 export interface DailyMetric {
   data: string;
@@ -138,6 +157,7 @@ export interface AllDesafiosData {
   analiseCompradores: AnaliseCompradorSection[];
   analiseAplicacoes: AnaliseCompradorSection[];
   analiseCruzada: AnaliseCompradorSection[];
+  organicoFontes: OrganicoFontes;
   lastUpdated: string;
   fromCache: boolean;
 }
