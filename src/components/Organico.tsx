@@ -1,24 +1,11 @@
 import { Users, Instagram, Youtube, Sparkles, TrendingUp, Calendar } from 'lucide-react';
-import type { OrganicoFontes, OrganicoSourceRow } from '@/types/metrics';
+import type { OrganicoFontes } from '@/types/metrics';
 
 interface OrganicoProps {
   data: OrganicoFontes;
 }
 
 const fmtNum = (n: number) => n.toLocaleString('pt-BR');
-
-const cellsForRow = (r: OrganicoSourceRow): { value: number; key: string; group: 'ss' | 'ig' | 'yt' | 'ex' }[] => [
-  { key: 'edson', value: r.edson, group: 'ss' },
-  { key: 'ellid', value: r.ellid, group: 'ss' },
-  { key: 'geovana', value: r.geovana, group: 'ss' },
-  { key: 'stories', value: r.stories, group: 'ig' },
-  { key: 'directAutomacao', value: r.directAutomacao, group: 'ig' },
-  { key: 'feed', value: r.feed, group: 'ig' },
-  { key: 'bio', value: r.bio, group: 'ig' },
-  { key: 'pulmonautas', value: r.pulmonautas, group: 'ig' },
-  { key: 'youtube', value: r.youtube, group: 'yt' },
-  { key: 'extra', value: r.extra, group: 'ex' },
-];
 
 export default function Organico({ data }: OrganicoProps) {
   const { soma, rows } = data;
@@ -130,104 +117,6 @@ export default function Organico({ data }: OrganicoProps) {
         </div>
       )}
 
-      {/* Tabela detalhada */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-border">
-          <h3 className="text-sm font-heading font-semibold uppercase tracking-wider text-muted-foreground">
-            Detalhamento diário
-          </h3>
-          <p className="text-xs text-muted-foreground/70 mt-0.5">
-            Range <code className="bg-muted px-1.5 py-0.5 rounded text-[10px]">ABR - METRICAS GERAIS · KV3:LF30</code>
-          </p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              {/* Linha de grupos */}
-              <tr className="bg-muted/40 text-muted-foreground text-[10px] uppercase tracking-wider">
-                <th className="px-3 py-2 sticky left-0 bg-muted/40 border-r border-border"></th>
-                <th colSpan={3} className="px-3 py-2 text-center font-heading border-r border-border">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Users className="w-3 h-3 text-blue-500" /> SS
-                  </span>
-                </th>
-                <th colSpan={5} className="px-3 py-2 text-center font-heading border-r border-border">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Instagram className="w-3 h-3 text-pink-500" /> Instagram
-                  </span>
-                </th>
-                <th className="px-3 py-2 text-center font-heading border-r border-border">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Youtube className="w-3 h-3 text-red-500" /> YouTube
-                  </span>
-                </th>
-                <th className="px-3 py-2 text-center font-heading">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Sparkles className="w-3 h-3 text-amber-500" /> Extra
-                  </span>
-                </th>
-              </tr>
-              {/* Linha de fontes */}
-              <tr className="bg-muted/20 text-muted-foreground text-xs border-b border-border">
-                <th className="px-3 py-2 text-left font-heading sticky left-0 bg-card">Data</th>
-                <th className="px-3 py-2 text-center font-heading">Edson</th>
-                <th className="px-3 py-2 text-center font-heading">Ellid</th>
-                <th className="px-3 py-2 text-center font-heading border-r border-border">Geovana</th>
-                <th className="px-3 py-2 text-center font-heading">Stories</th>
-                <th className="px-3 py-2 text-center font-heading">Direct</th>
-                <th className="px-3 py-2 text-center font-heading">Feed</th>
-                <th className="px-3 py-2 text-center font-heading">Bio</th>
-                <th className="px-3 py-2 text-center font-heading border-r border-border">Pulm</th>
-                <th className="px-3 py-2 text-center font-heading border-r border-border">—</th>
-                <th className="px-3 py-2 text-center font-heading">—</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Linha SOMA destacada */}
-              <tr className="bg-primary/5 border-b-2 border-primary/30 font-bold">
-                <td className="px-3 py-3 text-left text-foreground sticky left-0 bg-primary/5">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                    SOMA
-                  </span>
-                </td>
-                {cellsForRow(soma).map((c) => (
-                  <td key={c.key} className={`px-3 py-3 text-center tabular-nums font-mono ${c.value === 0 ? 'text-muted-foreground/30' : 'text-foreground'}`}>
-                    {c.value === 0 ? '—' : fmtNum(c.value)}
-                  </td>
-                ))}
-              </tr>
-
-              {/* Linhas por data */}
-              {rows.length === 0 ? (
-                <tr>
-                  <td colSpan={11} className="px-4 py-8 text-center text-muted-foreground">
-                    Sem dados disponíveis na planilha.
-                  </td>
-                </tr>
-              ) : (
-                rows.map((r) => {
-                  const totalDia = cellsForRow(r).reduce((acc, c) => acc + c.value, 0);
-                  const isEmpty = totalDia === 0;
-                  return (
-                    <tr key={r.data} className={`border-b border-border/40 last:border-0 transition-colors ${isEmpty ? 'opacity-50' : 'hover:bg-muted/20'}`}>
-                      <td className="px-3 py-2.5 text-left font-medium text-foreground sticky left-0 bg-card">
-                        {r.data}
-                      </td>
-                      {cellsForRow(r).map((c) => (
-                        <td key={c.key} className={`px-3 py-2.5 text-center tabular-nums font-mono ${c.value === 0 ? 'text-muted-foreground/30' : 'text-foreground'}`}>
-                          {c.value === 0 ? '—' : fmtNum(c.value)}
-                        </td>
-                      ))}
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 }
