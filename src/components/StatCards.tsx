@@ -1,4 +1,4 @@
-import { DollarSign, ShoppingCart, TrendingUp, Target, Ticket, Receipt } from 'lucide-react';
+import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, Target, Ticket, Receipt } from 'lucide-react';
 import type { DesafioData } from '@/types/metrics';
 
 interface StatCardsProps {
@@ -111,10 +111,48 @@ export default function StatCards({ data }: StatCardsProps) {
     },
   ];
 
+  // Cards organico (apenas para D6 e Geral quando D6 esta incluido).
+  // Critério: pelo menos um dos campos chave deve ter valor > 0.
+  const hasOrganico =
+    (data.vendasOrganico ?? 0) > 0 || (data.faturamentoOrganico ?? 0) > 0;
+
+  const prejuizoOrg = data.prejuizoGeralComOrganico ?? 0;
+  const organicoCards: CardData[] = [
+    {
+      label: 'VENDAS ORGANICAS',
+      value: (data.vendasOrganico ?? 0).toLocaleString('pt-BR'),
+      icon: ShoppingCart,
+      accentColor: 'text-emerald-500',
+      accentBg: 'bg-emerald-500/8',
+    },
+    {
+      label: 'CPA TOTAL C/ ORGANICO',
+      value: BRL.format(data.cpaTotalComOrganico ?? 0),
+      icon: Target,
+      accentColor: 'text-cyan-500',
+      accentBg: 'bg-cyan-500/8',
+    },
+    {
+      label: 'TICKET MEDIO GERAL',
+      value: BRL.format(data.ticketMedioGeral ?? 0),
+      icon: Receipt,
+      accentColor: 'text-violet-500',
+      accentBg: 'bg-violet-500/8',
+    },
+    {
+      label: 'PREJUIZO GERAL C/ ORG',
+      value: BRL.format(prejuizoOrg),
+      icon: prejuizoOrg < 0 ? TrendingDown : TrendingUp,
+      accentColor: prejuizoOrg < 0 ? 'text-red-500' : 'text-emerald-500',
+      accentBg: prejuizoOrg < 0 ? 'bg-red-500/8' : 'bg-emerald-500/8',
+    },
+  ];
+
   return (
     <div className="space-y-3">
       <CardGrid cards={captacaoCards} cols={5} />
       <CardGrid cards={formacaoCards} cols={4} />
+      {hasOrganico && <CardGrid cards={organicoCards} cols={4} />}
     </div>
   );
 }

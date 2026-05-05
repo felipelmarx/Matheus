@@ -52,6 +52,15 @@ export interface DesafioData {
 
   // Comparecimentos (participacao por sessao 1..5) — RESUMO-TECNICO
   comparecimentos: number[];
+
+  // Organico (preenchido apenas para Desafio 6 atualmente; opcionais para retro-compat com D1-D5)
+  vendasOrganico?: number;
+  faturamentoOrganico?: number;
+  cpaTotalComOrganico?: number;       // ja calculado pela planilha (KL)
+  ticketMedioGeral?: number;          // ja calculado (KM)
+  prejuizoGeralComOrganico?: number;  // ja calculado (KN, sinal incluido)
+  faturamentoTotalGeral?: number;     // KJ — util para Geral
+  investimentoCaptacaoGeral?: number; // KK — util para Geral
 }
 
 export type DesafioKey = 'desafio1' | 'desafio2' | 'desafio3' | 'desafio4' | 'desafio5' | 'desafio6';

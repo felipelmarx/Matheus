@@ -474,6 +474,38 @@ function extractDesafio6Daily(rows: string[][]): DailyMetric[] {
   return daily;
 }
 
+// Extract D6 organico aggregate (row 29) from 'ABR - METRICAS GERAIS'!KH5:KN29
+// rows[0] = headers (sheet row 5), rows[24] = aggregate (sheet row 29)
+// Cols: KH=ticket medio org (aux, idx 0), KI=fat org (1), KJ=fat total geral (2),
+//       KK=invest captacao geral (3), KL=CPA total c/ org (4),
+//       KM=ticket medio geral (5), KN=prejuizo geral c/ org (6, ja com sinal).
+function extractDesafio6OrganicoFromKHKN(rows: string[][]): {
+  faturamentoOrganico: number;
+  cpaTotalComOrganico: number;
+  ticketMedioGeral: number;
+  prejuizoGeralComOrganico: number;
+  faturamentoTotalGeral: number;
+  investimentoCaptacaoGeral: number;
+} {
+  const p = parseSheetNumber;
+  const aggregate = rows[24] ?? [];
+  return {
+    faturamentoOrganico: p(aggregate[1]),       // KI
+    faturamentoTotalGeral: p(aggregate[2]),     // KJ
+    investimentoCaptacaoGeral: p(aggregate[3]), // KK
+    cpaTotalComOrganico: p(aggregate[4]),       // KL
+    ticketMedioGeral: p(aggregate[5]),          // KM
+    prejuizoGeralComOrganico: p(aggregate[6]),  // KN (sinal ja incluido)
+  };
+}
+
+// Extract D6 vendas org (row 29) from 'ABR - METRICAS GERAIS'!IM5:IM29
+// Single column range: rows[24]?.[0] = sheet row 29, col IM.
+function extractDesafio6VendasOrganico(rows: string[][]): number {
+  const p = parseSheetNumber;
+  return p(rows[24]?.[0]);
+}
+
 // Extract daily metrics for Desafio 4 from FN4:JF16
 // Column indices (0-based from FN):
 // 7=date, 9=investimento, 77=cortesias, 78=vendas ads,
@@ -711,6 +743,24 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       console.warn('[sheets] Desafio 6 daily fetch failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
+    // D6 Organico aggregate (row 29 do range KH5:KN29) — metricas finais ja calculadas pela planilha
+    let d6OrganicoRows: string[][] = [];
+    try {
+      d6OrganicoRows = await fetchSheetRows("'ABR - METRICAS GERAIS'!KH5:KN29");
+      console.log(`[sheets] D6 organico: ${d6OrganicoRows.length} rows loaded`);
+    } catch (err) {
+      console.warn('[sheets] D6 organico fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
+    // D6 Vendas Organico (row 29 do range IM5:IM29) — numero de vendas organicas
+    let d6VendasOrgRows: string[][] = [];
+    try {
+      d6VendasOrgRows = await fetchSheetRows("'ABR - METRICAS GERAIS'!IM5:IM29");
+      console.log(`[sheets] D6 vendas org: ${d6VendasOrgRows.length} rows loaded`);
+    } catch (err) {
+      console.warn('[sheets] D6 vendas org fetch failed (non-blocking):', err instanceof Error ? err.message : err);
+    }
+
     // Resumo Organico (Comercial e Midias) — 'ABR - METRICAS GERAIS'!KV3:LF30
     let organicoRows: string[][] = [];
     try {
@@ -878,6 +928,26 @@ export async function fetchMetricsFromSheets(): Promise<AllDesafiosData> {
       const desafioData = extractDesafioData(resumoRows, col.labelCol, col.valueCol);
       data[col.key] = desafioData;
       console.log(`[sheets] ${col.key}: inv=${desafioData.investimento} vendas=${desafioData.vendas} fat=${desafioData.faturamentoTotal}`);
+    }
+
+    // Enriquece D6 com metricas organicas (KH5:KN29 + IM5:IM29 — row 29 = agregado)
+    // Apenas D6 tem essas metricas; D1-D5 ficam com os campos undefined.
+    try {
+      const d6Organico = extractDesafio6OrganicoFromKHKN(d6OrganicoRows);
+      const vendasOrg = extractDesafio6VendasOrganico(d6VendasOrgRows);
+      data.desafio6 = {
+        ...data.desafio6,
+        vendasOrganico: vendasOrg,
+        faturamentoOrganico: d6Organico.faturamentoOrganico,
+        cpaTotalComOrganico: d6Organico.cpaTotalComOrganico,
+        ticketMedioGeral: d6Organico.ticketMedioGeral,
+        prejuizoGeralComOrganico: d6Organico.prejuizoGeralComOrganico,
+        faturamentoTotalGeral: d6Organico.faturamentoTotalGeral,
+        investimentoCaptacaoGeral: d6Organico.investimentoCaptacaoGeral,
+      };
+      console.log(`[sheets] D6 organico enriched: vendasOrg=${vendasOrg} fatOrg=${d6Organico.faturamentoOrganico} cpaTotal=${d6Organico.cpaTotalComOrganico} prejuizo=${d6Organico.prejuizoGeralComOrganico}`);
+    } catch (err) {
+      console.warn('[sheets] D6 organico enrichment failed (non-blocking):', err instanceof Error ? err.message : err);
     }
 
     // Cancelamentos & No-show from RESUMO - GERAL B35:AJ46

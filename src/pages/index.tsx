@@ -53,6 +53,19 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
     ? desafios.reduce((acc, d) => acc + (typeof d.checkouts === 'number' ? d.checkouts : 0), 0)
     : null;
 
+  // Organico atualmente so existe em D6. Geral (modo total) consolida copiando
+  // os campos do D6 quando o D6 esta entre os desafios incluidos. Em meta1/meta2
+  // (que nao incluem D6), os campos ficam undefined — o card nao renderiza.
+  const includesD6 = desafios.includes(data.desafio6);
+  const d6 = data.desafio6;
+  const vendasOrganico = includesD6 ? d6.vendasOrganico : undefined;
+  const faturamentoOrganico = includesD6 ? d6.faturamentoOrganico : undefined;
+  const cpaTotalComOrganico = includesD6 ? d6.cpaTotalComOrganico : undefined;
+  const ticketMedioGeral = includesD6 ? d6.ticketMedioGeral : undefined;
+  const prejuizoGeralComOrganico = includesD6 ? d6.prejuizoGeralComOrganico : undefined;
+  const faturamentoTotalGeral = includesD6 ? d6.faturamentoTotalGeral : undefined;
+  const investimentoCaptacaoGeral = includesD6 ? d6.investimentoCaptacaoGeral : undefined;
+
   return {
     captacao: '',
     aoVivo: '',
@@ -81,6 +94,13 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
     cancelamentos,
     noShow,
     comparecimentos,
+    vendasOrganico,
+    faturamentoOrganico,
+    cpaTotalComOrganico,
+    ticketMedioGeral,
+    prejuizoGeralComOrganico,
+    faturamentoTotalGeral,
+    investimentoCaptacaoGeral,
   };
 }
 
