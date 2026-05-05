@@ -136,15 +136,31 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
         { label: 'Conv. Checkout → Venda', value: convCheckoutVenda === 0 ? '--' : `${convCheckoutVenda.toFixed(1)}%`, isHighlight: convCheckoutVenda >= 30 },
         { label: 'Investimento', value: fmt(data.investimento), isHighlight: true },
         { label: 'Vendas', value: fmtNum(data.vendas) },
+        ...(data.vendasOrganico !== undefined
+          ? [{ label: 'Vendas Orgânicas', value: fmtNum(data.vendasOrganico), isHighlight: data.vendasOrganico > 0 }]
+          : []),
         { label: 'Ingressos Totais (vendas + cortesia)', value: fmtNum(data.ingressosTotais) },
         { label: 'CPA', value: fmt(data.cpa) },
+        ...(data.cpaTotalComOrganico !== undefined
+          ? [{ label: 'CPA Total c/ Orgânico', value: fmt(data.cpaTotalComOrganico), isHighlight: data.cpaTotalComOrganico > 0 }]
+          : []),
         { label: 'Ticket Médio', value: fmt(data.ticketMedio) },
+        ...(data.ticketMedioGeral !== undefined
+          ? [{ label: 'Ticket Médio Geral', value: fmt(data.ticketMedioGeral), isHighlight: data.ticketMedioGeral > 0 }]
+          : []),
         { label: 'Fat. Ingressos + Bumps', value: fmt(data.faturamento) },
         {
           label: 'Lucro / Prejuízo',
           value: data.lucroPrejuizo === 0 ? '--' : BRL.format(data.lucroPrejuizo),
           isNegative: data.lucroPrejuizo < 0,
         },
+        ...(data.prejuizoGeralComOrganico !== undefined
+          ? [{
+              label: 'Prejuízo Captação Tráfego c/ Org',
+              value: data.prejuizoGeralComOrganico === 0 ? '--' : BRL.format(data.prejuizoGeralComOrganico),
+              isNegative: data.prejuizoGeralComOrganico < 0,
+            }]
+          : []),
         { label: 'ROAS', value: roas === 0 ? '--' : roas.toFixed(2) + 'x', isHighlight: roas >= 2 },
       ],
     },

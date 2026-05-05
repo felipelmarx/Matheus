@@ -1,4 +1,4 @@
-import { DollarSign, ShoppingCart, TrendingUp, TrendingDown, Target, Ticket, Receipt } from 'lucide-react';
+import { DollarSign, ShoppingCart, TrendingUp, Target, Ticket, Receipt } from 'lucide-react';
 import type { DesafioData } from '@/types/metrics';
 
 interface StatCardsProps {
@@ -112,61 +112,12 @@ export default function StatCards({ data }: StatCardsProps) {
     },
   ];
 
-  // Cards organico construidos dinamicamente.
-  // Cada card so entra se o campo correspondente estiver definido (nao undefined).
-  // - D6: 4 cards (todos os campos presentes)
-  // - Geral (mode=total): 3 cards (prejuizoGeralComOrganico nao e copiado)
-  // - D1-D5: 0 cards (grid nao renderiza)
-  const organicoCards: CardData[] = [];
-
-  if (data.vendasOrganico !== undefined) {
-    organicoCards.push({
-      label: 'VENDAS ORGANICAS',
-      value: data.vendasOrganico.toLocaleString('pt-BR'),
-      icon: ShoppingCart,
-      accentColor: 'text-emerald-500',
-      accentBg: 'bg-emerald-500/8',
-    });
-  }
-
-  if (data.cpaTotalComOrganico !== undefined) {
-    organicoCards.push({
-      label: 'CPA TOTAL C/ ORGANICO',
-      value: BRL.format(data.cpaTotalComOrganico),
-      icon: Target,
-      accentColor: 'text-cyan-500',
-      accentBg: 'bg-cyan-500/8',
-    });
-  }
-
-  if (data.ticketMedioGeral !== undefined) {
-    organicoCards.push({
-      label: 'TICKET MEDIO GERAL',
-      value: BRL.format(data.ticketMedioGeral),
-      icon: Receipt,
-      accentColor: 'text-violet-500',
-      accentBg: 'bg-violet-500/8',
-    });
-  }
-
-  if (data.prejuizoGeralComOrganico !== undefined) {
-    const prejuizoOrg = data.prejuizoGeralComOrganico;
-    organicoCards.push({
-      label: 'PREJUIZO CAPTACAO TRAFEGO C/ ORG',
-      value: BRL.format(prejuizoOrg),
-      icon: prejuizoOrg < 0 ? TrendingDown : TrendingUp,
-      accentColor: prejuizoOrg < 0 ? 'text-red-500' : 'text-emerald-500',
-      accentBg: prejuizoOrg < 0 ? 'bg-red-500/8' : 'bg-emerald-500/8',
-    });
-  }
-
-  const organicoCols: 3 | 4 = organicoCards.length >= 4 ? 4 : 3;
-
+  // Metricas organicas (vendas org, CPA total c/ org, ticket geral, prejuizo)
+  // foram movidas para a secao "Tráfego" do componente ResumoGeral.tsx.
   return (
     <div className="space-y-3">
       <CardGrid cards={captacaoCards} cols={5} />
       <CardGrid cards={formacaoCards} cols={4} />
-      {organicoCards.length > 0 && <CardGrid cards={organicoCards} cols={organicoCols} />}
     </div>
   );
 }
