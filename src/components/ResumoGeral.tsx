@@ -148,19 +148,15 @@ export default function ResumoGeral({ data, activeTab, comparecimentosSiteOnly =
         ...(data.ticketMedioGeral !== undefined
           ? [{ label: 'Ticket Médio Geral', value: fmt(data.ticketMedioGeral), isHighlight: data.ticketMedioGeral > 0 }]
           : []),
-        { label: 'Fat. Ingressos + Bumps', value: fmt(data.faturamento) },
+        {
+          label: activeTab === 'desafio6' ? 'Fat. Ingressos + Bumps (Org + Pago)' : 'Fat. Ingressos + Bumps',
+          value: fmt(data.faturamento),
+        },
         {
           label: 'Lucro / Prejuízo',
           value: data.lucroPrejuizo === 0 ? '--' : BRL.format(data.lucroPrejuizo),
           isNegative: data.lucroPrejuizo < 0,
         },
-        ...(data.prejuizoGeralComOrganico !== undefined
-          ? [{
-              label: 'Prejuízo Captação Tráfego c/ Org',
-              value: data.prejuizoGeralComOrganico === 0 ? '--' : BRL.format(data.prejuizoGeralComOrganico),
-              isNegative: data.prejuizoGeralComOrganico < 0,
-            }]
-          : []),
         { label: 'ROAS', value: roas === 0 ? '--' : roas.toFixed(2) + 'x', isHighlight: roas >= 2 },
       ],
     },
