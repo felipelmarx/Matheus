@@ -489,8 +489,14 @@ function extractDesafio6OrganicoFromKHKN(rows: string[][]): {
 } {
   const p = parseSheetNumber;
   const aggregate = rows[24] ?? [];
+  // KI29 (faturamento org consolidado) esta vazio na planilha — somar os dailies KI manualmente.
+  // rows[0] = headers, rows[1..23] = dias, rows[24] = aggregate row 29.
+  let faturamentoOrganico = 0;
+  for (let i = 0; i < 24; i++) {
+    faturamentoOrganico += p(rows[i]?.[1]);
+  }
   return {
-    faturamentoOrganico: p(aggregate[1]),       // KI
+    faturamentoOrganico,                        // KI somado dos dailies (KI29 vazio)
     faturamentoTotalGeral: p(aggregate[2]),     // KJ
     investimentoCaptacaoGeral: p(aggregate[3]), // KK
     cpaTotalComOrganico: p(aggregate[4]),       // KL
