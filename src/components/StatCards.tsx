@@ -13,10 +13,11 @@ interface CardData {
   accentBg: string;
 }
 
-function CardGrid({ cards, cols }: { cards: CardData[]; cols: 4 | 5 }) {
-  const gridClass = cols === 5
-    ? 'grid grid-cols-2 lg:grid-cols-5 gap-3'
-    : 'grid grid-cols-2 lg:grid-cols-4 gap-3';
+function CardGrid({ cards, cols }: { cards: CardData[]; cols: 3 | 4 | 5 }) {
+  const gridClass =
+    cols === 5 ? 'grid grid-cols-2 lg:grid-cols-5 gap-3'
+    : cols === 4 ? 'grid grid-cols-2 lg:grid-cols-4 gap-3'
+    : 'grid grid-cols-1 lg:grid-cols-3 gap-3';
   return (
     <div className={gridClass}>
       {cards.map((card) => {
@@ -73,7 +74,7 @@ export default function StatCards({ data }: StatCardsProps) {
     },
     {
       label: 'FATURAMENTO CAPTACAO',
-      value: BRL.format(data.faturamento),
+      value: BRL.format(data.faturamento + (data.faturamentoOrganico ?? 0)),
       icon: TrendingUp,
       accentColor: 'text-teal-500',
       accentBg: 'bg-teal-500/8',
@@ -111,48 +112,61 @@ export default function StatCards({ data }: StatCardsProps) {
     },
   ];
 
-  // Cards organico (apenas para D6 e Geral quando D6 esta incluido).
-  // Critério: pelo menos um dos campos chave deve ter valor > 0.
-  const hasOrganico =
-    (data.vendasOrganico ?? 0) > 0 || (data.faturamentoOrganico ?? 0) > 0;
+  // Cards organico construidos dinamicamente.
+  // Cada card so entra se o campo correspondente estiver definido (nao undefined).
+  // - D6: 4 cards (todos os campos presentes)
+  // - Geral (mode=total): 3 cards (prejuizoGeralComOrganico nao e copiado)
+  // - D1-D5: 0 cards (grid nao renderiza)
+  const organicoCards: CardData[] = [];
 
-  const prejuizoOrg = data.prejuizoGeralComOrganico ?? 0;
-  const organicoCards: CardData[] = [
-    {
+  if (data.vendasOrganico !== undefined) {
+    organicoCards.push({
       label: 'VENDAS ORGANICAS',
-      value: (data.vendasOrganico ?? 0).toLocaleString('pt-BR'),
+      value: data.vendasOrganico.toLocaleString('pt-BR'),
       icon: ShoppingCart,
       accentColor: 'text-emerald-500',
       accentBg: 'bg-emerald-500/8',
-    },
-    {
+    });
+  }
+
+  if (data.cpaTotalComOrganico !== undefined) {
+    organicoCards.push({
       label: 'CPA TOTAL C/ ORGANICO',
-      value: BRL.format(data.cpaTotalComOrganico ?? 0),
+      value: BRL.format(data.cpaTotalComOrganico),
       icon: Target,
       accentColor: 'text-cyan-500',
       accentBg: 'bg-cyan-500/8',
-    },
-    {
+    });
+  }
+
+  if (data.ticketMedioGeral !== undefined) {
+    organicoCards.push({
       label: 'TICKET MEDIO GERAL',
-      value: BRL.format(data.ticketMedioGeral ?? 0),
+      value: BRL.format(data.ticketMedioGeral),
       icon: Receipt,
       accentColor: 'text-violet-500',
       accentBg: 'bg-violet-500/8',
-    },
-    {
-      label: 'PREJUIZO GERAL C/ ORG',
+    });
+  }
+
+  if (data.prejuizoGeralComOrganico !== undefined) {
+    const prejuizoOrg = data.prejuizoGeralComOrganico;
+    organicoCards.push({
+      label: 'PREJUIZO CAPTACAO TRAFEGO C/ ORG',
       value: BRL.format(prejuizoOrg),
       icon: prejuizoOrg < 0 ? TrendingDown : TrendingUp,
       accentColor: prejuizoOrg < 0 ? 'text-red-500' : 'text-emerald-500',
       accentBg: prejuizoOrg < 0 ? 'bg-red-500/8' : 'bg-emerald-500/8',
-    },
-  ];
+    });
+  }
+
+  const organicoCols: 3 | 4 = organicoCards.length >= 4 ? 4 : 3;
 
   return (
     <div className="space-y-3">
       <CardGrid cards={captacaoCards} cols={5} />
       <CardGrid cards={formacaoCards} cols={4} />
-      {hasOrganico && <CardGrid cards={organicoCards} cols={4} />}
+      {organicoCards.length > 0 && <CardGrid cards={organicoCards} cols={organicoCols} />}
     </div>
   );
 }

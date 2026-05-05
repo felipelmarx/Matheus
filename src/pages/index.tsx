@@ -62,7 +62,8 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
   const faturamentoOrganico = includesD6 ? d6.faturamentoOrganico : undefined;
   const cpaTotalComOrganico = includesD6 ? d6.cpaTotalComOrganico : undefined;
   const ticketMedioGeral = includesD6 ? d6.ticketMedioGeral : undefined;
-  const prejuizoGeralComOrganico = includesD6 ? d6.prejuizoGeralComOrganico : undefined;
+  // prejuizoGeralComOrganico: nao copiar para Geral — Sr. Matheus pediu remover
+  // o card "PREJUIZO CAPTACAO TRAFEGO C/ ORG" da aba Geral (apenas D6 mostra).
   const faturamentoTotalGeral = includesD6 ? d6.faturamentoTotalGeral : undefined;
   const investimentoCaptacaoGeral = includesD6 ? d6.investimentoCaptacaoGeral : undefined;
 
@@ -98,7 +99,7 @@ function buildGeralData(data: AllDesafiosData, mode: GeralMode): DesafioData {
     faturamentoOrganico,
     cpaTotalComOrganico,
     ticketMedioGeral,
-    prejuizoGeralComOrganico,
+    // prejuizoGeralComOrganico intencionalmente omitido (apenas D6 mostra esse card)
     faturamentoTotalGeral,
     investimentoCaptacaoGeral,
   };
